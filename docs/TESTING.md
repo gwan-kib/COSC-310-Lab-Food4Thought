@@ -10,7 +10,7 @@ The test-first cycle below is a team convention; the supplied M0 specification r
 
 ## Current setup and commands
 
-At drafting, this repository has no Python application, dependency file, pytest configuration, or tests. No passing test suite or working application is claimed. The following are invocation patterns to use **after** project dependencies and tests exist, from the repository root in its virtual environment:
+The initial scaffold provides pinned dependencies and empty Python packages, but no runnable application or tests. Follow the [README setup](../README.md#development-setup). Scaffold CI runs `python -m compileall app`; it does not run pytest or claim behaviour is verified. Add a separate pytest CI step with the first real tests. The following are invocation patterns to use **after** tests exist, from the repository root in its virtual environment:
 
 ```sh
 python -m pytest
@@ -26,7 +26,7 @@ python -m pytest -k <actual-behaviour-name>
 
 Replace placeholders; do not run them literally. Document verified commands here when the suite is established. Use the project's interpreter so pytest and application dependencies resolve from the same environment. No tests collected is not successful feature verification.
 
-No exact test directory structure is adopted yet. Group tests by the responsibilities they exercise, following the structure established when implementation begins. Do not create empty route/service/repository directories just to match an example.
+The `tests/` directory currently contains only `.gitkeep`; no internal test layout is adopted yet. Group real tests by the responsibilities they exercise. Do not create empty test subdirectories just to match an example.
 
 ## Write tests before implementation
 
