@@ -50,7 +50,7 @@ If a source or component is missing, say so. New files/functions/endpoints must 
 
 Run applicable checks and inspect the complete final diff, including new files. Give exact commands and actual results. Never claim tests/builds pass, an endpoint works, or an application runs without verification. Separate environment failures, product failures, pre-existing failures, and unperformed checks; explain remaining risk.
 
-Follow [CONTRIBUTING's provenance policy](CONTRIBUTING.md#provenance-and-individual-understanding). Do not invent current-milestone labels or create `docs/PROVENANCE.md` before its required format is available. Until then, retain assistance facts in the PR/handoff and report formal provenance as pending. This supersedes the initial draft's provisional-file instruction.
+Follow [CONTRIBUTING's provenance policy](CONTRIBUTING.md#provenance-and-individual-understanding) and maintain the shared [provenance record](docs/PROVENANCE.md) for AI contributions that affect project artifacts. Use one guide-defined label per entry: `AI-GENERATED`, `AI-ASSISTED`, `AI-REVISED`, or `NO-AI`. Record student(s), artifact, label, AI tool, purpose, influence, validation, and PR/commit when practical. Select labels by AI's actual role, not how much output was edited. Keep unknown facts and student review status explicit; never infer student understanding or approval from agent checks. Do not require labels on every commit or entries for interactions that did not affect project artifacts.
 
 ## Handoff
 

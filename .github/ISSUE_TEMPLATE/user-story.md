@@ -72,7 +72,7 @@ Expected tests (or explain non-applicability):
 - [ ] Architecture/requirements
 - [ ] No documentation change expected (explain)
 
-<!-- Create deferred documents only when real content warrants them. Record required provenance during implementation. -->
+<!-- Create deferred documents only when real content warrants them. Record AI contributions affecting project artifacts in docs/PROVENANCE.md during implementation, using the guide-defined labels and entry fields. -->
 
 ## Notes / Open Questions
 

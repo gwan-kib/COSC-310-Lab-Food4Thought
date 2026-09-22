@@ -52,13 +52,12 @@ Details:
 
 ## Provenance
 
-<!-- Select the accurate status. Do not claim student review or current-format compliance without evidence. -->
+<!-- Follow docs/PROVENANCE.md and link the relevant entries below. Each entry uses one of AI-GENERATED, AI-ASSISTED, AI-REVISED, or NO-AI and records student(s), artifact, AI tool, purpose, influence, validation, and PR/commit when practical. Do not claim student review without evidence. -->
 
-- [ ] `docs/PROVENANCE.md` updated using current milestone requirements
-- [ ] Required format unavailable: assistance facts recorded below; formal provenance pending
-- [ ] No consequential external/AI assistance requiring an entry (explain)
+- [ ] [Shared provenance record](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/blob/main/docs/PROVENANCE.md) updated for AI contributions affecting project artifacts
+- [ ] No AI contribution requiring an entry (explain; interactions that did not affect project artifacts need no entry)
 
-Affected artifacts / assistance / validation / responsible student and review status:
+Entry links / affected artifacts / assistance / validation / responsible student and review status:
 
 ## Risks / Limitations / Follow-up
 

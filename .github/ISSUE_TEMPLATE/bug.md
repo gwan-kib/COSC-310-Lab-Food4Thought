@@ -57,6 +57,8 @@ Did this previously work? Give a verified version/commit if known; otherwise say
 - [ ] Existing relevant tests pass
 - [ ] Affected documentation/provenance updated as required
 
+<!-- Record AI contributions affecting project artifacts in docs/PROVENANCE.md, using the guide-defined labels and entry fields. -->
+
 ## Dependencies / Ownership / Open Questions
 
 <!-- Link related work, blockers, and confirmed ownership. Keep suspected causes distinct from evidence. -->

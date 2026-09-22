@@ -45,7 +45,7 @@ How will completion be verified? Identify applicable checks and expected manual 
 
 ## Documentation / Provenance Impact
 
-<!-- Affected docs; assistance disclosure is recorded during implementation under current milestone rules. -->
+<!-- Affected docs; record AI contributions affecting project artifacts in docs/PROVENANCE.md during implementation, using the guide-defined labels and entry fields. -->
 
 ## Dependencies / Risks
 

@@ -4,6 +4,7 @@ Food4Thought is a COSC 310 food-delivery project. This checkout contains the ini
 
 - [M0 checkpoint and submission requirements](docs/milestones/M0.md)
 - [Contributing and AI/provenance policy](CONTRIBUTING.md)
+- [Shared AI provenance record](docs/PROVENANCE.md)
 - [Testing conventions](docs/TESTING.md)
 - [Agent instructions](AGENTS.md)
 

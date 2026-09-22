@@ -185,17 +185,22 @@ Before merging, verify required review, actual checks, resolved feedback, and th
 
 ## Provenance and individual understanding
 
-**Course policy supplied by the user:** generative AI tools may be used in accordance with course policy. Regardless of how work is produced, students remain responsible for understanding, validating, testing, correcting, and explaining all submitted work. Consequential externally assisted content, including code, tests, diagrams, design decisions, and documentation, must be identified in `docs/PROVENANCE.md` using the required provenance labels. Consult each milestone for its labels.
+**Course policy:** the user-supplied **Generative AI Use and Provenance Guide**, read on 2026-09-22, requires one shared [docs/PROVENANCE.md](docs/PROVENANCE.md). Students remain responsible for understanding, validating, testing, correcting, and explaining all submitted work.
 
-The required format has not been supplied. Create `docs/PROVENANCE.md` once it is available, and use it consistently thereafter. Do not invent labels or reuse superseded ones. Until then, preserve assistance facts in PR descriptions/handoffs and keep formal provenance compliance pending. Transfer those facts into the required record before claiming compliance. Check the current source before submission.
+Record AI use when it produces or influences a project artifact: code, tests, documentation, diagrams, API specifications, or adopted design decisions. Record each relevant contribution separately when contributors or AI roles differ, even for the same artifact. Interactions that do not affect project artifacts, such as learning a concept, need no entry; minor autocomplete that does not meaningfully affect work normally needs none. When in doubt, record the contribution. Labels on every Git commit are not required.
 
-For each assisted change, record affected artifacts, nature of assistance, responsible student when known, validation, and student review status. Do not fabricate reviewer identities, tool details, or student approval.
+Use one label per entry, based on the role AI played:
 
-### Starter-document assistance pending formal provenance
+| Label | Use when |
+| --- | --- |
+| `AI-GENERATED` | AI produced content or a substantial part that was used or adapted, even if the output was later edited. |
+| `AI-ASSISTED` | AI provided ideas, explanations, alternatives, or guidance, but the student created the final content. |
+| `AI-REVISED` | The student created the original work and AI later substantially changed, refactored, or rewrote it. |
+| `NO-AI` | No generative AI produced or influenced the work described in the entry. |
 
-On 2026-09-15, Codex drafted the initial `AGENTS.md` and then reorganized the user's supplied briefs into `AGENTS.md`, `CONTRIBUTING.md`, the three issue templates, the PR template, and `docs/TESTING.md`. This is consequential AI-assisted documentation/process drafting. No application code or tests were generated. Current milestone provenance labels and responsible-student review remain pending. This factual note is for later transfer, not an official provenance format.
+For each recorded contribution, include **student(s), artifact, provenance label, AI tool, purpose, influence, validation, and the relevant PR or commit when practical**. Use the [entry template](docs/PROVENANCE.md#entry-template). Do not fabricate identities, tool details, checks, or approval; distinguish historical reported validation from checks performed now.
 
-On 2026-09-18, Codex updated the test-first workflow documentation and templates, clarified the supplied AI/provenance policy, and added the M0 checkpoint and documentation links. These are AI-assisted documentation changes; no application code or tests were generated. Validation covered documentation content and local links. Required provenance labels and responsible-student review remain pending.
+**Team workflow:** update the shared file with the affected work, link its entries in the PR, and add the PR/commit reference when available. Keep responsible-student confirmation and review status explicit; agent checks do not certify student understanding. Earlier documentation and scaffold assistance disclosures are now recorded in [the historical entries](docs/PROVENANCE.md#recorded-contributions). Recheck newer authoritative course guidance before submission.
 
 The use of generative AI does not automatically reduce a student's grade. **However, submitting work that a student cannot explain, validate, test, or take responsibility for may result in the student failing the individual component.** Do not promise grading outcomes. The earlier brief prohibits generative AI during midterms and other explicitly prohibited activities; consult current rules without extending those restrictions by assumption.
 
