@@ -158,3 +158,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The Markdown text was compared against the signed agreement for unchanged wording. `git diff --check` passed.
 - PR or commit: [Issue #7](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/7); [PR #15](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/15).
 - Student review status: Sreeram Nara confirmed the Markdown matches the signed agreement on 2026-09-24. Confirmation from Gwantana Kiboigo and Thomas Chen, and team agreement to the added version-history table, are pending on the PR.
+
+### Entry 11: Restaurant discovery endpoint
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #5 assignee and requester; responsible-student confirmation remains pending.
+- Artifact: `app/api/routes/restaurants.py`, `app/services/restaurant.py`, `app/main.py`, `tests/test_restaurants.py`, `tests/test_restaurant_service.py`, and `README.md`.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Implement issue #5 using the merged model, configuration, repository, application, and test-isolation interfaces from issues #2, #3, #4, and #6.
+- Influence: Codex wrote tests before implementation, added the service and typed GET route, registered it with FastAPI, and documented the endpoint and request path. No new business rules or persistence schema were introduced. The route maps repository data failures to a generic HTTP 500 response without exposing file paths or validation details.
+- Validation: The baseline passed 17 tests. `.venv/Scripts/python.exe -m pytest -q tests/test_restaurants.py tests/test_restaurant_service.py` failed all 10 new tests before implementation because the route/service did not exist. After implementation, `.venv/Scripts/python.exe -m pytest -q` passed all 27 tests; `-m compileall app`, `-m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. A temporary Uvicorn process returned HTTP 200 for `/health`, `/restaurants` (two records), `/docs`, and `/openapi.json`. The initial sandboxed pytest run failed on filesystem permissions; the successful runs used normal filesystem access. One existing Starlette/AnyIO deprecation warning remains.
+- PR or commit: [Issue #5](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/5); [PR #16](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/16), branch `feature/5-restaurant-list`.
+- Student review status: Pending; agent checks do not establish student understanding or peer approval.

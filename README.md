@@ -65,11 +65,14 @@ The API starts at `http://127.0.0.1:8000`. Stop it with `Ctrl+C`.
 
 | Method and path | Purpose |
 | --- | --- |
+| `GET /restaurants` | Restaurant list; HTTP 200 with a JSON array of `id`, `name`, `cuisine`, and `description`. |
 | `GET /health` | Liveness check; returns `{"status": "ok"}` with HTTP 200. |
 | `GET /docs` | Interactive OpenAPI (Swagger) documentation. |
 | `GET /openapi.json` | Raw OpenAPI schema. |
 
-The restaurant-list endpoint is tracked in issue #5 and will be listed here when it is merged.
+An empty restaurant data array returns `[]`. Missing, malformed, or invalid data returns HTTP 500 with `{"detail": "Restaurant data is unavailable"}`, without exposing file paths or validation details.
+
+Restaurant requests follow `GET /restaurants` → route → `RestaurantService.list_restaurants()` → `RestaurantRepository.list_restaurants()` → configured JSON file. Only the repository reads persistence; the route translates data failures into HTTP errors.
 
 ## Data
 
@@ -88,8 +91,8 @@ python -m pytest
 ```text
 app/
   main.py               FastAPI application; registers routers
-  api/routes/           HTTP routes (health.py)
-  services/             Business logic
+  api/routes/           HTTP routes (health.py, restaurants.py)
+  services/             Restaurant discovery service (restaurant.py)
   repositories/         Data access for JSON files (restaurant.py)
   schemas/              Pydantic models (restaurant.py)
   core/config.py        Configurable data-file location
