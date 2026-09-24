@@ -134,3 +134,27 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The three isolation tests first errored because the fixture did not exist; after implementation `python -m pytest -q` passed 12 tests (17 after rebasing onto `main` with the issue #4 repository tests). A temporary test that wrote to `data/restaurants.json` made the session check fail as intended (the file was then restored and the test deleted). A fresh Python 3.12 environment installed `requirements.txt` and ran compileall, pytest, and the `data/` diff check successfully. The workflow was not run on GitHub Actions from this environment.
 - PR or commit: [Issue #6](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/6); [PR #14](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/14).
 - Student review status: Reviewed by Sreeram Nara on 2026-09-24, who ran the test suite and the application locally on Windows with Python 3.12. Peer review is recorded on the PR.
+
+### Entry 9: M0 README
+
+- Student(s): Sreeram Nara (`SreeramNara`), System Administrator and issue #7 owner.
+- Artifact: `README.md`.
+- Label: `AI-GENERATED`.
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Implement the README part of issue #7 so it covers every M0 documentation item.
+- Influence: Claude restructured the README: team name, Python version, setup, virtual environments, dependencies, start command, endpoints, `/docs`, data location, test command, and repository structure.
+- Validation: README install and test commands were followed in a fresh Python 3.12 environment on Linux; pytest passed 17 tests, the app served `/health` and `/docs` with HTTP 200, and committed `data/` was unchanged. Windows activation commands were not executed. Relative links were checked to exist. The restaurant endpoint is intentionally not listed until issue #5 merges.
+- PR or commit: [Issue #7](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/7); [PR #15](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/15).
+- Student review status: Reviewed by Sreeram Nara on 2026-09-24, who ran the test suite and the application locally on Windows with Python 3.12. Peer review is recorded on the PR.
+
+### Entry 10: Team agreement Markdown conversion
+
+- Student(s): Gwantana Kiboigo, Sreeram Nara, and Thomas Chen wrote and signed the agreement on 15/9/2026; Sreeram Nara (`SreeramNara`) added it to the repository for issue #7.
+- Artifact: `scrum/team-agreement.md`.
+- Label: `AI-REVISED`.
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Convert the team's signed agreement into Markdown at the path M0 requires.
+- Influence: Formatting only, plus the explicit "V1" version label and a version-history table that M0 requires. The agreement's wording, decisions, and signatures are the team's and were not changed.
+- Validation: The Markdown text was compared against the signed agreement for unchanged wording. `git diff --check` passed.
+- PR or commit: [Issue #7](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/7); [PR #15](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/15).
+- Student review status: Sreeram Nara confirmed the Markdown matches the signed agreement on 2026-09-24. Confirmation from Gwantana Kiboigo and Thomas Chen, and team agreement to the added version-history table, are pending on the PR.
