@@ -19,6 +19,9 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
-      - name: Compile scaffold
+      - name: Compile application
         run: python -m compileall app
-      # Add a separate python -m pytest step when the first real tests exist.
+      - name: Run tests
+        run: python -m pytest
+      - name: Confirm tests left committed data unchanged
+        run: git diff --exit-code -- data/

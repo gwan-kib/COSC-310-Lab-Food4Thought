@@ -122,3 +122,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: On Python 3.12.3, `tests/test_health.py` first failed at collection because `httpx2` was missing, then failed 4/4 with `ImportError` because `app.main` had no application. After implementation, `python -m pytest -q` passed 9 tests (14 after rebasing onto `main` with the issue #4 repository tests). `python -m uvicorn app.main:app` was started and `GET /health` returned `{"status":"ok"}` (HTTP 200) and `GET /docs` returned HTTP 200. `git diff --check` passed.
 - PR or commit: [Issue #2](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/2); [PR #13](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/13).
 - Student review status: Reviewed by Sreeram Nara on 2026-09-24, who ran the test suite and the application locally on Windows with Python 3.12. Peer review is recorded on the PR.
+
+### Entry 8: Test isolation fixtures and pytest in CI
+
+- Student(s): Sreeram Nara (`SreeramNara`), System Administrator and issue #6 owner.
+- Artifact: `tests/conftest.py`, `tests/test_test_isolation.py`, `.github/workflows/ci.yml`, `docs/TESTING.md`, and `README.md`.
+- Label: `AI-GENERATED`.
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Implement the test-infrastructure and CI parts of issue #6.
+- Influence: Claude wrote isolation tests first, then an autouse fixture giving every test a temporary copy of the restaurant data, a session check that fails if committed `data/` files change, a CI pytest step with a `git diff --exit-code -- data/` check, and matching documentation.
+- Validation: The three isolation tests first errored because the fixture did not exist; after implementation `python -m pytest -q` passed 12 tests (17 after rebasing onto `main` with the issue #4 repository tests). A temporary test that wrote to `data/restaurants.json` made the session check fail as intended (the file was then restored and the test deleted). A fresh Python 3.12 environment installed `requirements.txt` and ran compileall, pytest, and the `data/` diff check successfully. The workflow was not run on GitHub Actions from this environment.
+- PR or commit: [Issue #6](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/6); [PR #14](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/14).
+- Student review status: Reviewed by Sreeram Nara on 2026-09-24, who ran the test suite and the application locally on Windows with Python 3.12. Peer review is recorded on the PR.
