@@ -49,10 +49,11 @@ The API listens on `http://127.0.0.1:8000`:
 - `data/restaurants.json`: committed representative restaurant records with stable IDs.
 - `tests/test_restaurant_foundation.py` and `tests/test_restaurant_repository.py`: model, data-path, repository, and failure-case tests.
 - `tests/test_health.py`: health endpoint and `/docs` tests.
-- `.github/workflows/ci.yml`: installs dependencies on Python 3.12 and compiles `app/` for pushes and pull requests to `main`.
+- `tests/conftest.py`: shared fixtures that isolate test data and guard committed `data/` files.
+- `.github/workflows/ci.yml`: installs dependencies on Python 3.12, compiles `app/`, and runs pytest for pushes and pull requests to `main`.
 
 The repository reads `data/restaurants.json` by default. Set `RESTAURANTS_DATA_PATH` to another JSON file path, or pass a path to `RestaurantRepository`, to use isolated data; tests use temporary locations rather than modifying the committed sample file.
 
-Run the current tests from the repository root with `python -m pytest`. CI currently checks Python syntax only; adding pytest to CI is tracked in issue #6.
+Run the tests from the repository root with `python -m pytest`. Each test automatically uses a temporary copy of the restaurant data (see `tests/conftest.py`). CI runs the same command on pushes and pull requests to `main`.
 
 The restaurant endpoint and the remaining M0 test coverage are tracked in subsequent issues. This foundation is not yet sufficient for an M0 demonstration.

@@ -10,7 +10,7 @@ The test-first cycle below is a team convention; the supplied M0 specification r
 
 ## Current setup and commands
 
-The project has pinned dependencies and restaurant foundation/repository tests, but no runnable application yet. Follow the [README setup](../README.md#development-setup). Scaffold CI runs `python -m compileall app`; it does not run pytest or claim behaviour is verified. Adding a pytest CI step is tracked in issue #6. Run the suite from the repository root in its virtual environment:
+Follow the [README setup](../README.md#development-setup). CI installs `requirements.txt` on Python 3.12, runs `python -m compileall app` and `python -m pytest`, then fails if any file under `data/` was modified. Run the suite from the repository root in its virtual environment:
 
 ```sh
 python -m pytest
@@ -26,7 +26,7 @@ python -m pytest -k <actual-behaviour-name>
 
 Replace placeholders; do not run them literally. Use the project's interpreter so pytest and application dependencies resolve from the same environment. No tests collected is not successful feature verification.
 
-The `tests/` directory contains foundation and repository tests. Group further tests by the responsibilities they exercise. Do not create empty test subdirectories just to match an example.
+`tests/conftest.py` applies two automatic fixtures to every test: `isolated_restaurants_path` copies `data/restaurants.json` into the test's `tmp_path` and points `RESTAURANTS_DATA_PATH` at the copy, and a session check fails the run if any committed file under `data/` changed. Request `isolated_restaurants_path` as a test argument when a test needs the temporary file's location. Group further tests by the responsibilities they exercise. Do not create empty test subdirectories just to match an example.
 
 ## Write tests before implementation
 
