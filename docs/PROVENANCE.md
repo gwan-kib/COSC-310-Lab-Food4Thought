@@ -134,3 +134,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The three isolation tests first errored because the fixture did not exist; after implementation `python -m pytest -q` passed 12 tests (17 after rebasing onto `main` with the issue #4 repository tests). A temporary test that wrote to `data/restaurants.json` made the session check fail as intended (the file was then restored and the test deleted). A fresh Python 3.12 environment installed `requirements.txt` and ran compileall, pytest, and the `data/` diff check successfully. The workflow was not run on GitHub Actions from this environment.
 - PR or commit: [Issue #6](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/6); [PR #14](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/14).
 - Student review status: Reviewed by Sreeram Nara on 2026-09-24, who ran the test suite and the application locally on Windows with Python 3.12. Peer review is recorded on the PR.
+
+### Entry 9: Restaurant discovery endpoint
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #5 assignee and requester; responsible-student confirmation remains pending.
+- Artifact: `app/api/routes/restaurants.py`, `app/services/restaurant.py`, `app/main.py`, `tests/test_restaurants.py`, `tests/test_restaurant_service.py`, and `README.md`.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Implement issue #5 using the merged model, configuration, repository, application, and test-isolation interfaces from issues #2, #3, #4, and #6.
+- Influence: Codex wrote tests before implementation, added the service and typed GET route, registered it with FastAPI, and documented the endpoint and request path. No new business rules or persistence schema were introduced. The route maps repository data failures to a generic HTTP 500 response without exposing file paths or validation details.
+- Validation: The baseline passed 17 tests. `.venv/Scripts/python.exe -m pytest -q tests/test_restaurants.py tests/test_restaurant_service.py` failed all 10 new tests before implementation because the route/service did not exist. After implementation, `.venv/Scripts/python.exe -m pytest -q` passed all 27 tests; `-m compileall app`, `-m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. A temporary Uvicorn process returned HTTP 200 for `/health`, `/restaurants` (two records), `/docs`, and `/openapi.json`. The initial sandboxed pytest run failed on filesystem permissions; the successful runs used normal filesystem access. One existing Starlette/AnyIO deprecation warning remains.
+- PR or commit: [Issue #5](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/5); changes on `feature/5-restaurant-list`. See the linked issue's PR for commit and review evidence.
+- Student review status: Pending; agent checks do not establish student understanding or peer approval.
