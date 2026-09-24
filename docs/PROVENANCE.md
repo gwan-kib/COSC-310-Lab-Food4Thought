@@ -113,12 +113,12 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 7: FastAPI application entry point and health endpoint
 
-- Student(s): Sreeram Nara (System Administrator, issue #2 owner); GitHub username to be added by the student.
+- Student(s): Sreeram Nara (`SreeramNara`), System Administrator and issue #2 owner.
 - Artifact: `app/main.py`, `app/api/routes/health.py`, `tests/test_health.py`, `requirements.txt` (added `httpx2`), and `README.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Claude (Anthropic), via claude.ai.
 - Purpose: Implement issue #2: a runnable FastAPI app exposing `GET /health` and `/docs`.
 - Influence: Claude wrote the tests first, then the application entry point, health router, README run instructions, and identified that the pinned FastAPI/Starlette `TestClient` requires the `httpx2` package, which was missing from `requirements.txt`.
 - Validation: On Python 3.12.3, `tests/test_health.py` first failed at collection because `httpx2` was missing, then failed 4/4 with `ImportError` because `app.main` had no application. After implementation, `python -m pytest -q` passed 9 tests (14 after rebasing onto `main` with the issue #4 repository tests). `python -m uvicorn app.main:app` was started and `GET /health` returned `{"status":"ok"}` (HTTP 200) and `GET /docs` returned HTTP 200. `git diff --check` passed.
-- PR or commit: Branch `feature/2-fastapi-health`; add the PR link when opened.
-- Student review status: Pending; the student must review and be able to explain these changes before merge.
+- PR or commit: [Issue #2](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/2); [PR #13](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/13).
+- Student review status: Reviewed by Sreeram Nara on 2026-09-24, who ran the test suite and the application locally on Windows with Python 3.12. Peer review is recorded on the PR.
