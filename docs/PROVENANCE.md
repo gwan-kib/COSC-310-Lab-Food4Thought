@@ -89,12 +89,12 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 5: Restaurant schema, sample data, and configuration
 
-- Student(s): `Tc2006415`, issue #3 assignee; student review and responsibility for the generated work await confirmation.
+- Student(s): `Tc2006415`, contributor and issue #3 assignee; student review and responsibility for the generated work await confirmation.
 - Artifact: `app/schemas/restaurant.py`, `app/core/config.py`, `data/restaurants.json`, `tests/test_restaurant_foundation.py`, and `README.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
 - Purpose: Establish the M0 restaurant response contract, representative JSON data, and configurable data location for issue #3.
 - Influence: Codex drafted the Pydantic model, sample records, path-selection function, tests, and related README updates from the course requirements and issue acceptance criteria.
 - Validation: On Python 3.12, all five foundation tests were observed failing before implementation because the model/configuration modules were missing; after implementation, `python -m pytest tests/test_restaurant_foundation.py -q` and `python -m pytest -q` each passed 5 tests, and `python -m compileall app` passed. Student review remains pending.
-- PR or commit: [Issue #3](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/3); [implementation commit a333af4](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/a333af41265be2cafcb5b054299932239b76a238). Add the PR link when available.
+- PR or commit: [Issue #3](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/3); [implementation commit a333af4](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/a333af41265be2cafcb5b054299932239b76a238). [PR #11](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/11).
 - Student review status: Pending; passing agent-run checks do not establish student understanding or approval.

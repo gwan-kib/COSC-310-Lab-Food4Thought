@@ -35,7 +35,7 @@ If PowerShell activation is restricted, invoke `.venv\Scripts\python.exe` direct
 - `tests/test_restaurant_foundation.py`: model, sample-data, and configuration tests.
 - `.github/workflows/ci.yml`: installs dependencies on Python 3.12 and compiles `app/` for pushes and pull requests to `main`.
 
-By default, restaurant data is read from `data/restaurants.json`. Set `RESTAURANTS_DATA_PATH` to another JSON file path to use isolated data; tests use temporary locations rather than modifying the committed sample file.
+The default restaurant data path points to `data/restaurants.json`. Set `RESTAURANTS_DATA_PATH` to another JSON file path to use isolated data; tests use temporary locations rather than modifying the committed sample file.
 
 Run the current tests from the repository root with `python -m pytest`. CI currently checks Python syntax only; adding pytest to CI is tracked in issue #6.
 
