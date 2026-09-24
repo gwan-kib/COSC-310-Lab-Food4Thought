@@ -1,6 +1,6 @@
 # COSC-310-Lab-Food-4-Thought
 
-Food4Thought is a COSC 310 food-delivery project. The restaurant response model, representative data, and data-path configuration are available. `app/main.py` is still empty; there is no runnable application or endpoint yet.
+Food4Thought is a COSC 310 food-delivery project. The restaurant response model, representative data, configurable data path, and JSON repository are available. `app/main.py` is still empty; there is no runnable application or endpoint yet.
 
 - [M0 checkpoint and submission requirements](docs/milestones/M0.md)
 - [Contributing and AI/provenance policy](CONTRIBUTING.md)
@@ -30,12 +30,13 @@ If PowerShell activation is restricted, invoke `.venv\Scripts\python.exe` direct
 - `app/main.py`: empty application entrypoint reserved for the next implementation issue.
 - `app/schemas/restaurant.py`: provisional typed restaurant response model.
 - `app/core/config.py`: selects the restaurant JSON path.
-- `app/api/routes/`, `app/services/`, `app/repositories/`: package skeletons for the remaining layers.
+- `app/repositories/restaurant.py`: reads and validates restaurant JSON; raises `RestaurantDataError` for persistence failures.
+- `app/api/routes/` and `app/services/`: package skeletons for the remaining layers.
 - `data/restaurants.json`: committed representative restaurant records with stable IDs.
-- `tests/test_restaurant_foundation.py`: model, sample-data, and configuration tests.
+- `tests/test_restaurant_foundation.py` and `tests/test_restaurant_repository.py`: model, data-path, repository, and failure-case tests.
 - `.github/workflows/ci.yml`: installs dependencies on Python 3.12 and compiles `app/` for pushes and pull requests to `main`.
 
-The default restaurant data path points to `data/restaurants.json`. Set `RESTAURANTS_DATA_PATH` to another JSON file path to use isolated data; tests use temporary locations rather than modifying the committed sample file.
+The repository reads `data/restaurants.json` by default. Set `RESTAURANTS_DATA_PATH` to another JSON file path, or pass a path to `RestaurantRepository`, to use isolated data; tests use temporary locations rather than modifying the committed sample file.
 
 Run the current tests from the repository root with `python -m pytest`. CI currently checks Python syntax only; adding pytest to CI is tracked in issue #6.
 
