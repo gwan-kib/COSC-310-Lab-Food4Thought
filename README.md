@@ -1,6 +1,6 @@
 # COSC-310-Lab-Food-4-Thought
 
-Food4Thought is a COSC 310 food-delivery project. This checkout contains the initial Python scaffold and development dependencies. `app/main.py` is intentionally empty; there is no runnable application, endpoint, representative data, or test suite yet.
+Food4Thought is a COSC 310 food-delivery project. The restaurant response model, representative data, and data-path configuration are available. `app/main.py` is still empty; there is no runnable application or endpoint yet.
 
 - [M0 checkpoint and submission requirements](docs/milestones/M0.md)
 - [Contributing and AI/provenance policy](CONTRIBUTING.md)
@@ -28,10 +28,15 @@ If PowerShell activation is restricted, invoke `.venv\Scripts\python.exe` direct
 ## Structure and validation
 
 - `app/main.py`: empty application entrypoint reserved for the next implementation issue.
-- `app/api/routes/`, `app/services/`, `app/repositories/`, `app/schemas/`, `app/core/`: package skeletons for the agreed layers.
-- `data/`, `tests/`: empty directories retained with `.gitkeep`.
+- `app/schemas/restaurant.py`: provisional typed restaurant response model.
+- `app/core/config.py`: selects the restaurant JSON path.
+- `app/api/routes/`, `app/services/`, `app/repositories/`: package skeletons for the remaining layers.
+- `data/restaurants.json`: committed representative restaurant records with stable IDs.
+- `tests/test_restaurant_foundation.py`: model, sample-data, and configuration tests.
 - `.github/workflows/ci.yml`: installs dependencies on Python 3.12 and compiles `app/` for pushes and pull requests to `main`.
 
-Compilation checks Python syntax only; it does not verify application behaviour. Once real tests are committed, add a separate `python -m pytest` step to CI and run that command locally. pytest is intentionally not run by scaffold CI because no tests exist yet.
+The default restaurant data path points to `data/restaurants.json`. Set `RESTAURANTS_DATA_PATH` to another JSON file path to use isolated data; tests use temporary locations rather than modifying the committed sample file.
 
-Application startup, endpoint paths, representative data, and M0 test coverage remain for subsequent issues. This scaffold is not yet sufficient for an M0 demonstration.
+Run the current tests from the repository root with `python -m pytest`. CI currently checks Python syntax only; adding pytest to CI is tracked in issue #6.
+
+Application startup, endpoint paths, and the remaining M0 test coverage are tracked in subsequent issues. This foundation is not yet sufficient for an M0 demonstration.

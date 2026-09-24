@@ -1,0 +1,14 @@
+[
+  {
+    "id": "restaurant-001",
+    "name": "Cedar Bowl",
+    "cuisine": "Japanese",
+    "description": "Rice bowls and noodles"
+  },
+  {
+    "id": "restaurant-002",
+    "name": "Harbour Slice",
+    "cuisine": "Italian",
+    "description": "Pizza and pasta"
+  }
+]
