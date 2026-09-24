@@ -108,5 +108,5 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Purpose: Implement issue #4's persistence-access layer using the issue #3 restaurant model and configurable data path.
 - Influence: Codex drafted the JSON-reading repository, typed results, clean persistence/validation errors, isolated-data tests, and documentation updates.
 - Validation: On Python 3.12, all five repository tests were observed failing before implementation because the repository module was missing; after implementation, `python -m pytest tests/test_restaurant_repository.py -q` passed 5 tests, `python -m pytest -q` passed 10 tests, and `python -m compileall app` passed. Student review remains pending.
-- PR or commit: [Issue #4](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/4); [implementation commit 91198fa](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/91198fa). Add the PR link when available.
+- PR or commit: [Issue #4](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/4); [implementation commit 91198fa](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/91198faeb1424f6c4c5dc516de100f7e9221392b); [PR #12](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/12).
 - Student review status: Pending; passing agent-run checks do not establish student understanding or approval.
