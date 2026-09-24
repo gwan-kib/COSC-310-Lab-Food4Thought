@@ -10,7 +10,7 @@ The test-first cycle below is a team convention; the supplied M0 specification r
 
 ## Current setup and commands
 
-The initial scaffold provides pinned dependencies and empty Python packages, but no runnable application or tests. Follow the [README setup](../README.md#development-setup). Scaffold CI runs `python -m compileall app`; it does not run pytest or claim behaviour is verified. Add a separate pytest CI step with the first real tests. The following are invocation patterns to use **after** tests exist, from the repository root in its virtual environment:
+The project has pinned dependencies and restaurant foundation/repository tests, but no runnable application yet. Follow the [README setup](../README.md#development-setup). Scaffold CI runs `python -m compileall app`; it does not run pytest or claim behaviour is verified. Adding a pytest CI step is tracked in issue #6. Run the suite from the repository root in its virtual environment:
 
 ```sh
 python -m pytest
@@ -24,9 +24,9 @@ python -m pytest <actual-test-file>::<actual-test-name>
 python -m pytest -k <actual-behaviour-name>
 ```
 
-Replace placeholders; do not run them literally. Document verified commands here when the suite is established. Use the project's interpreter so pytest and application dependencies resolve from the same environment. No tests collected is not successful feature verification.
+Replace placeholders; do not run them literally. Use the project's interpreter so pytest and application dependencies resolve from the same environment. No tests collected is not successful feature verification.
 
-The `tests/` directory currently contains only `.gitkeep`; no internal test layout is adopted yet. Group real tests by the responsibilities they exercise. Do not create empty test subdirectories just to match an example.
+The `tests/` directory contains foundation and repository tests. Group further tests by the responsibilities they exercise. Do not create empty test subdirectories just to match an example.
 
 ## Write tests before implementation
 
