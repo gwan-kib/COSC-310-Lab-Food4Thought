@@ -101,7 +101,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 6: Restaurant repository layer
 
-- Student(s): `Tc2006415`, issue #4 assignee; student review and responsibility for the generated work await confirmation.
+- Student(s): `Tc2006415`, recorded implementation-commit and PR author; student review and responsibility for the generated work await confirmation.
 - Artifact: `app/repositories/restaurant.py`, `tests/test_restaurant_repository.py`, `README.md`, and `docs/TESTING.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
