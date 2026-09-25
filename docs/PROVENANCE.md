@@ -41,7 +41,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 1: Initial repository workflow documentation
 
-- Student(s): Gwantana Kiboigo (`gwan-kib`), recorded author of the linked commit; attribution and responsibility for this historical entry await student confirmation. No other participating students are established by the available evidence.
+- Student(s): Gwantana Kiboigo (`gwan-kib`), recorded author of the linked commit; Gwantana confirmed responsibility for this historical entry on 2026-09-24. No other participating students are established by the available evidence.
 - Artifact: `AGENTS.md`, `CONTRIBUTING.md`, `docs/TESTING.md`, `.github/ISSUE_TEMPLATE/user-story.md`, `.github/ISSUE_TEMPLATE/technical-task.md`, `.github/ISSUE_TEMPLATE/bug.md`, and `.github/PULL_REQUEST_TEMPLATE.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -49,23 +49,23 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex drafted the initial instructions and reorganized them into the seven documentation/template files. No application code or tests were generated.
 - Validation: The retained assistance record reports checks of the seven documents, relative links, Markdown fences, whitespace, issue-template metadata, and `git diff --check`. During issue #9, the commit inventory and previous disclosure were inspected to verify scope. Historical checks were not rerun against the original working tree.
 - PR or commit: [Project-planning commit 6826e6c](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/6826e6c191328dee82e66a83395ce735b66ad4e5), committed 2026-09-18 (America/Vancouver).
-- Student review status: Pending; no student confirmation or peer approval is asserted.
+- Student review status: Confirmed by Gwantana Kiboigo on 2026-09-24 through explicit instruction to update his pending provenance review confirmations. No separate peer approval of this historical documentation change is asserted.
 
 ### Entry 2: Test-first workflow and M0 documentation
 
-- Student(s): Gwantana Kiboigo (`gwan-kib`), recorded author of the linked commit; historical attribution and responsibility await student confirmation.
+- Student(s): Gwantana Kiboigo (`gwan-kib`), recorded author of the linked commit; Gwantana confirmed the historical attribution and responsibility on 2026-09-24.
 - Artifact: `AGENTS.md`, `CONTRIBUTING.md`, `docs/TESTING.md`, `docs/milestones/M0.md`, `README.md`, and the three issue templates and PR template under `.github/`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
 - Purpose: On 2026-09-18, document the supplied test-first workflow, AI/provenance policy, and M0 foundational-gate requirements, with navigation links.
-- Influence: Codex updated workflow documentation/templates and added the M0 checkpoint and documentation links, building on the earlier generated documentation. No application code or tests were generated. The README changes are included in the linked planning commit; student confirmation of the complete historical attribution remains pending.
+- Influence: Codex updated workflow documentation/templates and added the M0 checkpoint and documentation links, building on the earlier generated documentation. No application code or tests were generated. The README changes are included in the linked planning commit; Gwantana confirmed the historical attribution on 2026-09-24.
 - Validation: The previous `CONTRIBUTING.md` disclosure reports documentation-content and local-link checks. During issue #9, the planning commit and README diff were inspected. No application test results are claimed for these documentation changes.
 - PR or commit: [Project-planning commit 6826e6c](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/6826e6c191328dee82e66a83395ce735b66ad4e5).
-- Student review status: Pending; the record does not certify student understanding or approval.
+- Student review status: Confirmed by Gwantana Kiboigo on 2026-09-24 through explicit instruction to update his pending provenance review confirmations.
 
 ### Entry 3: Initial Python development scaffold
 
-- Student(s): Gwantana Kiboigo (`gwan-kib`), PR #1 author and implementation-commit author; responsible-student confirmation remains pending as recorded in the PR.
+- Student(s): Gwantana Kiboigo (`gwan-kib`), PR #1 author and implementation-commit author; Gwantana confirmed responsibility for this generated scaffold on 2026-09-24.
 - Artifact: `.gitignore`, `requirements.txt`, `.github/workflows/ci.yml`, `app/main.py`, `app/__init__.py`, `app/api/__init__.py`, `app/api/routes/__init__.py`, `app/core/__init__.py`, `app/repositories/__init__.py`, `app/schemas/__init__.py`, `app/services/__init__.py`, `data/.gitkeep`, `tests/.gitkeep`, `README.md`, and `docs/TESTING.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -73,11 +73,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex created the scaffold and configuration and updated setup documentation. All eight Python files were empty; no feature implementation, representative data, or tests were generated. CI installed dependencies and compiled the scaffold only.
 - Validation: PR #1 reports successful creation of two Python 3.12.13 environments, dependency installation (including an independent `python -m pip install -r requirements.txt`), `python -m pip check` with no broken requirements, `python -m compileall app`, imports of all four dependencies, `git diff --cached --check`, tracked-file/diff inspection, and ignore-rule checks. These are historical reported results, not checks rerun for issue #9. pytest, application startup, and endpoint checks were not performed because no application or tests existed. The implementation diff was inspected for this entry.
 - PR or commit: [PR #1](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/1), merged; [implementation commit 0e9f6c8](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/0e9f6c893083a1a5a5c8080d675e1a9bf4e4d6c1).
-- Student review status: Pending. PR #1's recorded disclosure leaves confirmation pending; its merged state does not prove student review. No submitted GitHub reviews were returned when inspected on 2026-09-22.
+- Student review status: Confirmed by Gwantana Kiboigo on 2026-09-24 through explicit instruction to update his pending provenance review confirmations. PR #1 still has no separate submitted peer review recorded.
 
 ### Entry 4: Align provenance workflow with the course guide
 
-- Student(s): `gwan-kib`, requester and issue #9 author; responsible-student review and confirmation of these entries remain pending.
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #9 author; Gwantana confirmed responsibility for this provenance-workflow update on 2026-09-24.
 - Artifact: `docs/PROVENANCE.md`, `CONTRIBUTING.md`, `AGENTS.md`, `docs/milestones/M0.md`, `.github/PULL_REQUEST_TEMPLATE.md`, the three `.github/ISSUE_TEMPLATE/` files, and `README.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -85,7 +85,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex extracted the guide's text, drafted the shared record and historical entries, and updated workflow instructions and links. Historical statements are limited to available disclosures, commit history, and PR evidence; no student approval is invented.
 - Validation: Compared the required labels and fields with the downloaded guide and inspected documentation history and PR #1. A local Python documentation check passed for all 10 Markdown files (relative links/anchors, fences, whitespace, and obsolete wording), all three issue templates, and all four entries' required fields and labels. `git diff --check` passed. The complete changed documentation was inspected. No application tests are applicable to this documentation-only change.
 - PR or commit: [Issue #9](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/9); [implementation commit `1ff670b`](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/1ff670b33599cc92cde73b05bb3b30751277b5a1), which added the shared provenance workflow to `main`.
-- Student review status: Pending; student confirmation and peer review must be recorded only after they occur.
+- Student review status: Confirmed by Gwantana Kiboigo on 2026-09-24 through explicit instruction to update his pending provenance review confirmations. No separate peer review of this historical documentation change is asserted.
 
 ### Entry 5: Restaurant schema, sample data, and configuration
 
@@ -95,9 +95,9 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - AI tool: Codex.
 - Purpose: Establish the M0 restaurant response contract, representative JSON data, and configurable data location for issue #3.
 - Influence: Codex drafted the Pydantic model, sample records, path-selection function, tests, and related README updates from the course requirements and issue acceptance criteria.
-- Validation: On Python 3.12, all five foundation tests were observed failing before implementation because the model/configuration modules were missing; after implementation, `python -m pytest tests/test_restaurant_foundation.py -q` and `python -m pytest -q` each passed 5 tests, and `python -m compileall app` passed. Student review remains pending.
+- Validation: On Python 3.12, all five foundation tests were observed failing before implementation because the model/configuration modules were missing; after implementation, `python -m pytest tests/test_restaurant_foundation.py -q` and `python -m pytest -q` each passed 5 tests, and `python -m compileall app` passed. PR #11 was peer-reviewed and approved by Gwantana Kiboigo on 2026-09-24; Thomas Chen's own review confirmation is not independently established.
 - PR or commit: [Issue #3](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/3); [implementation commit a333af4](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/a333af41265be2cafcb5b054299932239b76a238). [PR #11](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/11).
-- Student review status: Pending; passing agent-run checks do not establish student understanding or approval.
+- Student review status: Peer review confirmed by Gwantana Kiboigo on PR #11 on 2026-09-24; responsible-student confirmation from Thomas Chen (`Tc2006415`) remains pending.
 
 ### Entry 6: Restaurant repository layer
 
@@ -107,9 +107,9 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - AI tool: Codex.
 - Purpose: Implement issue #4's persistence-access layer using the issue #3 restaurant model and configurable data path.
 - Influence: Codex drafted the JSON-reading repository, typed results, clean persistence/validation errors, isolated-data tests, and documentation updates.
-- Validation: On Python 3.12, all five repository tests were observed failing before implementation because the repository module was missing; after implementation, `python -m pytest tests/test_restaurant_repository.py -q` passed 5 tests, `python -m pytest -q` passed 10 tests, and `python -m compileall app` passed. Student review remains pending.
+- Validation: On Python 3.12, all five repository tests were observed failing before implementation because the repository module was missing; after implementation, `python -m pytest tests/test_restaurant_repository.py -q` passed 5 tests, `python -m pytest -q` passed 10 tests, and `python -m compileall app` passed. PR #12 was peer-reviewed and approved by Gwantana Kiboigo on 2026-09-24; Thomas Chen's own review confirmation is not independently established.
 - PR or commit: [Issue #4](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/4); [implementation commit 91198fa](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/91198faeb1424f6c4c5dc516de100f7e9221392b); [PR #12](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/12).
-- Student review status: Pending; passing agent-run checks do not establish student understanding or approval.
+- Student review status: Peer review confirmed by Gwantana Kiboigo on PR #12 on 2026-09-24; responsible-student confirmation from Thomas Chen (`Tc2006415`) remains pending.
 
 ### Entry 7: FastAPI application entry point and health endpoint
 
@@ -157,11 +157,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Formatting only, plus the explicit "V1" version label and a version-history table that M0 requires. The agreement's wording, decisions, and signatures are the team's and were not changed.
 - Validation: The Markdown text was compared against the signed agreement for unchanged wording. `git diff --check` passed.
 - PR or commit: [Issue #7](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/7); [PR #15](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/15).
-- Student review status: Sreeram Nara confirmed the Markdown matches the signed agreement on 2026-09-24. Confirmation from Gwantana Kiboigo and Thomas Chen, and team agreement to the added version-history table, are pending on the PR.
+- Student review status: Sreeram Nara confirmed the Markdown matches the signed agreement on 2026-09-24. Gwantana Kiboigo confirmed his review and agreement with the Markdown/version-history addition on 2026-09-24. Thomas Chen's confirmation of the Markdown/version-history addition remains pending.
 
 ### Entry 11: Restaurant discovery endpoint
 
-- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #5 assignee and requester; responsible-student confirmation remains pending.
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #5 assignee and requester; Gwantana confirmed responsibility for this generated endpoint work on 2026-09-24.
 - Artifact: `app/api/routes/restaurants.py`, `app/services/restaurant.py`, `app/main.py`, `tests/test_restaurants.py`, `tests/test_restaurant_service.py`, and `README.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -169,4 +169,4 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex wrote tests before implementation, added the service and typed GET route, registered it with FastAPI, and documented the endpoint and request path. No new business rules or persistence schema were introduced. The route maps repository data failures to a generic HTTP 500 response without exposing file paths or validation details.
 - Validation: The baseline passed 17 tests. `.venv/Scripts/python.exe -m pytest -q tests/test_restaurants.py tests/test_restaurant_service.py` failed all 10 new tests before implementation because the route/service did not exist. After implementation, `.venv/Scripts/python.exe -m pytest -q` passed all 27 tests; `-m compileall app`, `-m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. A temporary Uvicorn process returned HTTP 200 for `/health`, `/restaurants` (two records), `/docs`, and `/openapi.json`. The initial sandboxed pytest run failed on filesystem permissions; the successful runs used normal filesystem access. One existing Starlette/AnyIO deprecation warning remains.
 - PR or commit: [Issue #5](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/5); [PR #16](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/16), branch `feature/5-restaurant-list`.
-- Student review status: Pending; agent checks do not establish student understanding or peer approval.
+- Student review status: Confirmed by Gwantana Kiboigo on 2026-09-24 through explicit instruction to update his pending provenance review confirmations. Peer review is also recorded from Sreeram Nara on PR #16 on 2026-09-24.
