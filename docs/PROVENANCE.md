@@ -192,5 +192,5 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Purpose: Update the M0 provenance record after Gwantana reported that Thomas Chen had confirmed review of his generated M0 work and the Team Agreement Markdown/version-history addition.
 - Influence: ChatGPT changed Entries 5, 6, and 10 from pending to confirmed while preserving the source of the confirmation as Gwantana's report, and updated Entry 12 so it no longer implies Thomas's confirmation is unresolved.
 - Validation: The edits were limited to provenance documentation. Existing PR #11 and PR #12 peer-review evidence was retained, and the responsible-student confirmation was attributed to Gwantana's report rather than represented as a direct GitHub review from Thomas.
-- PR or commit: [Issue #19](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/19). PR link will be added after the pull request is opened.
+- PR or commit: [Issue #19](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/19). [PR #20](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/20).
 - Student review status: Gwantana Kiboigo explicitly supplied the confirmation information used for this update.
