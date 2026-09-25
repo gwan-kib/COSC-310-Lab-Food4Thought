@@ -170,3 +170,14 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The baseline passed 17 tests. `.venv/Scripts/python.exe -m pytest -q tests/test_restaurants.py tests/test_restaurant_service.py` failed all 10 new tests before implementation because the route/service did not exist. After implementation, `.venv/Scripts/python.exe -m pytest -q` passed all 27 tests; `-m compileall app`, `-m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. A temporary Uvicorn process returned HTTP 200 for `/health`, `/restaurants` (two records), `/docs`, and `/openapi.json`. The initial sandboxed pytest run failed on filesystem permissions; the successful runs used normal filesystem access. One existing Starlette/AnyIO deprecation warning remains.
 - PR or commit: [Issue #5](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/5); [PR #16](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/16), branch `feature/5-restaurant-list`.
 - Student review status: Confirmed by Gwantana Kiboigo on 2026-09-24 through explicit instruction to update his pending provenance review confirmations. Peer review is also recorded from Sreeram Nara on PR #16 on 2026-09-24.
+### Entry 12: M0 provenance review-status audit
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #17 owner.
+- Artifact: `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Audit the remaining M0 provenance review-status statements and update them using explicit student confirmation and recorded GitHub review evidence.
+- Influence: ChatGPT drafted the review-status edits, converted Gwantana-attributable pending statements to confirmed based on his explicit instruction, recorded existing peer approvals for PR #11, PR #12, and PR #16, and preserved Thomas Chen's self-review as pending where no direct confirmation was available.
+- Validation: The edited statements were checked against issue #17, the existing provenance record, and recorded GitHub reviews. No application code, tests, or runtime behaviour were changed. Unsupported teammate self-review was not inferred.
+- PR or commit: [Issue #17](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/17); [status-update commit acbf8d8](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/acbf8d80119fedeb37b8ff1b57ee6450ed5fa382). PR link will be added after the pull request is opened.
+- Student review status: Gwantana Kiboigo explicitly authorized this provenance-status audit and instructed that it be merged without requesting peer review; no separate post-edit peer review is asserted.
