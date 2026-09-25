@@ -89,27 +89,27 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 5: Restaurant schema, sample data, and configuration
 
-- Student(s): `Tc2006415`, contributor and issue #3 assignee; student review and responsibility for the generated work await confirmation.
+- Student(s): Thomas Chen (`Tc2006415`), contributor and issue #3 assignee; Gwantana Kiboigo reports that Thomas confirmed review and responsibility for the generated work on 2026-09-24.
 - Artifact: `app/schemas/restaurant.py`, `app/core/config.py`, `data/restaurants.json`, `tests/test_restaurant_foundation.py`, and `README.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
 - Purpose: Establish the M0 restaurant response contract, representative JSON data, and configurable data location for issue #3.
 - Influence: Codex drafted the Pydantic model, sample records, path-selection function, tests, and related README updates from the course requirements and issue acceptance criteria.
-- Validation: On Python 3.12, all five foundation tests were observed failing before implementation because the model/configuration modules were missing; after implementation, `python -m pytest tests/test_restaurant_foundation.py -q` and `python -m pytest -q` each passed 5 tests, and `python -m compileall app` passed. PR #11 was peer-reviewed and approved by Gwantana Kiboigo on 2026-09-24; Thomas Chen's own review confirmation is not independently established.
+- Validation: On Python 3.12, all five foundation tests were observed failing before implementation because the model/configuration modules were missing; after implementation, `python -m pytest tests/test_restaurant_foundation.py -q` and `python -m pytest -q` each passed 5 tests, and `python -m compileall app` passed. PR #11 was peer-reviewed and approved by Gwantana Kiboigo on 2026-09-24. Gwantana Kiboigo also reports that Thomas Chen confirmed he reviewed this generated work on 2026-09-24.
 - PR or commit: [Issue #3](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/3); [implementation commit a333af4](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/a333af41265be2cafcb5b054299932239b76a238). [PR #11](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/11).
-- Student review status: Peer review confirmed by Gwantana Kiboigo on PR #11 on 2026-09-24; responsible-student confirmation from Thomas Chen (`Tc2006415`) remains pending.
+- Student review status: Confirmed. Peer review is recorded from Gwantana Kiboigo on PR #11, and Gwantana reports that Thomas Chen (`Tc2006415`) confirmed his own review on 2026-09-24.
 
 ### Entry 6: Restaurant repository layer
 
-- Student(s): `Tc2006415`, recorded implementation-commit and PR author; student review and responsibility for the generated work await confirmation.
+- Student(s): Thomas Chen (`Tc2006415`), recorded implementation-commit and PR author; Gwantana Kiboigo reports that Thomas confirmed review and responsibility for the generated work on 2026-09-24.
 - Artifact: `app/repositories/restaurant.py`, `tests/test_restaurant_repository.py`, `README.md`, and `docs/TESTING.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
 - Purpose: Implement issue #4's persistence-access layer using the issue #3 restaurant model and configurable data path.
 - Influence: Codex drafted the JSON-reading repository, typed results, clean persistence/validation errors, isolated-data tests, and documentation updates.
-- Validation: On Python 3.12, all five repository tests were observed failing before implementation because the repository module was missing; after implementation, `python -m pytest tests/test_restaurant_repository.py -q` passed 5 tests, `python -m pytest -q` passed 10 tests, and `python -m compileall app` passed. PR #12 was peer-reviewed and approved by Gwantana Kiboigo on 2026-09-24; Thomas Chen's own review confirmation is not independently established.
+- Validation: On Python 3.12, all five repository tests were observed failing before implementation because the repository module was missing; after implementation, `python -m pytest tests/test_restaurant_repository.py -q` passed 5 tests, `python -m pytest -q` passed 10 tests, and `python -m compileall app` passed. PR #12 was peer-reviewed and approved by Gwantana Kiboigo on 2026-09-24. Gwantana Kiboigo also reports that Thomas Chen confirmed he reviewed this generated work on 2026-09-24.
 - PR or commit: [Issue #4](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/4); [implementation commit 91198fa](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/91198faeb1424f6c4c5dc516de100f7e9221392b); [PR #12](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/12).
-- Student review status: Peer review confirmed by Gwantana Kiboigo on PR #12 on 2026-09-24; responsible-student confirmation from Thomas Chen (`Tc2006415`) remains pending.
+- Student review status: Confirmed. Peer review is recorded from Gwantana Kiboigo on PR #12, and Gwantana reports that Thomas Chen (`Tc2006415`) confirmed his own review on 2026-09-24.
 
 ### Entry 7: FastAPI application entry point and health endpoint
 
@@ -157,7 +157,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Formatting only, plus the explicit "V1" version label and a version-history table that M0 requires. The agreement's wording, decisions, and signatures are the team's and were not changed.
 - Validation: The Markdown text was compared against the signed agreement for unchanged wording. `git diff --check` passed.
 - PR or commit: [Issue #7](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/7); [PR #15](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/15).
-- Student review status: Sreeram Nara confirmed the Markdown matches the signed agreement on 2026-09-24. Gwantana Kiboigo confirmed his review and agreement with the Markdown/version-history addition on 2026-09-24. Thomas Chen's confirmation of the Markdown/version-history addition remains pending.
+- Student review status: Confirmed by all three team members. Sreeram Nara confirmed the Markdown matches the signed agreement on 2026-09-24; Gwantana Kiboigo confirmed his review and agreement with the Markdown/version-history addition on 2026-09-24; Gwantana also reports that Thomas Chen confirmed his review and agreement on 2026-09-24.
 
 ### Entry 11: Restaurant discovery endpoint
 
@@ -177,7 +177,20 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Label: `AI-GENERATED`.
 - AI tool: ChatGPT.
 - Purpose: Audit the remaining M0 provenance review-status statements and update them using explicit student confirmation and recorded GitHub review evidence.
-- Influence: ChatGPT drafted the review-status edits, converted Gwantana-attributable pending statements to confirmed based on his explicit instruction, recorded existing peer approvals for PR #11, PR #12, and PR #16, and preserved Thomas Chen's self-review as pending where no direct confirmation was available.
+- Influence: ChatGPT drafted the review-status edits, converted Gwantana-attributable pending statements to confirmed based on his explicit instruction, and recorded existing peer approvals for PR #11, PR #12, and PR #16. Thomas Chen's self-review was left pending at that time because no confirmation had yet been reported to the assistant; issue #19 later records Gwantana's report that Thomas confirmed his review.
 - Validation: The edited statements were checked against issue #17, the existing provenance record, and recorded GitHub reviews. No application code, tests, or runtime behaviour were changed. Unsupported teammate self-review was not inferred.
 - PR or commit: [Issue #17](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/17); [status-update commit acbf8d8](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/acbf8d80119fedeb37b8ff1b57ee6450ed5fa382). [PR #18](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/18).
 - Student review status: Gwantana Kiboigo explicitly authorized this provenance-status audit and instructed that it be merged without requesting peer review; no separate post-edit peer review is asserted.
+
+
+### Entry 13: Thomas Chen M0 review confirmation
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`) reporting Thomas Chen's confirmation for the M0 artifacts attributed to `Tc2006415`.
+- Artifact: `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Update the M0 provenance record after Gwantana reported that Thomas Chen had confirmed review of his generated M0 work and the Team Agreement Markdown/version-history addition.
+- Influence: ChatGPT changed Entries 5, 6, and 10 from pending to confirmed while preserving the source of the confirmation as Gwantana's report, and updated Entry 12 so it no longer implies Thomas's confirmation is unresolved.
+- Validation: The edits were limited to provenance documentation. Existing PR #11 and PR #12 peer-review evidence was retained, and the responsible-student confirmation was attributed to Gwantana's report rather than represented as a direct GitHub review from Thomas.
+- PR or commit: [Issue #19](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/19). [PR #20](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/20).
+- Student review status: Gwantana Kiboigo explicitly supplied the confirmation information used for this update.
