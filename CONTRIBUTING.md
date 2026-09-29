@@ -22,6 +22,7 @@ The GitHub Project Board is the primary record of planning, ownership, and progr
 
 Search for overlapping work before creating an issue. Use:
 
+- [Epic](.github/ISSUE_TEMPLATE/epic.md) for a major capability that groups related user stories; implementation work still belongs in child user-story issues.
 - [User story](.github/ISSUE_TEMPLATE/user-story.md) for functional requirements.
 - [Technical task](.github/ISSUE_TEMPLATE/technical-task.md) for refactoring, tooling, configuration, test infrastructure, or documentation.
 - [Bug report](.github/ISSUE_TEMPLATE/bug.md) for reproducible defects.

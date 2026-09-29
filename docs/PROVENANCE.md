@@ -206,3 +206,16 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The documentation was checked against the current `requirements.txt`, `app/main.py`, health and restaurant routes, restaurant data configuration/repository, pytest isolation fixture, README, and CI workflow. The documented runtime surface is limited to the currently implemented `/health`, `/restaurants`, `/docs`, and `/openapi.json` endpoints. No application code changed. Runtime commands were not executed by ChatGPT; CI and human review remain required before merge.
 - PR or commit: [Issue #21](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/21); [PR #22](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/22); branch `chore/21-setup-docs`.
 - Student review status: Pending. Gwantana requested the documentation work, but no post-change student review is inferred from that request.
+
+### Entry 15: Epic issue template
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #23 owner.
+- Artifact: `.github/ISSUE_TEMPLATE/epic.md`, `CONTRIBUTING.md`, and `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Add a reusable epic planning template based on the supplied Milestone 1 specification and the repository's existing issue workflow.
+- Influence: ChatGPT drafted the epic template, added contributor guidance describing when to use it, and recorded this provenance entry. The template keeps feature-level acceptance criteria in child user stories rather than duplicating them at epic level.
+- Validation: The template was checked against the existing user-story, technical-task, and bug templates and against Milestone 1's requirement that implemented features originate from user stories with acceptance criteria. YAML front matter, Markdown structure, repository paths, and the intended issue-to-epic hierarchy were reviewed. No application code or runtime behaviour changed.
+- PR or commit: [Issue #23](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/23); [PR #24](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/24); branch `chore/23-epic-template`.
+- Student review status: Pending. Gwantana requested the change, but no post-change student review is inferred from that request.
+
