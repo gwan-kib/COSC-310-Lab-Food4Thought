@@ -219,3 +219,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [Issue #23](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/23); [PR #24](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/24); branch `chore/23-epic-template`.
 - Student review status: Pending. Gwantana requested the change, but no post-change student review is inferred from that request.
 
+### Entry 16: M0/M1 epic and issue planning
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester of the M1 planning work.
+- Artifact: GitHub issues #25–#42, including the retrospective M0 epics, M1 epics, M1 user stories, and M1 technical tasks.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Translate the supplied `Milestone 1 – First Vertical Slice` specification and the repository's completed M0 issue history into a traceable epic → user-story/technical-task plan for M1.
+- Influence: ChatGPT created two retrospective M0 epics (#25–#26), three M1 epics (#27–#29), a shared API/data-contract task (#30), the required M1 customer and restaurant-management user stories (#31–#39), and cross-cutting M1 verification/design-decision/submission tasks (#40–#42). The issue bodies include source-grounded scope, acceptance criteria, dependencies, testing expectations, and explicit M1 exclusions. No application code or runtime behaviour was changed.
+- Validation: The issue set was checked against the supplied M1 sections for Functional Scope, Required Vertical Slice, Pydantic Models, Persistence, Automated Tests, API Documentation, Frontend, GitHub Collaboration Expectations, Canvas Submission, and Live Demonstration. Existing M0 issues #2–#8 and the current repository tree were inspected so already-implemented M0 work was grouped retrospectively rather than recreated. M1-excluded authentication/authorization, carts, checkout, orders, and deliveries were kept out of implementation scope.
+- PR or commit: [M0 Platform epic #25](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/25), [M0 Restaurant epic #26](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/26), [M1 Discovery epic #27](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/27), [M1 Management epic #28](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/28), [M1 Quality epic #29](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/29), and child issues #30–#42; provenance PR pending.
+- Student review status: Pending. Gwantana requested the planning work, but no post-creation student review of all issue contents is inferred from that request.
+
