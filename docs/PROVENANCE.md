@@ -231,3 +231,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [M0 Platform epic #25](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/25), [M0 Restaurant epic #26](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/26), [M1 Discovery epic #27](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/27), [M1 Management epic #28](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/28), [M1 Quality epic #29](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/29), and child issues #30–#42; [PR #43](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/43).
 - Student review status: Pending. Gwantana requested the planning work, but no post-creation student review of all issue contents is inferred from that request.
 
+### Entry 17: Structured issue metadata workflow
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #44 owner.
+- Artifact: `.github/ISSUE_TEMPLATE/epic.md`, `.github/ISSUE_TEMPLATE/user-story.md`, `.github/ISSUE_TEMPLATE/technical-task.md`, `.github/ISSUE_TEMPLATE/bug.md`, `CONTRIBUTING.md`, `AGENTS.md`, and `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Implement the team's agreed convention for shorter issue titles and structured GitHub/Project metadata before migrating the existing issues.
+- Influence: ChatGPT updated all issue templates to separate title text from Type, Role, Workstream, Assignee, Milestone, Parent epic, and Status metadata; changed the epic title prefix to `EPIC: `; made GitHub Relationships the canonical epic hierarchy; documented technical-label usage; and updated contributor/agent guidance to prevent future bracket-prefixed titles.
+- Validation: The four issue templates, `CONTRIBUTING.md`, and `AGENTS.md` were checked for consistent terminology and for the distinction between Role and Assignee. The change is documentation/planning configuration only; no application code, tests, API behaviour, or persistence changed.
+- PR or commit: [Issue #44](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/44); branch `chore/44-issue-metadata-docs`; PR pending.
+- Student review status: Gwantana Kiboigo explicitly instructed implementation and merge without waiting for peer review. No separate post-change peer review is asserted.
+
