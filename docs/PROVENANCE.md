@@ -216,6 +216,6 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Purpose: Add a reusable epic planning template based on the supplied Milestone 1 specification and the repository's existing issue workflow.
 - Influence: ChatGPT drafted the epic template, added contributor guidance describing when to use it, and recorded this provenance entry. The template keeps feature-level acceptance criteria in child user stories rather than duplicating them at epic level.
 - Validation: The template was checked against the existing user-story, technical-task, and bug templates and against Milestone 1's requirement that implemented features originate from user stories with acceptance criteria. YAML front matter, Markdown structure, repository paths, and the intended issue-to-epic hierarchy were reviewed. No application code or runtime behaviour changed.
-- PR or commit: [Issue #23](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/23); branch `chore/23-epic-template`; PR pending.
+- PR or commit: [Issue #23](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/23); [PR #24](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/24); branch `chore/23-epic-template`.
 - Student review status: Pending. Gwantana requested the change, but no post-change student review is inferred from that request.
 
