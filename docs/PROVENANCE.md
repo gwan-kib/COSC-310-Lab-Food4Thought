@@ -243,3 +243,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [Issue #44](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/44); [PR #45](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/45); branch `chore/44-issue-metadata-docs`.
 - Student review status: Gwantana Kiboigo explicitly instructed implementation and merge without waiting for peer review. No separate post-change peer review is asserted.
 
+### Entry 18: Open issue metadata migration
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #46 owner.
+- Artifact: GitHub issues #27–#42 and issue #46; `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Migrate the currently open M1 epics, user stories, and technical tasks to the structured issue-metadata convention adopted in issue #44.
+- Influence: ChatGPT removed role/milestone bracket prefixes from open issue titles, retained `EPIC: ` as the only planning prefix, shortened selected technical-task titles, and added consistent Project Metadata sections recording Type, Role, Workstream, Assignee state, M1 delivery target, parent epic, and board-status reference. Existing requirements, acceptance criteria, dependencies, testing expectations, and implementation scope were preserved.
+- Validation: All open issues were re-queried after the migration. Issues #27–#29 use `EPIC: `; regular issues #30–#42 and #46 have concise titles without bracket prefixes. Project Metadata sections were fetched and checked for the expected Type, Role, Workstream, unassigned state, M1 target, and parent-epic mapping. No assignee, label, implementation behaviour, API contract, test, or persistence change was invented.
+- PR or commit: [Issue #46](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/46); branch `docs/46-issue-metadata-migration`; PR pending.
+- Student review status: Pending. Gwantana requested the migration, but no separate post-migration review is inferred from that request.
+
