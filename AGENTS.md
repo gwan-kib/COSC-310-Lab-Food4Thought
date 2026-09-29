@@ -46,6 +46,17 @@ If a source or component is missing, say so. New files/functions/endpoints must 
 - Keep GitHub writes within user authorization. If posting is unavailable or unauthorized, prepare the content and report it as unposted. Do not invent issues, ownership, comments, reviews, or board updates.
 - Do not impersonate a peer reviewer, self-approve on a student's behalf, or certify student understanding without student involvement.
 
+## Setup documentation maintenance
+
+Treat [docs/FIRST_TIME_SETUP.md](docs/FIRST_TIME_SETUP.md) and [docs/QUICK_SETUP.md](docs/QUICK_SETUP.md) as maintained operational documentation, not one-time onboarding notes.
+
+- Keep both guides synchronized with the current repository. Update them in the same PR whenever a change affects prerequisites, supported Python version, dependency installation, virtual-environment commands, required tools, environment/configuration variables, data-file requirements, application entry points, run commands, test commands, or the endpoints/checks used to verify a local setup.
+- Document only behaviour and requirements that are already implemented and present in the repository. Do not add planned features, future dependencies, anticipated services, or speculative setup steps.
+- Keep the first-time guide complete enough for a contributor starting from a new machine. Keep the quick guide limited to the shortest reliable workflow for a contributor whose machine has already completed first-time setup.
+- Prefer linking to these guides from README and other docs instead of copying full setup procedures into multiple places. If a small command is duplicated elsewhere, update every affected copy in the same PR.
+- Verify setup-related commands against the actual repository whenever practical. In the PR, distinguish commands that were executed from commands that were only inspected for consistency.
+- When reviewing implementation work, explicitly check whether the change makes either setup guide stale even if the issue did not mention documentation.
+
 ## Verification and provenance
 
 Run applicable checks and inspect the complete final diff, including new files. Give exact commands and actual results. Never claim tests/builds pass, an endpoint works, or an application runs without verification. Separate environment failures, product failures, pre-existing failures, and unperformed checks; explain remaining risk.
