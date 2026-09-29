@@ -240,6 +240,6 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Purpose: Implement the team's agreed convention for shorter issue titles and structured GitHub/Project metadata before migrating the existing issues.
 - Influence: ChatGPT updated all issue templates to separate title text from Type, Role, Workstream, Assignee, Milestone, Parent epic, and Status metadata; changed the epic title prefix to `EPIC: `; made GitHub Relationships the canonical epic hierarchy; documented technical-label usage; and updated contributor/agent guidance to prevent future bracket-prefixed titles.
 - Validation: The four issue templates, `CONTRIBUTING.md`, and `AGENTS.md` were checked for consistent terminology and for the distinction between Role and Assignee. The change is documentation/planning configuration only; no application code, tests, API behaviour, or persistence changed.
-- PR or commit: [Issue #44](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/44); branch `chore/44-issue-metadata-docs`; PR pending.
+- PR or commit: [Issue #44](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/44); [PR #45](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/45); branch `chore/44-issue-metadata-docs`.
 - Student review status: Gwantana Kiboigo explicitly instructed implementation and merge without waiting for peer review. No separate post-change peer review is asserted.
 
