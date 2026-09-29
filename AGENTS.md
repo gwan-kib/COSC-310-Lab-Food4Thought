@@ -33,6 +33,18 @@ Distinguish **course requirements**, **team/repository conventions**, and **reco
 
 If a source or component is missing, say so. New files/functions/endpoints must follow the authorized task and established requirements, not assumptions that they already exist.
 
+## Issue and Project metadata
+
+Follow the issue metadata convention in [CONTRIBUTING.md](CONTRIBUTING.md#issue-titles-and-project-metadata) whenever creating or updating GitHub planning artifacts.
+
+- Keep regular issue titles concise and free of role/milestone/type prefixes. Do not create titles such as `[Customer] [M1] View restaurant details`.
+- Use `EPIC: ` as the only intentional planning prefix for epic titles.
+- Put work type, role, workstream, milestone, status, actual assignee, and parent epic in their dedicated GitHub/Project metadata when those fields are available.
+- Treat Role as the responsibility/work area and Assignee as the actual person doing the work; do not substitute one for the other.
+- Use GitHub Relationships / parent-child links as the canonical epic hierarchy. Keep any epic checklist synchronized with the relationship.
+- Use labels only for overlapping technical categories such as `frontend`, `backend`, `api`, `persistence`, `testing`, or `documentation`; do not duplicate Type, Role, Milestone, Status, Assignee, or epic membership with labels.
+- If the expected field or label has not yet been configured, leave that metadata pending and report it. Do not re-encode it in the issue title or invent a substitute field/value.
+
 ## While working
 
 - Follow CONTRIBUTING's engineering constraints, workflow, and Definition of Done. Preserve unrelated changes; do not silently broaden scope or clean up unrelated code.
