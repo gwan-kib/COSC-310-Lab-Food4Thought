@@ -4,6 +4,8 @@
 
 Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. This version is the Milestone 0 foundation.
 
+- [First-time application setup](docs/FIRST_TIME_SETUP.md)
+- [Quick setup for returning contributors](docs/QUICK_SETUP.md)
 - [M0 checkpoint and submission requirements](docs/milestones/M0.md)
 - [Contributing and AI/provenance policy](CONTRIBUTING.md)
 - [Shared AI provenance record](docs/PROVENANCE.md)
@@ -20,38 +22,12 @@ All Python dependencies are pinned in `requirements.txt`.
 
 ## Setup
 
-Run every command from the repository root.
+Use the dedicated setup guides so installation instructions have one source of truth:
 
-1. Clone the repository and enter it:
+- **New machine / first clone:** [First-Time Application Setup](docs/FIRST_TIME_SETUP.md)
+- **Already configured:** [Quick Setup](docs/QUICK_SETUP.md)
 
-   ```sh
-   git clone https://github.com/gwan-kib/COSC-310-Lab-Food4Thought.git
-   cd COSC-310-Lab-Food4Thought
-   ```
-
-2. Create a virtual environment with Python 3.12:
-
-   ```sh
-   python -m venv .venv
-   ```
-
-   If `python` is not 3.12 on your machine, use `py -3.12 -m venv .venv` on Windows or `python3.12 -m venv .venv` on macOS/Linux.
-
-3. Activate it:
-
-   | Shell | Command |
-   | --- | --- |
-   | macOS/Linux | `source .venv/bin/activate` |
-   | Windows PowerShell | `.venv\Scripts\Activate.ps1` |
-   | Windows Command Prompt | `.venv\Scripts\activate.bat` |
-
-   If PowerShell blocks activation, run the commands below with `.\.venv\Scripts\python.exe` in place of `python`.
-
-4. Install dependencies:
-
-   ```sh
-   python -m pip install -r requirements.txt
-   ```
+Both guides describe only the application's current implementation.
 
 ## Running the application
 
