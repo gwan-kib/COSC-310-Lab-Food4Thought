@@ -194,3 +194,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The edits were limited to provenance documentation. Existing PR #11 and PR #12 peer-review evidence was retained, and the responsible-student confirmation was attributed to Gwantana's report rather than represented as a direct GitHub review from Thomas.
 - PR or commit: [Issue #19](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/19). [PR #20](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/20).
 - Student review status: Gwantana Kiboigo explicitly supplied the confirmation information used for this update.
+
+### Entry 14: First-time and returning setup documentation
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #21 owner.
+- Artifact: `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, `README.md`, and `AGENTS.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Add separate setup instructions for a first-time application setup and for quick setup on an already-configured machine, and require future agents to keep those instructions aligned with implementation.
+- Influence: ChatGPT drafted both setup guides from the current repository state, replaced duplicated README setup instructions with links to the guides, and added AGENTS.md maintenance rules requiring setup documentation to change alongside setup-relevant implementation changes. The documentation intentionally excludes planned or unimplemented features.
+- Validation: The documentation was checked against the current `requirements.txt`, `app/main.py`, health and restaurant routes, restaurant data configuration/repository, pytest isolation fixture, README, and CI workflow. The documented runtime surface is limited to the currently implemented `/health`, `/restaurants`, `/docs`, and `/openapi.json` endpoints. No application code changed. Runtime commands were not executed by ChatGPT; CI and human review remain required before merge.
+- PR or commit: [Issue #21](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/21); branch `chore/21-setup-docs`; pull request pending at the time of this entry.
+- Student review status: Pending. Gwantana requested the documentation work, but no post-change student review is inferred from that request.
