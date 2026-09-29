@@ -6,7 +6,10 @@ labels: ""
 assignees: ""
 ---
 
-<!-- Remove secrets/personal data from logs and screenshots. Use isolated data to reproduce writes. -->
+<!--
+Remove secrets/personal data from logs and screenshots. Use isolated data to reproduce writes.
+Keep the title concise and describe the defect only. Do not add role or milestone prefixes.
+-->
 
 ## Problem
 
@@ -58,6 +61,20 @@ Did this previously work? Give a verified version/commit if known; otherwise say
 - [ ] Affected documentation/provenance updated as required
 
 <!-- Record AI contributions affecting project artifacts in docs/PROVENANCE.md, using the guide-defined labels and entry fields. -->
+
+## Project Metadata
+
+<!-- Set these in GitHub / the Project Board after creating the issue. Do not duplicate them in the title or body once the fields are available. -->
+
+- Type: Bug
+- Role:
+- Workstream:
+- Assignee:
+- Milestone:
+- Parent epic:
+- Status:
+
+<!-- Use labels only for overlapping technical categories such as frontend, backend, api, persistence, testing, or documentation. -->
 
 ## Dependencies / Ownership / Open Questions
 

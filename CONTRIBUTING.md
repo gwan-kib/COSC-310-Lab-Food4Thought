@@ -27,7 +27,35 @@ Search for overlapping work before creating an issue. Use:
 - [Technical task](.github/ISSUE_TEMPLATE/technical-task.md) for refactoring, tooling, configuration, test infrastructure, or documentation.
 - [Bug report](.github/ISSUE_TEMPLATE/bug.md) for reproducible defects.
 
-Assign yourself only after checking ownership and coordinating overlap. Use actual board fields and milestones; none are assumed here. Keep one focused issue per branch where reasonable. Acceptance criteria must be observable and grounded in a requirement or an agreed technical objective. Do not invent stakeholder needs or business rules to fill a template.
+### Issue titles and Project metadata
+
+Keep issue titles short and focused on the work itself. Do not encode metadata that has a dedicated GitHub/Project field in the title.
+
+- Regular issues: use a concise capability, task, or defect title such as `View restaurant details` or `Verify API documentation`.
+- Epics: use the single visual prefix `EPIC: `, for example `EPIC: Restaurant Discovery & Menu Browsing`.
+- Do not add title prefixes such as `[M1]`, `[Customer]`, `[Restaurant User]`, `[System Administrator]`, `[User Story]`, or `[Technical Task]`.
+
+Use the following metadata model when the corresponding fields are available:
+
+| Metadata | Purpose | Values / examples |
+| --- | --- | --- |
+| **Type** | What kind of work is this? | Epic, User Story, Technical Task, Bug |
+| **Role** | Which project responsibility area owns the work? | Customer, Restaurant User, System Administrator, Shared / Team |
+| **Assignee** | Which actual person is responsible for doing the work? | GitHub assignee(s) |
+| **Workstream** | Which coherent area does the work belong to? | Restaurant Discovery, Restaurant Management, Engineering / Release, Foundation |
+| **Milestone** | Which course delivery checkpoint is this due for? | Use the native GitHub milestone, e.g. M1 – First Vertical Slice |
+| **Parent epic** | Which major capability contains this work? | Use GitHub Relationships / parent-child links |
+| **Status** | Where is the work in the team workflow? | Use the Project Board Status field |
+
+**Role and Assignee are different.** Role identifies the responsibility/work area even before a person claims the issue; Assignee identifies the actual team member doing the work.
+
+GitHub Relationships are the canonical epic hierarchy. An epic may keep a child-issue checklist for readability, but the checklist must not replace or contradict the parent-child relationship.
+
+Use labels only when they add overlapping technical information that does not fit a single-select field. Recommended technical categories are `frontend`, `backend`, `api`, `persistence`, `testing`, and `documentation` once those labels are configured. Do not create labels that duplicate Type, Role, Milestone, Status, Assignee, or epic membership.
+
+The Project fields and labels may be configured separately from this document. If a documented field is not available yet, leave that metadata pending rather than putting bracket prefixes back into the title.
+
+Assign yourself only after checking role ownership, current assignees, dependencies, and overlapping work. Keep one focused issue per branch where reasonable. Acceptance criteria must be observable and grounded in a requirement or an agreed technical objective. Do not invent stakeholder needs or business rules to fill a template.
 
 Record source references and preserve the chain:
 

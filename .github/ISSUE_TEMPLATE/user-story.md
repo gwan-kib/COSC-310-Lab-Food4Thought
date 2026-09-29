@@ -6,7 +6,10 @@ labels: ""
 assignees: ""
 ---
 
-<!-- Use CONTRIBUTING.md. Replace placeholders; do not invent requirements or stakeholder needs. -->
+<!--
+Use CONTRIBUTING.md. Replace placeholders; do not invent requirements or stakeholder needs.
+Keep the title concise and describe the work only. Do not add role or milestone prefixes such as [Customer] or [M1].
+-->
 
 ## User Story
 
@@ -50,7 +53,19 @@ Blocked by:
 
 Related issues/PRs:
 
-Owner / milestone / board placement, once confirmed:
+## Project Metadata
+
+<!-- Set these in GitHub / the Project Board after creating the issue. Do not duplicate them in the title or body once the fields are available. -->
+
+- Type: User Story
+- Role:
+- Workstream:
+- Assignee:
+- Milestone:
+- Parent epic:
+- Status:
+
+<!-- Use labels only for overlapping technical categories such as frontend, backend, api, persistence, testing, or documentation. -->
 
 ## Testing
 
