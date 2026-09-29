@@ -1,7 +1,7 @@
 ---
 name: Epic
 about: Organize a major capability made up of multiple user stories
-title: "[EPIC] "
+title: "EPIC: "
 labels: ""
 assignees: ""
 ---
@@ -10,6 +10,7 @@ assignees: ""
 Use an epic for a major capability or coherent project area that spans multiple user stories.
 Implementation work should remain in child user-story issues with their own acceptance criteria.
 Do not use an epic as a substitute for a course milestone or as a catch-all task list.
+Keep the title concise. "EPIC:" is the only intentional title prefix; role and milestone belong in Project/GitHub metadata.
 -->
 
 ## Goal
@@ -45,7 +46,11 @@ Not included:
 
 ## Child User Stories
 
-<!-- Link only actual child issues. Add stories as the epic is refined. -->
+<!--
+Use GitHub Relationships / parent-child links as the canonical epic hierarchy.
+This checklist is a convenient summary only; keep it consistent with the actual Relationships field.
+Link only actual child issues.
+-->
 
 - [ ] #
 - [ ] #
@@ -57,6 +62,20 @@ Depends on:
 Blocked by:
 
 Related epics / issues / PRs:
+
+## Project Metadata
+
+<!-- Set these in GitHub / the Project Board after creating the issue. Do not duplicate them in the title or body once the fields are available. -->
+
+- Type: Epic
+- Role:
+- Workstream:
+- Assignee:
+- Milestone:
+- Parent epic: Usually none
+- Status:
+
+<!-- Use labels only for overlapping technical categories such as frontend, backend, api, persistence, testing, or documentation. -->
 
 ## Engineering Requirements
 
