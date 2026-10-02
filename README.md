@@ -7,6 +7,8 @@ Food4Thought is a food-delivery application built for the COSC 310 team term pro
 - [First-time application setup](docs/FIRST_TIME_SETUP.md)
 - [Quick setup for returning contributors](docs/QUICK_SETUP.md)
 - [M0 checkpoint and submission requirements](docs/milestones/M0.md)
+- [M1 checkpoint and source requirements](docs/milestones/M1.md)
+- [Proposed M1 restaurant/menu API and data contract](docs/M1_API_CONTRACT.md) (team review pending)
 - [Contributing and AI/provenance policy](CONTRIBUTING.md)
 - [Shared AI provenance record](docs/PROVENANCE.md)
 - [Testing conventions](docs/TESTING.md)

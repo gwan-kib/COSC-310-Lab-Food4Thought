@@ -255,3 +255,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [Issue #46](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/46); [PR #47](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/47); branch `docs/46-issue-metadata-migration`.
 - Student review status: Pending. Gwantana requested the migration, but no separate post-migration review is inferred from that request.
 
+### Entry 19: M1 restaurant and menu contract
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #30 assignee.
+- Artifact: `docs/M1_API_CONTRACT.md`, `docs/milestones/M1.md`, `README.md`, `CONTRIBUTING.md`, and this entry.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Prepare the shared M1 API/data contract before the dependent restaurant and menu stories are implemented.
+- Influence: Codex drafted the endpoint inventory, request/read/update model responsibilities, cuisine filter, partial-update semantics, identifier ownership, menu containment, JSON persistence compatibility, errors, examples, and child-story verification mapping. Codex summarized the user-supplied M1 specification and recorded that its required search/filter operation supersedes the earlier brief's optional-filtering wording. Engineering choices are explicitly proposed for team review; no feature code, models, tests, or persisted data were changed.
+- Validation: Compared the contract with issue #30, child stories #31–#39, the supplied M1 source, and the existing restaurant route/service/repository/schema/configuration/data. A Python documentation check validated 31 relative links, four fenced JSON examples, all eight operation rows, and seven backend child-story mappings. `git diff --check` and `git diff --exit-code -- app tests data requirements.txt` passed. Application tests and test-first failing/passing evidence are not applicable to this documentation-only change. Both setup guides were inspected; current setup behavior remains unchanged. Board status was unavailable because the token lacks `read:project`.
+- PR or commit: [Issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30); branch `chore/30-restaurant-menu-contract` (PR reference to be recorded after creation).
+- Student review status: Pending. The user supplied the milestone source and requested the work; team contract adoption, responsible-student review, and peer approval are not inferred from those actions.
+
