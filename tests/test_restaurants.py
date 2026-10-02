@@ -64,7 +64,3 @@ def test_restaurants_openapi_uses_restaurant_response_model():
     response_schema = operation["responses"]["200"]["content"]["application/json"]["schema"]
     assert response_schema["type"] == "array"
     assert response_schema["items"]["$ref"] == "#/components/schemas/Restaurant"
-
-
-def test_restaurants_rejects_post():
-    assert TestClient(app).post("/restaurants").status_code == 405

@@ -279,3 +279,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: Inspected the current per-request dependency and complete documentation diff. Relative-link and JSON-example checks, `git diff --check`, and `git diff --exit-code -- app tests data requirements.txt` passed. No application behavior or setup changed; application tests are not applicable locally to this documentation-only revision.
 - PR or commit: [PR #48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48), issue #30, branch `chore/30-restaurant-menu-contract`.
 - Student review status: Review feedback supplied by the user on 2026-10-02; adoption of the revised contract and responsible-student confirmation remain pending. No reviewer identity or approval is inferred.
+
+### Entry 21: Create restaurant and shared persistence foundation
+
+- Student(s): Attribution pending confirmation; the user authorized issue #35 work in this chat, but this chat does not establish a student identity or responsible-student review.
+- Artifact: `app/schemas/restaurant.py`, `app/repositories/restaurant.py`, `app/services/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_restaurant_create.py`, `tests/test_restaurants.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, and `docs/milestones/M1.md`.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Implement issue #35's create-restaurant vertical slice and the shared complete-record persistence foundation described in the proposed M1 contract.
+- Influence: Codex created the request, menu-item, stored-record, and error models; added full-record validation, a process-wide mutation lock and atomic file replacement; added server-generated IDs and the create route; and wrote isolated behavior, failure, concurrency, and OpenAPI tests plus README updates. The proposal's team-adoption status is unchanged.
+- Validation: The new tests were run before implementation and failed for the missing POST operation and repository/model methods. A legacy-field regression test then failed with HTTP 500 before the compatibility fix and passed afterward. Using this worktree's Python 3.12 virtual environment, `python -m pytest tests/test_restaurant_create.py -q` passed 24 tests before that added regression, and `python -m pytest -q` passed 51 tests after it. `python -m compileall -q app`, `python -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. A separate Codex review found the legacy-field regression and a concurrency-test timing weakness; both were addressed. This is not team peer review, and responsible-student validation remains pending.
+- PR or commit: Branch `feature/35-create-restaurant`; add the PR or commit link when available.
+- Student review status: Pending; passing agent-run checks do not establish student understanding or approval.
