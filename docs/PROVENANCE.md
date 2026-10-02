@@ -282,7 +282,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 21: Create restaurant and shared persistence foundation
 
-- Student(s): Attribution pending confirmation; the user authorized issue #35 work in this chat, but this chat does not establish a student identity or responsible-student review.
+- Student(s): `Tc2006415`, verified issue #35 assignee and PR #51 author; responsible-student review and confirmation remain pending.
 - Artifact: `app/schemas/restaurant.py`, `app/repositories/restaurant.py`, `app/services/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_restaurant_create.py`, `tests/test_restaurants.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, and `docs/milestones/M1.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
