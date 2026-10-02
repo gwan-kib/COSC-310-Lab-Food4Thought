@@ -267,3 +267,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [Issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30); [PR #48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48); branch `chore/30-restaurant-menu-contract`.
 - Student review status: Pending. The user supplied the milestone source and requested the work; team contract adoption, responsible-student review, and peer approval are not inferred from those actions.
 
+
+### Entry 20: M1 contract review revisions
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #30 assignee; the supplied review does not identify its author.
+- Artifact: `docs/M1_API_CONTRACT.md` and this entry.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Resolve the three ambiguities supplied in review before team adoption.
+- Influence: Codex assigned the shared persistence foundation to #35 before #33/#36 merge, specified a module-level lock covering complete mutations across per-request repository instances, and removed unsupported GET 422 responses. Added future preservation/concurrency checks and explicit adoption evidence requirements.
+- Validation: Inspected the current per-request dependency and complete documentation diff. Relative-link and JSON-example checks, `git diff --check`, and `git diff --exit-code -- app tests data requirements.txt` passed. No application behavior or setup changed; application tests are not applicable locally to this documentation-only revision.
+- PR or commit: [PR #48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48), issue #30, branch `chore/30-restaurant-menu-contract`.
+- Student review status: Review feedback supplied by the user on 2026-10-02; adoption of the revised contract and responsible-student confirmation remain pending. No reviewer identity or approval is inferred.

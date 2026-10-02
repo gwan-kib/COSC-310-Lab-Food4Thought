@@ -2,7 +2,7 @@
 
 ## Status and authority
 
-Proposed contract for [issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30), drafted on 2026-10-02 and checked against the user-supplied **Milestone 1 – First Vertical Slice** specification that day. Team review is pending. Do not treat this draft as recorded team agreement or as implemented API behavior.
+Proposed contract for [issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30), drafted on 2026-10-02 and checked against the user-supplied **Milestone 1 – First Vertical Slice** specification that day. Review feedback supplied by the user on 2026-10-02 has been addressed below. Team adoption of the revised contract remains pending. Do not treat this draft as recorded team agreement or as implemented API behavior.
 
 The [M1 checkpoint](milestones/M1.md) records the supplied course source and its scope. Sections 1–2, Required Vertical Slice, Pydantic Models, Persistence, and API Documentation ground this contract. Trace implementation through [discovery epic #27](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/27), [management epic #28](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/28), [quality epic #29](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/29), and their child stories. The pasted specification was verified directly; its linked downloads and live Canvas page were not supplied or inspected.
 
@@ -18,8 +18,8 @@ Use the existing unprefixed `/restaurants` collection. Path identifiers are opaq
 | --- | --- | --- | --- | --- |
 | List restaurants / existing #5 | `GET /restaurants` | None | `200`, `list[Restaurant]`; `[]` when empty | `500` |
 | Filter restaurants / #32 | `GET /restaurants?cuisine=Japanese` | Optional `cuisine` query string | `200`, `list[Restaurant]`; `[]` when no match | `422`, `500` |
-| Restaurant details / #31 | `GET /restaurants/{restaurant_id}` | Restaurant ID | `200`, `Restaurant` | `404`, `422`, `500` |
-| Menu and its items / #33 | `GET /restaurants/{restaurant_id}/menu` | Restaurant ID | `200`, `Menu`; empty `items` for an existing restaurant with no items | `404`, `422`, `500` |
+| Restaurant details / #31 | `GET /restaurants/{restaurant_id}` | Restaurant ID | `200`, `Restaurant` | `404`, `500` |
+| Menu and its items / #33 | `GET /restaurants/{restaurant_id}/menu` | Restaurant ID | `200`, `Menu`; empty `items` for an existing restaurant with no items | `404`, `500` |
 | Create restaurant / #35 | `POST /restaurants` | `RestaurantCreate` | `201`, persisted `Restaurant` | `422`, `500` |
 | Update restaurant / #36 | `PATCH /restaurants/{restaurant_id}` | Restaurant ID; `RestaurantUpdate` | `200`, complete updated `Restaurant` | `404`, `422`, `500` |
 | Add menu item / #37 | `POST /restaurants/{restaurant_id}/menu/items` | Restaurant ID; `MenuItemCreate` | `201`, persisted `MenuItem` | `404`, `422`, `500` |
@@ -35,7 +35,7 @@ One cuisine filter satisfies the search-or-filter choice described in #32 withou
 
 ## Pydantic model responsibilities
 
-Keep models in the existing `app/schemas/` layer. Names below are the proposed shared names; define them in the feature that first uses them, not as unused placeholders in #30.
+Keep models in the existing `app/schemas/` layer. Names below are the proposed shared names; introduce the shared persistence models in #35 as specified below, and other models with their consuming features, not as unused placeholders in #30.
 
 | Model | Fields and responsibilities |
 | --- | --- |
@@ -88,11 +88,15 @@ Illustrative stored record (not a change to committed representative data in #30
 ]
 ```
 
-A missing `menu_items` key on a valid M0 record means an empty menu. An explicit null, wrong type, or invalid item is invalid data, not an empty menu. Reads must not rewrite legacy records. Writes may materialize `menu_items: []`; they must preserve all existing identifiers, restaurant information, and menu items. Introduce the persistence model in #33, and ensure #35–#38 use it rather than serializing the four-field read model and accidentally losing menu data. If a restaurant-write story lands first, coordinate this shared model with #33 before adding menu data.
+A missing `menu_items` key on a valid M0 record means an empty menu. An explicit null, wrong type, or invalid item is invalid data, not an empty menu. Reads must not rewrite legacy records. Writes may materialize `menu_items: []`; they must preserve all existing identifiers, restaurant information, and menu items. **Shared foundation ownership:** #35 introduces `MenuItem`, `RestaurantRecord`, and repository loading/saving of complete records as the prerequisite portion of restaurant creation. This foundation must land before #33 or #36; it can be reviewed and merged separately within #35 without waiting for the create endpoint. Those stories integrate the foundation rather than redefining its models. #33 then adds menu browsing and representative menu data; #36 adds restaurant updates; #37 and #38 reuse the same persistence contract. No restaurant writer may serialize the four-field read model back to storage, even before menu browsing lands. #35 must test creating a restaurant alongside existing nonempty menu data and reloading without losing item fields or IDs; #36 must test preserving that data during updates. This assigns scope to stories, not new student assignees.
 
 The route parses HTTP input, declares response/error models, and maps application failures to HTTP responses. The service performs cuisine matching, parent/item existence checks, ID generation, and update orchestration. The repository alone loads, validates, and saves records. There is no frontend or service file access.
 
 The repository validates the full result before saving. A successful write response means persistence completed; a new repository/application instance must see the result. Write operations must preserve unrelated records and items. Implement replacement through a temporary file in the same directory and atomic replacement, with cleanup on failure; serialize each read-modify-write operation within the supported single-process application to avoid lost updates. Do not claim cross-process locking or crash durability beyond the implemented/tested guarantees. The feature PR must document this execution limit; atomic replacement alone does not coordinate multiple writers. An unsuccessful save must not truncate or silently reset the existing file.
+
+**Synchronization across requests:** #35 introduces one module-level `threading.Lock` in the repository module, shared by all repository instances and all restaurant/menu mutations in the process. Do not allocate it in the constructor or per-request dependency. A single lock across configured paths is sufficient for this small application; requests still resolve their own storage paths. Hold it across the entire mutation: load current records, check parent/item existence and ID uniqueness, apply the service-defined change, validate, and atomically replace the file. A repository mutation boundary runs the service change operation under this lock. Do not save a stale collection read before locking; repeat any earlier existence check against the locked current state. Release the lock on success or exception using a context manager, and do not reacquire the non-reentrant lock inside the boundary.
+
+The first write implementation must test overlapping mutations through two independently constructed repositories sharing one temporary file, verify both changes survive reload, and verify a failed mutation releases the lock. Atomic replacement protects file contents; the shared lock protects the read-modify-write sequence. This is a future implementation requirement, not a guarantee of the current read-only repository. Multiple worker processes and external file writers are outside the guarantee.
 
 One file keeps parent relationships and writes together and reuses the existing test-isolation configuration. The trade-off is reading/writing the whole dataset and needing write coordination. Separate restaurant/menu files would isolate data types but introduce cross-file consistency and additional configuration without a current requirement. Revisit this choice if later requirements need independently managed menus or multiple processes.
 
@@ -103,10 +107,12 @@ One file keeps parent relationships and writes together and reuses the existing 
 | Existing restaurant, including no menu items | `200`; restaurant or menu read response |
 | Unknown restaurant on any restaurant-scoped operation | `404`, `{"detail":"Restaurant not found"}` |
 | Known restaurant but unknown item under that parent on item update | `404`, `{"detail":"Menu item not found"}` |
-| Invalid body/query/path value rejected by request validation | `422`, FastAPI validation-error body with a `detail` array |
+| Invalid write body or blank cuisine filter rejected by request validation | `422`, FastAPI validation-error body with a `detail` array |
 | Missing/unreadable file, malformed JSON, invalid stored records/relationships, or save failure | `500`, `{"detail":"Restaurant data is unavailable"}` |
 
 Request validation happens first. For valid requests, load and validate storage before distinguishing existing from missing resources. Check restaurant existence before item existence. Do not convert a storage failure into `404`, an empty list/menu, or success. Return generic storage errors without local paths, exception messages, or stored data. An arbitrary nonempty opaque ID is a valid lookup value; an unknown one is `404`, not a UUID-format validation failure. A missing URL segment may fail route matching rather than model validation.
+
+The details and menu GET operations have no body or validated query input and impose no ID constraint beyond a nonempty path segment. They define no `422` case: an unknown opaque ID returns `404`, and a missing segment fails route matching. Their feature PRs must align generated OpenAPI with these responses, removing an automatically inserted `422` response if necessary. Write operations retain `422` for body validation; the filtered list retains it for a blank cuisine value.
 
 Creation returns the server-assigned ID in its read response only after saving. This contract does not promise idempotency for repeated POST requests: callers must not assume a retry cannot create another record. No `401`/`403` contract is added because the M1 issue plan excludes authentication/authorization.
 
@@ -140,8 +146,8 @@ Example `201` response (ID is illustrative, not fixed):
 | --- | --- | --- |
 | [#31](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/31) details | Inventory, `Restaurant`, failures | Known/unknown ID; storage failure; unchanged response fields |
 | [#32](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/32) filter | Filtering, inventory | Unfiltered parity; case/whitespace handling; exact match; no match; blank query; storage failure |
-| [#33](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/33) menu | Models, relationships, persistence | Representative menu data; parent scoping; empty legacy menu; unknown parent; corrupt/duplicate data; unchanged list shape |
-| [#35](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/35) create restaurant | Create model, IDs, persistence | `201`; reload survival; generated ID; invalid/extra fields; save failure; existing records preserved |
+| [#33](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/33) menu | Models, relationships, persistence; consumes #35's foundation | Representative menu data; parent scoping; empty legacy menu; unknown parent; corrupt/duplicate data; unchanged list shape |
+| [#35](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/35) create restaurant | Owns shared persistence models and mutation lock, then create model and IDs | Cross-instance overlapping writes; lock release after failure; nonempty menus preserved; `201`; reload survival; generated ID; invalid/extra fields; save failure; existing records preserved |
 | [#36](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/36) update restaurant | Partial updates, persistence | Omitted fields/ID/menu preserved; empty/null/invalid payload; unknown ID; reload; save failure |
 | [#37](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/37) add item | Item model, parent, IDs | Correct parent; price/text validation; unknown parent; generated ID; reload; existing items preserved; save failure |
 | [#38](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/38) update item | Partial updates, scoped lookup | Correct item updated; wrong parent/missing item; ID/parent preserved; invalid payload; reload; save failure |
@@ -155,6 +161,6 @@ For every feature, follow [TESTING.md](TESTING.md): tests first, isolated tempor
 - Confirm the proposed menu fields and combined menu/items response. The supplied M1 source requires menu and item retrieval but prescribes neither separate endpoints nor exact fields; the menu response exposes both.
 - Review the proposed cuisine filter, PATCH semantics, single logical menu, item price representation, ID ownership, and persistence guarantees together rather than choosing alternatives in individual feature branches.
 - Source conflict resolved: the earlier full-project brief treated filtering as optional, while the supplied M1 Functional Scope explicitly requires search **or** filter. The newer M1 source takes precedence; `CONTRIBUTING.md` now records that exception.
-- Record team review/adoption in the PR and update this status. Team agreement remains pending; no issue-completion, student-understanding, or peer-approval claim is made by this document.
+- Before closing #30, record explicit team adoption in the PR with confirming members, date, and adopted revision. Then update this status and the pending-status text in README, CONTRIBUTING, and the M1 checkpoint. The supplied review feedback alone does not establish adoption. Team agreement remains pending; no issue-completion, student-understanding, or peer-approval claim is made by this document.
 
 Authentication/authorization, carts, checkout, orders, deliveries, additional management operations, and frontend framework selection remain outside #30. This proposal does not fulfill the implemented-design Decision Receipt in #41 or the integration/submission work in #42.
