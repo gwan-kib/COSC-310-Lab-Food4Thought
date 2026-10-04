@@ -222,6 +222,32 @@ def test_invalid_mutated_collection_is_not_saved(isolated_restaurants_path):
     assert isolated_restaurants_path.read_bytes() == original
 
 
+def test_mutation_returns_normalized_persisted_records(isolated_restaurants_path):
+    existing = {
+        **_record("restaurant-001", "Cedar Bowl"),
+        "menu_items": [
+            {
+                "id": "item-001",
+                "name": "Soup",
+                "description": "Hot soup",
+                "price": "12.50",
+            }
+        ],
+    }
+    isolated_restaurants_path.write_text(json.dumps([existing]), encoding="utf-8")
+    repository = RestaurantRepository(isolated_restaurants_path)
+
+    def change(records):
+        records[0].menu_items[0].price = "7.5"
+
+    saved = repository.mutate_records(change)
+
+    assert saved[0].menu_items[0].price == "7.50"
+    assert RestaurantRepository(isolated_restaurants_path).load_records()[0].menu_items[
+        0
+    ].price == "7.50"
+
+
 def test_independent_repositories_serialize_overlapping_mutations(
     isolated_restaurants_path, monkeypatch
 ):
@@ -284,7 +310,7 @@ def test_failed_mutation_releases_shared_lock(isolated_restaurants_path):
     outcome = []
     def next_mutation():
         other = RestaurantRepository(isolated_restaurants_path)
-        outcome.append(other.mutate_records(lambda records: len(records)))
+        outcome.append(len(other.mutate_records(lambda records: None)))
 
     thread = threading.Thread(target=next_mutation, daemon=True)
     thread.start()

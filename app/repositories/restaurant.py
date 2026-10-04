@@ -3,7 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 from threading import Lock
-from typing import Callable, TypeVar
+from typing import Callable
 
 from pydantic import ValidationError
 
@@ -12,7 +12,6 @@ from app.schemas.restaurant import Restaurant, RestaurantRecord
 
 
 _mutation_lock = Lock()
-T = TypeVar("T")
 
 
 class RestaurantDataError(Exception):
@@ -44,14 +43,16 @@ class RestaurantRepository:
 
         return self._validate_records(records)
 
-    def mutate_records(self, change: Callable[[list[RestaurantRecord]], T]) -> T:
-        """Run a complete read-change-write under the process-wide mutation lock."""
+    def mutate_records(
+        self, change: Callable[[list[RestaurantRecord]], None]
+    ) -> list[RestaurantRecord]:
+        """Persist a locked mutation and return the validated records that were saved."""
         with _mutation_lock:
             records = self.load_records()
-            result = change(records)
+            change(records)
             validated = self._validate_records(records)
             self._save_records(validated)
-            return result
+            return validated
 
     def _validate_records(
         self, records: list[RestaurantRecord] | list[object]

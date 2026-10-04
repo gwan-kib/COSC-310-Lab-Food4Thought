@@ -14,7 +14,7 @@ class RestaurantService:
         return self.repository.list_restaurants()
 
     def create_restaurant(self, request: RestaurantCreate) -> Restaurant:
-        def add(records: list[RestaurantRecord]) -> Restaurant:
+        def add(records: list[RestaurantRecord]) -> None:
             existing_ids = {record.id for record in records}
             identifier = str(uuid4())
             while identifier in existing_ids:
@@ -24,6 +24,5 @@ class RestaurantService:
                 id=identifier, **request.model_dump(), menu_items=[]
             )
             records.append(record)
-            return record.as_restaurant()
 
-        return self.repository.mutate_records(add)
+        return self.repository.mutate_records(add)[-1].as_restaurant()
