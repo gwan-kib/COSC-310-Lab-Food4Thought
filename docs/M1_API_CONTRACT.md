@@ -2,13 +2,15 @@
 
 ## Status and authority
 
-Proposed contract for [issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30), drafted on 2026-10-02 and checked against the user-supplied **Milestone 1 – First Vertical Slice** specification that day. Review feedback supplied by the user on 2026-10-02 has been addressed below. Team adoption of the revised contract remains pending. Do not treat this draft as recorded team agreement or as implemented API behavior.
+Adopted contract for [issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30). The team agreed to the contract by merging [PR #48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48) on 2026-10-02 at revision [d4850b8](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/d4850b8caece7098fbaa3b660e8d7769984fda77), as the user clarified on 2026-10-04. The previous pending-adoption wording was stale. The contract was drafted and checked against the user-supplied **Milestone 1 – First Vertical Slice** specification on 2026-10-02.
+
+[PR #51](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/51) implements the #35 subset and adds the mutation-result clarification below; those changes remain under PR review. Contract adoption does not mean every endpoint is implemented. Merged code and generated OpenAPI describe implemented behavior.
 
 The [M1 checkpoint](milestones/M1.md) records the supplied course source and its scope. Sections 1–2, Required Vertical Slice, Pydantic Models, Persistence, and API Documentation ground this contract. Trace implementation through [discovery epic #27](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/27), [management epic #28](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/28), [quality epic #29](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/29), and their child stories. The pasted specification was verified directly; its linked downloads and live Canvas page were not supplied or inspected.
 
-Exact paths, field shapes, filtering, identifiers, and update semantics below are **proposed engineering decisions for team review**, not additional course requirements. This document is the single proposed contract for child implementations. Change it through review before dependent branches adopt a different contract.
+Exact paths, field shapes, filtering, identifiers, and update semantics are **agreed team engineering decisions**, not additional course requirements. This document is the shared contract for child implementations. Change it through review before dependent branches adopt a different contract.
 
-At this branch's starting point, only `GET /health`, unfiltered `GET /restaurants`, and FastAPI documentation routes exist. `Restaurant` has `id`, `name`, `cuisine`, and `description`; `data/restaurants.json` is a JSON array. This task adds documentation only. Feature stories will add models, data, code, tests, and matching OpenAPI declarations.
+When #30 was drafted, only `GET /health`, unfiltered `GET /restaurants`, and FastAPI documentation routes existed. `Restaurant` had `id`, `name`, `cuisine`, and `description`; `data/restaurants.json` was a JSON array. PR #48 added documentation only. Feature stories add models, data, code, tests, and matching OpenAPI declarations.
 
 ## Endpoint inventory
 
@@ -35,7 +37,7 @@ One cuisine filter satisfies the search-or-filter choice described in #32 withou
 
 ## Pydantic model responsibilities
 
-Keep models in the existing `app/schemas/` layer. Names below are the proposed shared names; introduce the shared persistence models in #35 as specified below, and other models with their consuming features, not as unused placeholders in #30.
+Keep models in the existing `app/schemas/` layer. Names below are the agreed shared names; introduce the shared persistence models in #35 as specified below, and other models with their consuming features, not as unused placeholders in #30.
 
 | Model | Fields and responsibilities |
 | --- | --- |
@@ -49,7 +51,7 @@ Keep models in the existing `app/schemas/` layer. Names below are the proposed s
 | `RestaurantRecord` | Persistence model with the four `Restaurant` fields and `menu_items: list[MenuItem]`, defaulting to a fresh empty list for legacy records. Project explicitly to `Restaurant` for list/detail responses. |
 | `ErrorResponse` | Required `detail: str` for the documented `404` and `500` responses. Keep FastAPI's validation-error model separate. |
 
-Menu item name, description, and price are a proposed minimal display/edit shape, subject to team review. The proposed two-decimal nonnegative price representation is an engineering choice, not a milestone pricing rule; no taxes, currency conversion, totals, discounts, or checkout semantics are defined here. Accept price input only as a decimal string matching `^[0-9]+(\.[0-9]{1,2})?$`; reject JSON numbers, signs, exponent notation, whitespace, NaN, and infinity with `422`. Convert to `Decimal` for validation and serialize/persist with exactly two fractional digits. Thus `"12"` and `"12.5"` become `"12.00"` and `"12.50"`. Do not use binary floating-point arithmetic for this field.
+Menu item name, description, and price are the agreed minimal display/edit shape. The two-decimal nonnegative price representation is an engineering choice, not a milestone pricing rule; no taxes, currency conversion, totals, discounts, or checkout semantics are defined here. Accept price input only as a decimal string matching `^[0-9]+(\.[0-9]{1,2})?$`; reject JSON numbers, signs, exponent notation, whitespace, NaN, and infinity with `422`. Convert to `Decimal` for validation and serialize/persist with exactly two fractional digits. Thus `"12"` and `"12.5"` become `"12.00"` and `"12.50"`. Do not use binary floating-point arithmetic for this field.
 
 For new write requests, reject unknown fields (`extra="forbid"`), including `id`, `restaurant_id`, `menu_id`, and `menu_items`. String fields accept strings only, are stripped of surrounding whitespace, and must remain nonempty. Existing persisted restaurant strings and read behavior are not silently normalized or tightened; preserve valid M0 records. New menu records use the same content constraints as their write models.
 
@@ -65,7 +67,7 @@ Duplicate restaurant IDs or duplicate item IDs within a restaurant in stored dat
 
 ## Persistence and layer boundaries
 
-Continue using UTF-8 JSON at `data/restaurants.json`, the `RESTAURANTS_DATA_PATH` override, and explicit repository path injection. Keep one top-level array and add `menu_items` to each restaurant record when menu support is implemented. No second file, environment variable, database, or schema-version mechanism is required by this proposal.
+Continue using UTF-8 JSON at `data/restaurants.json`, the `RESTAURANTS_DATA_PATH` override, and explicit repository path injection. Keep one top-level array and add `menu_items` to each restaurant record when menu support is implemented. No second file, environment variable, database, or schema-version mechanism is required by this contract.
 
 Illustrative stored record (not a change to committed representative data in #30):
 
@@ -92,7 +94,7 @@ A missing `menu_items` key on a valid M0 record means an empty menu. An explicit
 
 The route parses HTTP input, declares response/error models, and maps application failures to HTTP responses. The service performs cuisine matching, parent/item existence checks, ID generation, and update orchestration. The repository alone loads, validates, and saves records. There is no frontend or service file access.
 
-The repository validates the full result before saving. A successful write response means persistence completed; a new repository/application instance must see the result. Write operations must preserve unrelated records and items. Implement replacement through a temporary file in the same directory and atomic replacement, with cleanup on failure; serialize each read-modify-write operation within the supported single-process application to avoid lost updates. Do not claim cross-process locking or crash durability beyond the implemented/tested guarantees. The feature PR must document this execution limit; atomic replacement alone does not coordinate multiple writers. An unsuccessful save must not truncate or silently reset the existing file.
+The repository validates the full result before saving. Its mutation boundary returns the validated records that were saved, and services derive write responses from that result rather than from a callback's pre-validation object. A successful write response means persistence completed; a new repository/application instance must see the result. Write operations must preserve unrelated records and items. Implement replacement through a temporary file in the same directory and atomic replacement, with cleanup on failure; serialize each read-modify-write operation within the supported single-process application to avoid lost updates. Do not claim cross-process locking or crash durability beyond the implemented/tested guarantees. The feature PR must document this execution limit; atomic replacement alone does not coordinate multiple writers. An unsuccessful save must not truncate or silently reset the existing file.
 
 **Synchronization across requests:** #35 introduces one module-level `threading.Lock` in the repository module, shared by all repository instances and all restaurant/menu mutations in the process. Do not allocate it in the constructor or per-request dependency. A single lock across configured paths is sufficient for this small application; requests still resolve their own storage paths. Hold it across the entire mutation: load current records, check parent/item existence and ID uniqueness, apply the service-defined change, validate, and atomically replace the file. A repository mutation boundary runs the service change operation under this lock. Do not save a stale collection read before locking; repeat any earlier existence check against the locked current state. Release the lock on success or exception using a context manager, and do not reacquire the non-reentrant lock inside the boundary.
 
@@ -156,11 +158,11 @@ The customer frontend in [#34](https://github.com/gwan-kib/COSC-310-Lab-Food4Tho
 
 For every feature, follow [TESTING.md](TESTING.md): tests first, isolated temporary storage, and no writes to committed data. Verify the declared Pydantic response model and generated OpenAPI descriptions, parameters, request bodies, success statuses, and error responses against the relevant row above. Frontend callers can use the stated schemas without depending on JSON file structure. Cross-feature verification belongs to [#40](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/40).
 
-## Review needed before adoption
+## Adoption and future changes
 
-- Confirm the proposed menu fields and combined menu/items response. The supplied M1 source requires menu and item retrieval but prescribes neither separate endpoints nor exact fields; the menu response exposes both.
-- Review the proposed cuisine filter, PATCH semantics, single logical menu, item price representation, ID ownership, and persistence guarantees together rather than choosing alternatives in individual feature branches.
+- The team adopted the menu fields and combined menu/items response through PR #48. The supplied M1 source requires menu and item retrieval but prescribes neither separate endpoints nor exact fields; the menu response exposes both.
+- Use the agreed cuisine filter, PATCH semantics, single logical menu, item price representation, ID ownership, and persistence guarantees. Review future changes together before dependent feature branches use them.
 - Source conflict resolved: the earlier full-project brief treated filtering as optional, while the supplied M1 Functional Scope explicitly requires search **or** filter. The newer M1 source takes precedence; `CONTRIBUTING.md` now records that exception.
-- Before closing #30, record explicit team adoption in the PR with confirming members, date, and adopted revision. Then update this status and the pending-status text in README, CONTRIBUTING, and the M1 checkpoint. The supplied review feedback alone does not establish adoption. Team agreement remains pending; no issue-completion, student-understanding, or peer-approval claim is made by this document.
+- PR #48's merge records team adoption; no separate adoption confirmation is required for #30. The user's clarification corrects the earlier pending-status interpretation. Individual provenance review and feature PR approval remain separate.
 
-Authentication/authorization, carts, checkout, orders, deliveries, additional management operations, and frontend framework selection remain outside #30. This proposal does not fulfill the implemented-design Decision Receipt in #41 or the integration/submission work in #42.
+Authentication/authorization, carts, checkout, orders, deliveries, additional management operations, and frontend framework selection remain outside #30. This contract does not fulfill the implemented-design Decision Receipt in #41 or the integration/submission work in #42.

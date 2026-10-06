@@ -2,13 +2,13 @@
 
 **Team:** Agents Anonymous
 
-Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. This version is the Milestone 0 foundation.
+Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. The backend includes the Milestone 0 foundation and the M1 create-restaurant operation. The rest of the M1 slice is still in progress.
 
 - [First-time application setup](docs/FIRST_TIME_SETUP.md)
 - [Quick setup for returning contributors](docs/QUICK_SETUP.md)
 - [M0 checkpoint and submission requirements](docs/milestones/M0.md)
 - [M1 checkpoint and source requirements](docs/milestones/M1.md)
-- [Proposed M1 restaurant/menu API and data contract](docs/M1_API_CONTRACT.md) (team review pending)
+- [M1 restaurant/menu API and data contract](docs/M1_API_CONTRACT.md) (adopted through PR #48)
 - [Contributing and AI/provenance policy](CONTRIBUTING.md)
 - [Shared AI provenance record](docs/PROVENANCE.md)
 - [Testing conventions](docs/TESTING.md)
@@ -44,17 +44,18 @@ The API starts at `http://127.0.0.1:8000`. Stop it with `Ctrl+C`.
 | Method and path | Purpose |
 | --- | --- |
 | `GET /restaurants` | Restaurant list; HTTP 200 with a JSON array of `id`, `name`, `cuisine`, and `description`. |
+| `POST /restaurants` | Create a restaurant; HTTP 201 with its server-generated ID and the same four-field response shape. |
 | `GET /health` | Liveness check; returns `{"status": "ok"}` with HTTP 200. |
 | `GET /docs` | Interactive OpenAPI (Swagger) documentation. |
 | `GET /openapi.json` | Raw OpenAPI schema. |
 
-An empty restaurant data array returns `[]`. Missing, malformed, or invalid data returns HTTP 500 with `{"detail": "Restaurant data is unavailable"}`, without exposing file paths or validation details.
+Create requests require nonempty `name`, `cuisine`, and `description` strings. Surrounding whitespace is removed; unknown fields and invalid values return HTTP 422. A new restaurant starts with an empty menu. An empty restaurant data array returns `[]`. Missing, malformed, or invalid data and failed saves return HTTP 500 with `{"detail": "Restaurant data is unavailable"}`, without exposing file paths or validation details.
 
-Restaurant requests follow `GET /restaurants` → route → `RestaurantService.list_restaurants()` → `RestaurantRepository.list_restaurants()` → configured JSON file. Only the repository reads persistence; the route translates data failures into HTTP errors.
+Restaurant requests follow route → `RestaurantService` → `RestaurantRepository` → configured JSON file. The repository owns file access, and the route translates data failures into HTTP errors. `POST /restaurants` persists before returning success; a new repository instance can reload the created record.
 
 ## Data
 
-Representative restaurant data is stored in `data/restaurants.json`. `RestaurantRepository` (`app/repositories/restaurant.py`) reads it by default. To use a different file, set the `RESTAURANTS_DATA_PATH` environment variable to that file's path before starting the application, or pass a path to `RestaurantRepository`. Missing, malformed, or invalid data raises `RestaurantDataError`. Tests always use a temporary copy and never modify the committed file.
+Representative restaurant data is stored in `data/restaurants.json`. `RestaurantRepository` (`app/repositories/restaurant.py`) reads it by default. To use a different file, set the `RESTAURANTS_DATA_PATH` environment variable to that file's path before starting the application, or pass a path to `RestaurantRepository`. The file remains one JSON array. Existing records without `menu_items` load with an empty menu; creation writes complete records and preserves existing menu items. Missing, malformed, or invalid data raises `RestaurantDataError`. Writes use a temporary file and atomic replacement, with one lock shared by repository instances in the application process. This does not coordinate multiple worker processes or external writers. Tests always use a temporary copy and never modify the committed file.
 
 ## Running tests
 

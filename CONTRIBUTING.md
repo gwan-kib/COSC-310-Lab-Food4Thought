@@ -112,7 +112,7 @@ Required workflows are Discover a Restaurant, Build a Cart, Place an Order, Mana
 
 Real payment providers/transactions, GPS, external delivery services, and production-scale infrastructure are outside normal core scope. Optional filtering, favourites, reviews, promotions, notifications, or delivery enhancements require explicit selection after the required system is complete and stable.
 
-**M1 source update (2026-10-02):** the supplied [Milestone 1 specification](docs/milestones/M1.md) explicitly requires restaurant search **or** filtering. That newer requirement takes precedence over the earlier optional-filtering wording above for M1. Use the [shared M1 API/data contract](docs/M1_API_CONTRACT.md) for the proposed operation and schema choices; team review is pending.
+**M1 source update (2026-10-02):** the supplied [Milestone 1 specification](docs/milestones/M1.md) explicitly requires restaurant search **or** filtering. That newer requirement takes precedence over the earlier optional-filtering wording above for M1. Use the [shared M1 API/data contract](docs/M1_API_CONTRACT.md) for the operation and schema choices adopted by the team through PR #48.
 
 ### Layer boundaries
 
