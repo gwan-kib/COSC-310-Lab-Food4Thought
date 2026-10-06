@@ -72,7 +72,7 @@ python -m pytest
 app/
   main.py               FastAPI application; registers routers
   api/routes/           HTTP routes (health.py, restaurants.py)
-  api/openapi.py        OpenAPI post-processing (drops unreachable 422 responses)
+  api/openapi.py        OpenAPI post-processing (removes 422 only from contract-listed operations)
   services/             Restaurant discovery service (restaurant.py)
   repositories/         Data access for JSON files (restaurant.py)
   schemas/              Pydantic models (restaurant.py)
