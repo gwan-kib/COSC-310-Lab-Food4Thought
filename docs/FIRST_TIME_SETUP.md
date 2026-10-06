@@ -118,11 +118,14 @@ With the server running, the currently implemented HTTP surfaces are:
 | `GET /health` | Liveness check. Returns `{"status": "ok"}`. |
 | `GET /restaurants` | Returns the current restaurant list from JSON data. |
 | `POST /restaurants` | Creates and persists a restaurant from `name`, `cuisine`, and `description`; returns HTTP 201 with a generated ID. |
+| `PATCH /restaurants/{restaurant_id}` | Updates supplied restaurant fields and returns HTTP 200 after saving; preserves omitted fields, ID, and menu items. Unknown IDs return 404; invalid input returns 422. |
 | `GET /restaurants/{restaurant_id}/menu` | Returns one restaurant's menu items, e.g. `/restaurants/restaurant-001/menu`; unknown restaurants return 404. |
 | `GET /docs` | FastAPI's interactive OpenAPI documentation. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
 
 A simple browser check is enough for the GET operations. To try `POST /restaurants`, use the interactive form at `/docs` with a body such as `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. It writes to the configured JSON file, so use a disposable copy through `RESTAURANTS_DATA_PATH` when experimenting.
+
+For `PATCH /restaurants/{restaurant_id}`, use an ID from `GET /restaurants` and a body such as `{"description":"Seasonal bowls and noodles"}` in `/docs`, also with a disposable data copy. Supply at least one of `name`, `cuisine`, or `description`; supplied values must be nonblank strings. Nulls and unsupported fields are rejected. Re-list restaurants to check the saved result. See [README](../README.md#api-endpoints) for the full update/error behavior.
 
 ## Current data configuration
 

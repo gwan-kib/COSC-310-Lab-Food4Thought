@@ -3,7 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path
 
 from app.repositories.restaurant import RestaurantDataError, RestaurantRepository
-from app.schemas.restaurant import ErrorResponse, Menu, Restaurant, RestaurantCreate
+from app.schemas.restaurant import (
+    ErrorResponse,
+    Menu,
+    Restaurant,
+    RestaurantCreate,
+    RestaurantUpdate,
+)
 from app.services.restaurant import RestaurantNotFoundError, RestaurantService
 
 router = APIRouter()
@@ -53,6 +59,39 @@ def create_restaurant(
 ) -> Restaurant:
     try:
         return service.create_restaurant(request)
+    except RestaurantDataError as exc:
+        raise HTTPException(
+            status_code=500, detail="Restaurant data is unavailable"
+        ) from exc
+
+
+@router.patch(
+    "/restaurants/{restaurant_id}",
+    summary="Update a restaurant",
+    description=(
+        "Persist a partial update to name, cuisine, or description. Supply at least "
+        "one non-null, nonblank string; surrounding whitespace is trimmed. Omitted "
+        "fields, the stable ID, and menu items are preserved. Unsupported fields "
+        "are rejected. Returns the complete restaurant only after saving."
+    ),
+    response_model=Restaurant,
+    responses={
+        404: {"model": ErrorResponse, "description": "Restaurant not found"},
+        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
+    },
+)
+def update_restaurant(
+    restaurant_id: Annotated[
+        str,
+        Path(description="Stable restaurant identifier, for example `restaurant-001`."),
+    ],
+    request: RestaurantUpdate,
+    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+) -> Restaurant:
+    try:
+        return service.update_restaurant(restaurant_id, request)
+    except RestaurantNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Restaurant not found") from exc
     except RestaurantDataError as exc:
         raise HTTPException(
             status_code=500, detail="Restaurant data is unavailable"

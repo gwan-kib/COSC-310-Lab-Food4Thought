@@ -1,7 +1,15 @@
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Self
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
+from pydantic.json_schema import SkipJsonSchema
 
 
 WriteText = Annotated[
@@ -22,6 +30,26 @@ class RestaurantCreate(BaseModel):
     name: WriteText
     cuisine: WriteText
     description: WriteText
+
+
+class RestaurantUpdate(BaseModel):
+    """Supply at least one mutable field; omission preserves its stored value."""
+
+    model_config = ConfigDict(extra="forbid", json_schema_extra={"minProperties": 1})
+
+    # None represents omission internally, but is not valid request input.
+    # Factories avoid documenting a null default in the non-nullable schema.
+    name: WriteText | SkipJsonSchema[None] = Field(default_factory=lambda: None)
+    cuisine: WriteText | SkipJsonSchema[None] = Field(default_factory=lambda: None)
+    description: WriteText | SkipJsonSchema[None] = Field(default_factory=lambda: None)
+
+    @model_validator(mode="after")
+    def validate_changes(self) -> Self:
+        if not self.model_fields_set:
+            raise ValueError("At least one restaurant field must be supplied")
+        if any(getattr(self, field) is None for field in self.model_fields_set):
+            raise ValueError("Supplied restaurant fields cannot be null")
+        return self
 
 
 class MenuItem(BaseModel):

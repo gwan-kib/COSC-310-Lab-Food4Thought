@@ -6,6 +6,7 @@ from app.schemas.restaurant import (
     Restaurant,
     RestaurantCreate,
     RestaurantRecord,
+    RestaurantUpdate,
 )
 
 
@@ -14,7 +15,7 @@ class RestaurantNotFoundError(Exception):
 
 
 class RestaurantService:
-    """Provide restaurant discovery through the repository boundary."""
+    """Provide restaurant discovery and management through the repository boundary."""
 
     def __init__(self, repository: RestaurantRepository) -> None:
         self.repository = repository
@@ -43,3 +44,20 @@ class RestaurantService:
             records.append(record)
 
         return self.repository.mutate_records(add)[-1].as_restaurant()
+
+    def update_restaurant(
+        self, restaurant_id: str, request: RestaurantUpdate
+    ) -> Restaurant:
+        changes = request.model_dump(exclude_unset=True)
+
+        def update(records: list[RestaurantRecord]) -> None:
+            # Look up current state inside the mutation lock, never a stale snapshot.
+            for record in records:
+                if record.id == restaurant_id:
+                    for field, value in changes.items():
+                        setattr(record, field, value)
+                    return
+            raise RestaurantNotFoundError(restaurant_id)
+
+        saved = self.repository.mutate_records(update)
+        return next(record for record in saved if record.id == restaurant_id).as_restaurant()
