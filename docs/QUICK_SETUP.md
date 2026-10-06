@@ -65,6 +65,7 @@ Useful implemented checks:
 
 - `GET /health`
 - `GET /restaurants`
+- `GET /restaurants/restaurant-001/menu`
 - `POST /restaurants` (creates a persistent record; use `/docs` with an isolated data copy for experiments)
 - `GET /docs`
 - `GET /openapi.json`

@@ -17,9 +17,11 @@ def test_repository_loads_representative_restaurants_from_isolated_copy(tmp_path
 
     assert len(restaurants) >= 2
     assert all(isinstance(restaurant, Restaurant) for restaurant in restaurants)
-    assert [restaurant.model_dump() for restaurant in restaurants] == json.loads(
-        isolated_path.read_text(encoding="utf-8")
-    )
+    # list_restaurants projects stored records to the four-field read model.
+    assert [restaurant.model_dump() for restaurant in restaurants] == [
+        {key: record[key] for key in ("id", "name", "cuisine", "description")}
+        for record in json.loads(isolated_path.read_text(encoding="utf-8"))
+    ]
     assert len({restaurant.id for restaurant in restaurants}) == len(restaurants)
 
 

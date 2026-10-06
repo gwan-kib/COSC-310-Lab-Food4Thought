@@ -3,12 +3,40 @@
     "id": "restaurant-001",
     "name": "Cedar Bowl",
     "cuisine": "Japanese",
-    "description": "Rice bowls and noodles"
+    "description": "Rice bowls and noodles",
+    "menu_items": [
+      {
+        "id": "item-001",
+        "name": "Vegetable bowl",
+        "description": "Rice with seasonal vegetables and sesame dressing",
+        "price": "12.50"
+      },
+      {
+        "id": "item-002",
+        "name": "Chicken udon",
+        "description": "Udon noodles in broth with grilled chicken",
+        "price": "14.00"
+      }
+    ]
   },
   {
     "id": "restaurant-002",
     "name": "Harbour Slice",
     "cuisine": "Italian",
-    "description": "Pizza and pasta"
+    "description": "Pizza and pasta",
+    "menu_items": [
+      {
+        "id": "item-003",
+        "name": "Margherita pizza",
+        "description": "Tomato, mozzarella and basil",
+        "price": "15.00"
+      },
+      {
+        "id": "item-004",
+        "name": "Penne arrabbiata",
+        "description": "Penne in a spicy tomato sauce",
+        "price": "13.50"
+      }
+    ]
   }
 ]
