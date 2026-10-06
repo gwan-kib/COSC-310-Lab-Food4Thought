@@ -7,7 +7,11 @@ from app.main import app
 
 
 def test_restaurants_returns_representative_data(isolated_restaurants_path):
-    expected = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
+    # The list keeps its four-field shape; menu items are only on the menu endpoint.
+    expected = [
+        {key: record[key] for key in ("id", "name", "cuisine", "description")}
+        for record in json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
+    ]
 
     response = TestClient(app).get("/restaurants")
 

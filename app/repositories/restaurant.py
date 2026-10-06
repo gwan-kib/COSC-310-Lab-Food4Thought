@@ -43,6 +43,13 @@ class RestaurantRepository:
 
         return self._validate_records(records)
 
+    def get_record(self, restaurant_id: str) -> RestaurantRecord | None:
+        """Return the complete stored record with this ID, or None if none matches."""
+        for record in self.load_records():
+            if record.id == restaurant_id:
+                return record
+        return None
+
     def mutate_records(
         self, change: Callable[[list[RestaurantRecord]], None]
     ) -> list[RestaurantRecord]:

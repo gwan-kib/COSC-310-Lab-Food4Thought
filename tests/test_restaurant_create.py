@@ -147,6 +147,10 @@ def test_repository_rejects_corrupt_menu_and_duplicate_ids(isolated_restaurants_
 
 
 def test_legacy_record_loads_with_empty_menu_without_rewriting(isolated_restaurants_path):
+    # Committed data now has menus, so write M0-style records without menu_items.
+    isolated_restaurants_path.write_text(
+        json.dumps([_record("restaurant-001", "Cedar Bowl")]), encoding="utf-8"
+    )
     original = isolated_restaurants_path.read_bytes()
 
     records = RestaurantRepository(isolated_restaurants_path).load_records()

@@ -54,5 +54,12 @@ class RestaurantRecord(BaseModel):
         return Restaurant.model_validate(self.model_dump(exclude={"menu_items"}))
 
 
+class Menu(BaseModel):
+    """Read projection of one restaurant's single menu; not stored separately."""
+
+    restaurant_id: str
+    items: list[MenuItem]
+
+
 class ErrorResponse(BaseModel):
     detail: str

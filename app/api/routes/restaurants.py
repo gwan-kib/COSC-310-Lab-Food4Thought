@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 
 from app.repositories.restaurant import RestaurantDataError, RestaurantRepository
-from app.schemas.restaurant import ErrorResponse, Restaurant, RestaurantCreate
-from app.services.restaurant import RestaurantService
+from app.schemas.restaurant import ErrorResponse, Menu, Restaurant, RestaurantCreate
+from app.services.restaurant import RestaurantNotFoundError, RestaurantService
 
 router = APIRouter()
 
@@ -53,6 +53,36 @@ def create_restaurant(
 ) -> Restaurant:
     try:
         return service.create_restaurant(request)
+    except RestaurantDataError as exc:
+        raise HTTPException(
+            status_code=500, detail="Restaurant data is unavailable"
+        ) from exc
+
+
+@router.get(
+    "/restaurants/{restaurant_id}/menu",
+    summary="Get a restaurant's menu",
+    description=(
+        "Return the menu and all of its items for one restaurant. A restaurant "
+        "with no menu items returns an empty `items` list."
+    ),
+    response_model=Menu,
+    responses={
+        404: {"model": ErrorResponse, "description": "Restaurant not found"},
+        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
+    },
+)
+def get_menu(
+    restaurant_id: Annotated[
+        str,
+        Path(description="Stable restaurant identifier, for example `restaurant-001`."),
+    ],
+    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+) -> Menu:
+    try:
+        return service.get_menu(restaurant_id)
+    except RestaurantNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Restaurant not found") from exc
     except RestaurantDataError as exc:
         raise HTTPException(
             status_code=500, detail="Restaurant data is unavailable"

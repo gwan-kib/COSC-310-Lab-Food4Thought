@@ -118,6 +118,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | `GET /health` | Liveness check. Returns `{"status": "ok"}`. |
 | `GET /restaurants` | Returns the current restaurant list from JSON data. |
 | `POST /restaurants` | Creates and persists a restaurant from `name`, `cuisine`, and `description`; returns HTTP 201 with a generated ID. |
+| `GET /restaurants/{restaurant_id}/menu` | Returns one restaurant's menu items, e.g. `/restaurants/restaurant-001/menu`; unknown restaurants return 404. |
 | `GET /docs` | FastAPI's interactive OpenAPI documentation. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
 
