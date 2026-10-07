@@ -24,10 +24,9 @@ class RestaurantCreate(BaseModel):
     description: WriteText
 
 
-class MenuItem(BaseModel):
+class MenuItemCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    id: str = Field(min_length=1)
     name: WriteText
     description: WriteText
     price: str = Field(strict=True, pattern=r"^[0-9]+(\.[0-9]{1,2})?$")
@@ -36,6 +35,10 @@ class MenuItem(BaseModel):
     @classmethod
     def normalize_price(cls, value: str) -> str:
         return format(Decimal(value), ".2f")
+
+
+class MenuItem(MenuItemCreate):
+    id: str = Field(min_length=1)
 
 
 class RestaurantRecord(BaseModel):

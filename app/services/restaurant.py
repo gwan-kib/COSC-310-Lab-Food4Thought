@@ -3,6 +3,8 @@ from uuid import uuid4
 from app.repositories.restaurant import RestaurantRepository
 from app.schemas.restaurant import (
     Menu,
+    MenuItem,
+    MenuItemCreate,
     Restaurant,
     RestaurantCreate,
     RestaurantRecord,
@@ -14,7 +16,7 @@ class RestaurantNotFoundError(Exception):
 
 
 class RestaurantService:
-    """Provide restaurant discovery through the repository boundary."""
+    """Provide restaurant discovery and management through the repository boundary."""
 
     def __init__(self, repository: RestaurantRepository) -> None:
         self.repository = repository
@@ -43,3 +45,25 @@ class RestaurantService:
             records.append(record)
 
         return self.repository.mutate_records(add)[-1].as_restaurant()
+
+    def add_menu_item(self, restaurant_id: str, request: MenuItemCreate) -> MenuItem:
+        """Append an item to an existing restaurant and return its persisted form."""
+        created_id: str | None = None
+
+        def add(records: list[RestaurantRecord]) -> None:
+            nonlocal created_id
+            # Check the current parent and IDs inside the locked mutation.
+            record = next((r for r in records if r.id == restaurant_id), None)
+            if record is None:
+                raise RestaurantNotFoundError(restaurant_id)
+
+            existing_ids = {item.id for item in record.menu_items}
+            identifier = str(uuid4())
+            while identifier in existing_ids:
+                identifier = str(uuid4())
+            created_id = identifier
+            record.menu_items.append(MenuItem(id=identifier, **request.model_dump()))
+
+        saved = self.repository.mutate_records(add)
+        parent = next(record for record in saved if record.id == restaurant_id)
+        return next(item for item in parent.menu_items if item.id == created_id)
