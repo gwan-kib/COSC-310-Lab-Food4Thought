@@ -213,6 +213,40 @@ def test_service_add_item_returns_persisted_model(isolated_restaurants_path, men
     assert item.model_dump(exclude={"id"}) == BODY
 
 
+@pytest.mark.parametrize("collision", [False, True])
+def test_service_returns_created_item_by_id_when_saved_order_changes(
+    isolated_restaurants_path, menu_data, monkeypatch, collision
+):
+    existing_id = "f20dbbc4-5266-4f7b-bc5d-35cef3632c1c"
+    created_id = "a4143258-5314-4576-92b8-8838c5b69c1f"
+    menu_data[1]["menu_items"][0]["id"] = existing_id
+    isolated_restaurants_path.write_text(json.dumps(menu_data), encoding="utf-8")
+    identifiers = iter(
+        [UUID(existing_id), UUID(created_id)] if collision else [UUID(created_id)]
+    )
+    monkeypatch.setattr("app.services.restaurant.uuid4", lambda: next(identifiers))
+
+    class ReorderingRepository(RestaurantRepository):
+        def mutate_records(self, change):
+            def change_and_reorder(records):
+                change(records)
+                parent = next(record for record in records if record.id == "target")
+                # Exercise a different saved order through real validation and IO.
+                parent.menu_items.insert(0, parent.menu_items.pop())
+
+            return super().mutate_records(change_and_reorder)
+
+    service = RestaurantService(ReorderingRepository(isolated_restaurants_path))
+
+    item = service.add_menu_item("target", MenuItemCreate(**BODY))
+
+    assert item.id == created_id
+    reloaded = RestaurantRepository(isolated_restaurants_path).get_record("target")
+    assert [saved.id for saved in reloaded.menu_items] == [created_id, existing_id]
+    assert item == next(saved for saved in reloaded.menu_items if saved.id == created_id)
+    assert item.model_dump(exclude={"id"}) == BODY
+
+
 def test_service_add_item_raises_for_unknown_parent(isolated_restaurants_path, menu_data):
     service = RestaurantService(RestaurantRepository(isolated_restaurants_path))
 

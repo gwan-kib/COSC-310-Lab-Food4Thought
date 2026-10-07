@@ -48,7 +48,10 @@ class RestaurantService:
 
     def add_menu_item(self, restaurant_id: str, request: MenuItemCreate) -> MenuItem:
         """Append an item to an existing restaurant and return its persisted form."""
+        created_id: str | None = None
+
         def add(records: list[RestaurantRecord]) -> None:
+            nonlocal created_id
             # Check the current parent and IDs inside the locked mutation.
             record = next((r for r in records if r.id == restaurant_id), None)
             if record is None:
@@ -58,8 +61,9 @@ class RestaurantService:
             identifier = str(uuid4())
             while identifier in existing_ids:
                 identifier = str(uuid4())
+            created_id = identifier
             record.menu_items.append(MenuItem(id=identifier, **request.model_dump()))
 
         saved = self.repository.mutate_records(add)
         parent = next(record for record in saved if record.id == restaurant_id)
-        return parent.menu_items[-1]
+        return next(item for item in parent.menu_items if item.id == created_id)
