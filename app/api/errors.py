@@ -6,8 +6,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 
 
-async def request_validation_error_response(
-    request: Request, exc: RequestValidationError
+async def request_validation_error(
+    _request: Request, exc: RequestValidationError
 ) -> Response:
     """Return validation details even when rejected input cannot be rendered as JSON."""
     # Rejected input may contain overflowing numbers, lone surrogates, or raw

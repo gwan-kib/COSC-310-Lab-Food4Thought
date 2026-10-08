@@ -316,7 +316,43 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [Issue #33](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/33); [PR #52](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/52); branch `feature/33-menu-browsing`.
 - Student review status: Reviewed by Sreeram Nara on 2026-10-05, who confirmed he read the route, service, repository, `Menu` model, OpenAPI helper, and tests, can explain them, and ran the endpoints locally on Windows with Python 3.12. Peer review: Gwantana Kiboigo requested changes on PR #52 (OpenAPI helper scope, this entry); both were addressed.
 
-### Entry 24: Partial restaurant updates
+### Entry 24: Add menu item
+
+- Student(s): `Tc2006415`, verified issue #37 assignee; responsible-student review and confirmation remain pending.
+- Artifact: `app/schemas/restaurant.py`, `app/services/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_menu_item_create.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, `docs/M1_API_CONTRACT.md`, and `docs/milestones/M1.md`.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Implement issue #37 against the adopted #30 contract after verifying that #35's persistence foundation and #33's menu browsing were merged into `main` at base `b39f71a62d5279b27aee0817665603fe776b74ac`.
+- Influence: Codex added the strict `MenuItemCreate` model, reused its validators for `MenuItem`, implemented parent-scoped item creation inside the existing repository mutation lock, and added the documented POST route. It wrote isolated API/service tests for validation, stable IDs and collision retries, parent scoping, preservation, reload/menu retrieval, failure precedence, failed saves, and OpenAPI. It updated API/setup documentation and corrected stale prerequisite status descriptions; no dependency, storage format, or representative-data change was needed.
+- Validation: The Python 3.12 virtual environment was created with `py -3.12 -m venv .venv` and dependencies installed with `.\.venv\Scripts\python.exe -m pip install -r requirements.txt`. Baseline `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q` passed 75 tests. Before route/service implementation, the new route tests failed 44 cases for the absent endpoint/OpenAPI operation; three service tests then failed for the missing service method. After implementation, the full command passed 122 tests (47 new), including a separate Codex reviewer's independent run. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. An isolated live Uvicorn check using a temporary data copy verified POST 201, subsequent menu GET, unknown-parent 404, invalid-price 422, `/docs`, OpenAPI, and identical menu contents after stopping and restarting the server. The browser's interactive Swagger form was not manually exercised. The Codex code/test review found no actionable defects; this is not student peer approval.
+- PR or commit: [Issue #37](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/37); [PR #53](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53); implementation commit `964e03d`; branch `codex/37-add-menu-item`.
+- Student review status: Pending. Agent-run checks do not establish student understanding, approval, or completion of the team's peer-review and integration workflow.
+
+### Entry 25: Safe request-validation responses for issue 37 review
+
+- Student(s): `Tc2006415`, issue #37 assignee; responsible-student confirmation remains pending.
+- Artifact: `app/api/errors.py`, `app/main.py`, `tests/test_validation_errors.py`, `README.md`, `docs/M1_API_CONTRACT.md`, and the issue #37 PR description.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Fix the review finding that numeric overflow, raw non-finite values, or escaped unpaired Unicode surrogates turned request-validation failures into HTTP 500 instead of the documented 422. The same defect was reproduced in unmodified `main` through restaurant creation.
+- Influence: Codex implemented a shared `RequestValidationError` handler that preserves diagnostic fields, converts non-finite floats to strings, and JSON-escapes Unicode. Request validation and storage behavior remain unchanged. Regression tests cover both POST endpoints, nested invalid inputs, ordinary validation diagnostics, storage isolation, and validation-before-storage precedence.
+- Validation: On 2026-10-06, the baseline suite passed 122 tests. Before the fix, `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q tests/test_validation_errors.py --tb=short` produced 12 failures from HTTP 500 instead of 422 and one passing compatibility case. After the fix, `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q` passed 135 tests. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, and `git diff --exit-code -- data/` passed. Earlier self-review compared every existing OpenAPI operation/schema with a temporary `origin/main` snapshot and exercised 60 concurrent mixed requests without lost writes; those checks preceded this error-handler fix. See Entry 24 for the item-creation test-first and live-restart evidence. After the fix, a fresh isolated live Uvicorn check confirmed 422 responses for overflow, NaN, and invalid Unicode without storage writes, then successful item creation/menu retrieval and persistence after restart. A final independent Codex review found no actionable defects and reran the full suite successfully (135 passed). Agent checks are not student peer approval.
+- PR or commit: [Issue #37](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/37); [PR #53](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53); implementation commit `964e03d`; branch `codex/37-add-menu-item`.
+- Student review status: Pending. The user requested this correction and preparation for peer review; that instruction does not establish responsible-student validation or approval.
+
+### Entry 26: Return the created menu item by ID
+
+- Student(s): `Tc2006415`, issue #37 assignee and PR #53 author; responsible-student confirmation remains pending.
+- Artifact: `app/services/restaurant.py`, `tests/test_menu_item_create.py`, and the PR #53 description.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address `gwan-kib`'s [PR #53 review comment](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53#discussion_r4200448710) requesting selection of the created item by its generated ID instead of its list position.
+- Influence: Codex captured the final collision-free ID inside the existing locked mutation and selected that ID from the validated saved parent's items. A regression test uses real repository validation and persistence while placing the new item first, covering both immediate ID generation and a collision retry. API, storage format, locking, and normal insertion order are unchanged; neither setup guide needs an update for this internal service change.
+- Validation: On 2026-10-07, `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q tests/test_menu_item_create.py -k saved_order --tb=short` failed both cases before the fix because the service returned the existing item's ID. After the fix, `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q` passed 137 tests. `.\.venv\Scripts\python.exe -m compileall -q app`, `git diff --check`, and `git diff --exit-code -- data/` passed. No live-server check was repeated for this internal selection change; route behavior remains covered by the full suite.
+- PR or commit: [PR #53](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53); branch `codex/37-add-menu-item`.
+- Student review status: Pending. The reviewer requested this change on 2026-10-06; the updated implementation still requires re-review. Agent verification is not student approval.
+
+### Entry 27: Partial restaurant updates
 
 - Student(s): `Tc2006415`, verified issue #36 assignee; responsibility for this AI contribution and student review remain pending confirmation.
 - Artifact: `app/schemas/restaurant.py`, `app/services/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_restaurant_update.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, `docs/M1_API_CONTRACT.md`, `docs/milestones/M1.md`, and this entry.
@@ -328,7 +364,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [Issue #36](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/36); [PR #54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54); branch `codex/36-update-restaurant` based on `b39f71a`.
 - Student review status: Pending. Agent checks do not establish student understanding, peer approval, or integration.
 
-### Entry 25: Restaurant update review and validation-error correction
+### Entry 28: Restaurant update review and validation-error correction
 
 - Student(s): `Tc2006415`, verified issue #36 assignee; responsibility for this follow-up and student review remain pending confirmation.
 - Artifact: `app/api/errors.py`, `app/main.py`, `tests/test_validation_errors.py`, `README.md`, and this entry.
@@ -339,3 +375,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: `.\.venv\Scripts\python.exe -m pytest tests/test_validation_errors.py -q --tb=short` initially failed all ten JSON-input cases with 500 rather than 422. After correcting serialization, three test assertions were corrected to allow Pydantic's existing union-branch suffix in error locations; no production error paths were removed. Two additional raw-byte cases were then observed failing with 500 before adding safe byte decoding. The final focused run passed all 12 tests; `.\.venv\Scripts\python.exe -m pytest -q` passed 135 tests. All error cases verify unchanged isolated storage. Additional temporary-data probes confirmed rejection of mixed valid/invalid fields, exact ID matching, duplicate restaurant/item IDs, and invalid unrelated menus without writes. A separate Codex review checked the initial shared-handler correction and independently passed the then-current 133-test suite; it requested recording the correction here. That review preceded the additional two raw-byte tests and safe byte decoding.
 - PR or commit: [Issue #36](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/36); [PR #54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54); branch `codex/36-update-restaurant`.
 - Student review status: Pending. This self-review and agent verification do not replace human peer review.
+
+### Entry 29: Reconcile PR 54 with merged menu-item creation
+
+- Student(s): `Tc2006415`, issue #36 assignee and PR #54 author; responsible-student confirmation remains pending.
+- Artifact: Restaurant route/schema/service, shared validation-error handler and tests, README, both setup guides, M1 API contract/checkpoint, this record, and PR #54 description.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Resolve PR #54's merge conflicts after PR #53 merged into `main` at `e26e29e`.
+- Influence: Codex merged `origin/main` into `codex/36-update-restaurant`, preserving restaurant PATCH and menu-item POST, including PR #53's saved-item lookup by ID. It retained main's shared handler name and registration while preserving PR #54's safe byte decoding, combined both validation-test suites without removing cases, and reconciled documentation for both operations. Main's provenance entries 24–26 remain intact; the two issue #36 entries were renumbered 27–28. No API contract, persistence format, dependency, configuration, or committed-data changes were introduced by the resolution.
+- Validation: On 2026-10-07, `.\.venv\Scripts\python.exe -m pytest -q` passed 135 tests before merging and 197 after conflict resolution. `.\.venv\Scripts\python.exe -m compileall -q app` and `.\.venv\Scripts\python.exe -m pip check` passed. Both existing test suites were retained for this behaviour-preserving integration; no new feature or new red-green cycle was required. The complete integration diff and both setup guides were reviewed. Live-server checks were not repeated; the combined operations, error cases, persistence, and OpenAPI are covered by the suite.
+- PR or commit: [PR #54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54); merged base `e26e29e`; branch `codex/36-update-restaurant`.
+- Student review status: Pending. Conflict resolution and agent checks do not establish student understanding or human approval.

@@ -6,6 +6,8 @@ from app.repositories.restaurant import RestaurantDataError, RestaurantRepositor
 from app.schemas.restaurant import (
     ErrorResponse,
     Menu,
+    MenuItem,
+    MenuItemCreate,
     Restaurant,
     RestaurantCreate,
     RestaurantUpdate,
@@ -120,6 +122,39 @@ def get_menu(
 ) -> Menu:
     try:
         return service.get_menu(restaurant_id)
+    except RestaurantNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Restaurant not found") from exc
+    except RestaurantDataError as exc:
+        raise HTTPException(
+            status_code=500, detail="Restaurant data is unavailable"
+        ) from exc
+
+
+@router.post(
+    "/restaurants/{restaurant_id}/menu/items",
+    summary="Add a menu item",
+    description=(
+        "Add and persist an item under an existing restaurant with a server-generated "
+        "stable ID. Supply name, description, and a nonnegative decimal-string price "
+        "with at most two fractional digits. The saved price has two fractional digits."
+    ),
+    response_model=MenuItem,
+    status_code=201,
+    responses={
+        404: {"model": ErrorResponse, "description": "Restaurant not found"},
+        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
+    },
+)
+def add_menu_item(
+    restaurant_id: Annotated[
+        str,
+        Path(description="Stable restaurant identifier, for example `restaurant-001`."),
+    ],
+    request: MenuItemCreate,
+    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+) -> MenuItem:
+    try:
+        return service.add_menu_item(restaurant_id, request)
     except RestaurantNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Restaurant not found") from exc
     except RestaurantDataError as exc:
