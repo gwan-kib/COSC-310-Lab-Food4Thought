@@ -1,5 +1,5 @@
 import json
-from math import isfinite
+import math
 
 from fastapi import Request, Response
 from fastapi.encoders import jsonable_encoder
@@ -9,13 +9,16 @@ from fastapi.exceptions import RequestValidationError
 async def request_validation_error(
     _request: Request, exc: RequestValidationError
 ) -> Response:
-    """Return 422 even when rejected input cannot be encoded by JSONResponse."""
+    """Return validation details even when rejected input cannot be rendered as JSON."""
+    # Rejected input may contain overflowing numbers, lone surrogates, or raw
+    # non-UTF-8 bytes. Error rendering must not turn those failures into a 500.
     errors = jsonable_encoder(
         exc.errors(),
-        custom_encoder={float: lambda value: value if isfinite(value) else str(value)},
+        custom_encoder={
+            float: lambda value: value if math.isfinite(value) else str(value),
+            bytes: lambda value: value.decode("utf-8", errors="backslashreplace"),
+        },
     )
-    # Invalid inputs can contain non-finite numbers or unpaired surrogates.
-    # Keep diagnostics, but stringify non-finite numbers and escape Unicode.
     return Response(
         content=json.dumps({"detail": errors}, ensure_ascii=True, allow_nan=False),
         status_code=422,
