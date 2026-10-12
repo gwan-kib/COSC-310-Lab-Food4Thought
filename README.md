@@ -81,6 +81,14 @@ python -m pytest
 
 `tests/conftest.py` gives each test a temporary copy of the restaurant data and fails the run if any committed file under `data/` changes. GitHub Actions runs the same command on pushes and pull requests to `main`.
 
+`tests/browser/` drives the customer frontend in a real Chromium browser against a local test server with the same isolated data. Those tests need the development-only dependencies; without them they are skipped and the rest of the suite still runs. CI installs them and requires the browser tests to pass. To run them locally:
+
+```sh
+python -m pip install -r requirements-dev.txt
+python -m playwright install chromium
+python -m pytest
+```
+
 ## Repository structure
 
 ```text
@@ -95,11 +103,12 @@ app/
   core/config.py        Configurable data-file location
 frontend/               Customer page served at /app/ (index.html, app.js, styles.css)
 data/restaurants.json   Representative restaurant data
-tests/                  pytest suite and shared fixtures
+tests/                  pytest suite and shared fixtures (tests/browser/: real-browser frontend tests)
 scrum/                  Team agreement
 docs/                   Milestones, testing, and provenance records
 .github/                CI workflow, issue and PR templates
 requirements.txt        Pinned dependencies
+requirements-dev.txt    Development-only dependencies (Playwright for browser tests)
 ```
 
 The repository contains no passwords, tokens, or API keys, and none are needed to run it.

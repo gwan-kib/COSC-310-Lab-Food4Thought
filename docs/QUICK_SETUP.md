@@ -49,6 +49,8 @@ Running this command again is also safe when you are unsure whether dependencies
 python -m pytest
 ```
 
+Browser tests are skipped unless `requirements-dev.txt` and Playwright's Chromium are installed (see [first-time setup](FIRST_TIME_SETUP.md#6-verify-the-test-suite)); CI always runs them.
+
 ## 6. Start the application
 
 ```sh

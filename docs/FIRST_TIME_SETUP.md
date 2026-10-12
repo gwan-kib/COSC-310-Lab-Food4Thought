@@ -95,6 +95,14 @@ python -m pytest
 
 The tests use temporary restaurant-data copies and are designed not to modify committed files under `data/`.
 
+The real-browser frontend tests in `tests/browser/` are skipped unless the optional development dependencies are installed. CI always runs them. To run them locally as well:
+
+```sh
+python -m pip install -r requirements-dev.txt
+python -m playwright install chromium
+python -m pytest
+```
+
 ## 7. Run the application
 
 ```sh

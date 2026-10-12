@@ -55,9 +55,20 @@ function setStatus(element, message, isError = false) {
   element.classList.toggle("error", isError);
 }
 
-function selectedRestaurantId() {
+// Read the selection from the URL. A hand-typed link such as "#/restaurants/%"
+// is not valid percent-encoding, so report it instead of letting it throw.
+function readSelection() {
   const match = window.location.hash.match(/^#\/restaurants\/(.+)$/);
-  return match ? decodeURIComponent(match[1]) : null;
+  if (!match) return { id: null, valid: true };
+  try {
+    return { id: decodeURIComponent(match[1]), valid: true };
+  } catch {
+    return { id: null, valid: false };
+  }
+}
+
+function restaurantHash(restaurantId) {
+  return `#/restaurants/${encodeURIComponent(restaurantId)}`;
 }
 
 async function loadRestaurants(cuisine) {
@@ -83,7 +94,7 @@ function renderRestaurants(restaurants, cuisine) {
   }
 
   setStatus(listStatus, cuisine ? `Showing ${cuisine} restaurants.` : "");
-  const selectedId = selectedRestaurantId();
+  const selectedId = readSelection().id;
 
   for (const restaurant of restaurants) {
     const button = document.createElement("button");
@@ -101,7 +112,14 @@ function renderRestaurants(restaurants, cuisine) {
     button.append(name, cuisineLabel);
 
     button.addEventListener("click", () => {
-      window.location.hash = `#/restaurants/${encodeURIComponent(restaurant.id)}`;
+      const hash = restaurantHash(restaurant.id);
+      if (window.location.hash === hash) {
+        // Same URL means no hashchange event, so reload directly. This lets a
+        // customer retry after an error by clicking the restaurant again.
+        showDetails(readSelection());
+      } else {
+        window.location.hash = hash;
+      }
     });
 
     const item = document.createElement("li");
@@ -120,17 +138,24 @@ function markSelected(restaurantId) {
   }
 }
 
-async function showDetails(restaurantId) {
+async function showDetails(selection) {
+  // Every selection change, including clearing it, invalidates older requests,
+  // so a slow response can never redisplay a restaurant that is no longer selected.
+  const request = ++detailsRequest;
+  const restaurantId = selection.id;
   markSelected(restaurantId);
+  detailsContent.hidden = true;
+
+  if (!selection.valid) {
+    setStatus(detailsStatus, "That restaurant link isn't valid.", true);
+    return;
+  }
   if (restaurantId === null) {
-    detailsContent.hidden = true;
     setStatus(detailsStatus, "Select a restaurant to see its details and menu.");
     return;
   }
 
-  const request = ++detailsRequest;
   const path = `/restaurants/${encodeURIComponent(restaurantId)}`;
-  detailsContent.hidden = true;
   setStatus(detailsStatus, "Loading restaurant…");
 
   try {
@@ -188,7 +213,7 @@ clearFilter.addEventListener("click", () => {
   loadRestaurants(null);
 });
 
-window.addEventListener("hashchange", () => showDetails(selectedRestaurantId()));
+window.addEventListener("hashchange", () => showDetails(readSelection()));
 
 loadRestaurants(null);
-showDetails(selectedRestaurantId());
+showDetails(readSelection());
