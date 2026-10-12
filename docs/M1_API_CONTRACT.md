@@ -100,7 +100,15 @@ The repository validates the full result before saving. Its mutation boundary re
 
 The #35 foundation tests overlapping mutations through two independently constructed repositories sharing one temporary file, verifies both changes survive reload, and verifies a failed mutation releases the lock. The same foundation supports #37's menu-item creation. The #36 tests also cover overlapping updates to different fields of one restaurant through independent services/repositories. Atomic replacement protects file contents; the shared lock protects the read-modify-write sequence. Multiple worker processes and external file writers are outside the guarantee.
 
-One file keeps parent relationships and writes together and reuses the existing test-isolation configuration. The trade-off is reading/writing the whole dataset and needing write coordination. Separate restaurant/menu files would isolate data types but introduce cross-file consistency and additional configuration without a current requirement. Revisit this choice if later requirements need independently managed menus or multiple processes.
+One file keeps parent relationships and writes together and reuses the existing test-isolation configuration. Each mutation reads, validates, and rewrites the whole dataset, so its cost grows roughly linearly with total stored data size even for a single-field update. The process-wide lock serializes mutations, including writes to different restaurants or configured files. Separate restaurant/menu files would isolate data types but introduce cross-file consistency and additional configuration without a current requirement. Revisit this choice if later requirements need larger datasets, independently managed menus, or multiple processes; a persistence redesign is outside #38.
+
+## Deferred follow-up: menu-price bounds
+
+Status: pending team decision, outside PR #55. The [price-bound review comment](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55#discussion_r4252337503) identified that the adopted price syntax has no maximum value or input length. On 2026-10-12, the user chose to document a separate follow-up rather than tighten this PR's accepted contract. No upper bound is introduced here.
+
+Before implementation, the team must choose and justify a maximum value and/or encoded input length as an engineering decision, and agree how previously valid stored prices above that bound will be handled. Input length needs separate consideration because leading zeros can make a small numeric value arbitrarily long. The shared price type also validates persisted items, so tightening it without a compatibility decision could make an existing file unreadable and cause 500 responses.
+
+The follow-up must keep create/update validation consistent, document the agreed contract and storage compatibility policy, and add boundary tests for the accepted maximum, the first rejected value/length, normalization, and existing stored data. Track ownership and implementation through the team's issue/Project workflow once the team selects this work. No assignee, deadline, or team agreement on a numeric limit is implied by this record.
 
 ## Responses and failure precedence
 

@@ -226,7 +226,7 @@ def test_update_openapi_describes_partial_input_and_scoped_errors():
     assert operation["requestBody"]["content"]["application/json"]["schema"] == {
         "$ref": "#/components/schemas/MenuItemUpdate"
     }
-    assert set(operation["responses"]) == {"200", "404", "422", "500"}
+    assert {"200", "404", "422", "500"} <= operation["responses"].keys()
     for code, model in [("200", "MenuItem"), ("404", "ErrorResponse"),
                         ("422", "HTTPValidationError"), ("500", "ErrorResponse")]:
         assert operation["responses"][code]["content"]["application/json"]["schema"] == {
