@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from pydantic import StringConstraints
 
 from app.repositories.restaurant import RestaurantDataError, RestaurantRepository
 from app.schemas.restaurant import (
@@ -16,6 +17,9 @@ from app.services.restaurant import RestaurantNotFoundError, RestaurantService
 
 router = APIRouter()
 
+# A supplied filter must contain more than whitespace; blank values are a 422.
+CuisineFilter = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+
 
 def get_restaurant_service() -> RestaurantService:
     # Resolve configuration per request so isolated storage can be injected.
@@ -25,7 +29,11 @@ def get_restaurant_service() -> RestaurantService:
 @router.get(
     "/restaurants",
     summary="List restaurants",
-    description="Return the persisted restaurant list in stored order.",
+    description=(
+        "Return the persisted restaurant list in stored order. Supply `cuisine` to "
+        "return only restaurants whose whole cuisine matches, ignoring case and "
+        "surrounding whitespace; no match returns an empty list."
+    ),
     response_model=list[Restaurant],
     responses={
         500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"}
@@ -33,9 +41,18 @@ def get_restaurant_service() -> RestaurantService:
 )
 def list_restaurants(
     service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+    cuisine: Annotated[
+        CuisineFilter | None,
+        Query(
+            description=(
+                "Optional exact cuisine filter, case-insensitive, for example "
+                "`Japanese`. Empty or whitespace-only values are rejected."
+            ),
+        ),
+    ] = None,
 ) -> list[Restaurant]:
     try:
-        return service.list_restaurants()
+        return service.list_restaurants(cuisine)
     except RestaurantDataError as exc:
         raise HTTPException(
             status_code=500, detail="Restaurant data is unavailable"
