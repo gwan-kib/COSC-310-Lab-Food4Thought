@@ -67,6 +67,36 @@ def create_restaurant(
         ) from exc
 
 
+@router.get(
+    "/restaurants/{restaurant_id}",
+    summary="Get restaurant details",
+    description=(
+        "Return one restaurant by its stable ID, with the same four fields as the "
+        "list. Menu items are returned by the menu operation."
+    ),
+    response_model=Restaurant,
+    responses={
+        404: {"model": ErrorResponse, "description": "Restaurant not found"},
+        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
+    },
+)
+def get_restaurant(
+    restaurant_id: Annotated[
+        str,
+        Path(description="Stable restaurant identifier, for example `restaurant-001`."),
+    ],
+    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+) -> Restaurant:
+    try:
+        return service.get_restaurant(restaurant_id)
+    except RestaurantNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Restaurant not found") from exc
+    except RestaurantDataError as exc:
+        raise HTTPException(
+            status_code=500, detail="Restaurant data is unavailable"
+        ) from exc
+
+
 @router.patch(
     "/restaurants/{restaurant_id}",
     summary="Update a restaurant",

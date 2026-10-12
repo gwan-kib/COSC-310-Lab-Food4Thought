@@ -9,6 +9,7 @@ from fastapi import FastAPI
 # including a GET with a validated path parameter, keeps FastAPI's 422.
 CONTRACT_NO_VALIDATION_ERROR_OPERATIONS: frozenset[tuple[str, str]] = frozenset(
     {
+        ("get", "/restaurants/{restaurant_id}"),
         ("get", "/restaurants/{restaurant_id}/menu"),
     }
 )
