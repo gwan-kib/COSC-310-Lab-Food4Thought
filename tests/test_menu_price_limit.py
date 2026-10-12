@@ -90,6 +90,7 @@ def test_repository_rejects_stored_prices_above_limit_without_rewriting(
     "method, path, body",
     [
         ("GET", "/restaurants", None),
+        ("GET", "/restaurants/restaurant-001", None),
         ("GET", "/restaurants/restaurant-001/menu", None),
         ("POST", "/restaurants", {"name": "New", "cuisine": "Cafe", "description": "Food"}),
         ("PATCH", "/restaurants/restaurant-001", {"name": "New"}),

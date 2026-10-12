@@ -30,6 +30,12 @@ class RestaurantService:
     def list_restaurants(self) -> list[Restaurant]:
         return self.repository.list_restaurants()
 
+    def get_restaurant(self, restaurant_id: str) -> Restaurant:
+        record = self.repository.get_record(restaurant_id)
+        if record is None:
+            raise RestaurantNotFoundError(restaurant_id)
+        return record.as_restaurant()
+
     def get_menu(self, restaurant_id: str) -> Menu:
         # The repository only reports absence; treating it as an error is an
         # application decision, so it is made here rather than in storage.
