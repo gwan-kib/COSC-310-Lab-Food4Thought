@@ -387,3 +387,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: On 2026-10-07, `.\.venv\Scripts\python.exe -m pytest -q` passed 135 tests before merging and 197 after conflict resolution. `.\.venv\Scripts\python.exe -m compileall -q app` and `.\.venv\Scripts\python.exe -m pip check` passed. Both existing test suites were retained for this behaviour-preserving integration; no new feature or new red-green cycle was required. The complete integration diff and both setup guides were reviewed. Live-server checks were not repeated; the combined operations, error cases, persistence, and OpenAPI are covered by the suite.
 - PR or commit: [PR #54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54); merged base `e26e29e`; branch `codex/36-update-restaurant`.
 - Student review status: Pending. Conflict resolution and agent checks do not establish student understanding or human approval.
+
+### Entry 30: Restaurant details endpoint
+
+- Student(s): Sreeram Nara (`SreeramNara`), issue #31 assignee.
+- Artifact: `app/services/restaurant.py` (`get_restaurant`), `app/api/routes/restaurants.py` (`GET /restaurants/{restaurant_id}`), `app/api/openapi.py` (contract operation list), `tests/test_restaurant_details.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, and `docs/QUICK_SETUP.md`.
+- Label: `AI-GENERATED`.
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Implement issue #31 against the adopted M1 contract so a customer can retrieve one restaurant by its stable ID through Route → Service → Repository → JSON.
+- Influence: Claude wrote the tests first, then added `RestaurantService.get_restaurant`, which reuses the existing `RestaurantRepository.get_record` and projects the stored record to the four-field `Restaurant` model, and the documented `GET /restaurants/{restaurant_id}` route (404 `Restaurant not found`, generic 500 with `ErrorResponse`). The operation was added to `CONTRACT_NO_VALIDATION_ERROR_OPERATIONS`, as the contract defines no 422 for it; `PATCH` on the same path keeps its 422. README and both setup guides were updated. An earlier unmerged #31 branch from 2026-10-02 was superseded by this rebuild on the current `main`.
+- Validation: On Python 3.12.3 the baseline on `main` passed 197 tests. The new tests then failed (13 failed, 1 passed) because `get_restaurant` did not exist and `GET` on that path returned 405 from the existing `PATCH` route. After implementation, `python -m pytest -q` passed 211 tests; `python -m compileall app` and `git diff --check` passed. A running Uvicorn server returned 200 for `/restaurants/restaurant-001` with the four fields, 404 for an unknown ID, and OpenAPI listed 200/404/500 for GET and 200/404/422/500 for PATCH on `/restaurants/{restaurant_id}`.
+- PR or commit: [Issue #31](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/31); branch `feature/31-restaurant-details`. Add the PR link when opened.
+- Student review status: Pending; Sreeram must review and be able to explain these changes before merge.

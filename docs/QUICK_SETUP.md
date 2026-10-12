@@ -65,6 +65,7 @@ Useful implemented checks:
 
 - `GET /health`
 - `GET /restaurants`
+- `GET /restaurants/restaurant-001`
 - `GET /restaurants/restaurant-001/menu`
 - `POST /restaurants` (creates a persistent record; use `/docs` with an isolated data copy for experiments)
 - `PATCH /restaurants/restaurant-001` (updates supplied fields; use `/docs` with an isolated data copy and, for example, `{"description":"Seasonal bowls and noodles"}`)
