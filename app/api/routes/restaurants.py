@@ -141,7 +141,8 @@ def get_menu(
     description=(
         "Add and persist an item under an existing restaurant with a server-generated "
         "stable ID. Supply name, description, and a nonnegative decimal-string price "
-        "with at most two fractional digits. The saved price has two fractional digits."
+        "no greater than 999.00, with at most two fractional digits. "
+        "The saved price has two fractional digits."
     ),
     response_model=MenuItem,
     status_code=201,
@@ -174,8 +175,9 @@ def add_menu_item(
     description=(
         "Persist a partial update to name, description, or price under the specified "
         "restaurant. Supply at least one non-null field. Text must be nonblank; "
-        "price must be a nonnegative decimal string with at most two fractional "
-        "digits. Omitted fields, IDs, parent relationships, and unrelated items "
+        "price must be a nonnegative decimal string no greater than 999.00, with "
+        "at most two fractional digits. Omitted fields, IDs, parent relationships, "
+        "and unrelated items "
         "are preserved. Unsupported fields are rejected. Returns the complete item "
         "with a two-decimal price only after saving."
     ),

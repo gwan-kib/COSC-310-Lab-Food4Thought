@@ -15,16 +15,24 @@ from pydantic.json_schema import SkipJsonSchema
 WriteText = Annotated[
     str, StringConstraints(strict=True, strip_whitespace=True, min_length=1)
 ]
+MAX_MENU_ITEM_PRICE = Decimal("999.00")
 
 
 def normalize_price(value: str) -> str:
-    return format(Decimal(value), ".2f")
+    price = Decimal(value)
+    if price > MAX_MENU_ITEM_PRICE:
+        raise ValueError(f"Price must be at most {MAX_MENU_ITEM_PRICE}")
+    return format(price, ".2f")
 
 
 WritePrice = Annotated[
     str,
     StringConstraints(strict=True, pattern=r"^[0-9]+(\.[0-9]{1,2})?$"),
     AfterValidator(normalize_price),
+    Field(description=(
+        f"Decimal string from 0 to {MAX_MENU_ITEM_PRICE} inclusive, "
+        "with at most two fractional digits."
+    )),
 ]
 
 

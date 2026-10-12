@@ -73,6 +73,8 @@ Useful implemented checks:
 - `GET /docs`
 - `GET /openapi.json`
 
+Menu-item prices must be decimal strings from `0` through `999.00` inclusive. Over-limit request values return 422; over-limit prices in the configured data file cause generic 500 data errors and must be corrected in that file. The committed sample data is within the limit.
+
 Stop the server with `Ctrl+C`.
 
 ## Short version

@@ -129,7 +129,7 @@ A simple browser check is enough for the GET operations. To try `POST /restauran
 
 For `PATCH /restaurants/{restaurant_id}`, use an ID from `GET /restaurants` and a body such as `{"description":"Seasonal bowls and noodles"}` in `/docs`, also with a disposable data copy. Supply at least one of `name`, `cuisine`, or `description`; supplied values must be nonblank strings. Nulls and unsupported fields are rejected. Re-list restaurants to check the saved result. See [README](../README.md#api-endpoints) for the full update/error behavior.
 
-With that disposable data copy configured, try the add-menu-item operation in `/docs` using an existing restaurant ID and `{"name":"Soup","description":"Hot soup","price":"4.50"}`. It returns HTTP 201 with a generated item ID. Fetch that restaurant's menu to see the appended item; restart the server with the same data path and fetch it again to verify persistence. Unknown restaurants return 404 and invalid item bodies return 422.
+With that disposable data copy configured, try the add-menu-item operation in `/docs` using an existing restaurant ID and `{"name":"Soup","description":"Hot soup","price":"4.50"}`. It returns HTTP 201 with a generated item ID. Fetch that restaurant's menu to see the appended item; restart the server with the same data path and fetch it again to verify persistence. Unknown restaurants return 404 and invalid item bodies return 422. Create/update prices must be decimal strings from `0` through `999.00` inclusive; `"999.00"` is accepted and `"999.01"` returns 422.
 
 To update that item, use its returned ID and the same restaurant ID in `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` with `{"price":"7.5"}`. The response contains the complete saved item with price `"7.50"`; its ID, name, and description remain unchanged. Fetch the menu after restarting with the same disposable data path to verify the update persisted. Supply at least one of `name`, `description`, or `price`; nulls and unsupported fields are rejected. See [README](../README.md#api-endpoints) for validation and parent-scoping behavior.
 
@@ -157,7 +157,7 @@ macOS/Linux:
 export RESTAURANTS_DATA_PATH=/path/to/restaurants.json
 ```
 
-If the variable is not set, the application uses `data/restaurants.json`.
+If the variable is not set, the application uses `data/restaurants.json`. Stored menu-item prices must also be at most `999.00`. An over-limit stored price makes the file invalid, causing generic HTTP 500 data errors without changing the file; correct it before starting normal use. The committed sample data already satisfies this rule.
 
 ## Setup complete
 
