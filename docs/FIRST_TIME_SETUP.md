@@ -116,7 +116,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | Method / path | Current purpose |
 | --- | --- |
 | `GET /health` | Liveness check. Returns `{"status": "ok"}`. |
-| `GET /restaurants` | Returns the current restaurant list from JSON data. |
+| `GET /restaurants` | Returns the current restaurant list from JSON data. Add `?cuisine=japanese` to filter by cuisine (whole value, case-insensitive). |
 | `POST /restaurants` | Creates and persists a restaurant from `name`, `cuisine`, and `description`; returns HTTP 201 with a generated ID. |
 | `GET /restaurants/{restaurant_id}` | Returns one restaurant by ID, e.g. `/restaurants/restaurant-001`; unknown IDs return 404. |
 | `PATCH /restaurants/{restaurant_id}` | Updates supplied restaurant fields and returns HTTP 200 after saving; preserves omitted fields, ID, and menu items. Unknown IDs return 404; invalid input returns 422. |

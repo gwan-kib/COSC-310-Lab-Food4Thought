@@ -27,8 +27,17 @@ class RestaurantService:
     def __init__(self, repository: RestaurantRepository) -> None:
         self.repository = repository
 
-    def list_restaurants(self) -> list[Restaurant]:
-        return self.repository.list_restaurants()
+    def list_restaurants(self, cuisine: str | None = None) -> list[Restaurant]:
+        """Return restaurants in stored order, optionally only one cuisine.
+
+        Matching compares the whole value case-insensitively; casefold() also
+        handles letters such as "ß" that lower() leaves unchanged.
+        """
+        restaurants = self.repository.list_restaurants()
+        if cuisine is None:
+            return restaurants
+        wanted = cuisine.strip().casefold()
+        return [r for r in restaurants if r.cuisine.casefold() == wanted]
 
     def get_restaurant(self, restaurant_id: str) -> Restaurant:
         record = self.repository.get_record(restaurant_id)
