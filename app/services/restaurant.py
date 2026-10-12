@@ -5,6 +5,7 @@ from app.schemas.restaurant import (
     Menu,
     MenuItem,
     MenuItemCreate,
+    MenuItemUpdate,
     Restaurant,
     RestaurantCreate,
     RestaurantRecord,
@@ -14,6 +15,10 @@ from app.schemas.restaurant import (
 
 class RestaurantNotFoundError(Exception):
     """No restaurant exists with the requested identifier."""
+
+
+class MenuItemNotFoundError(Exception):
+    """No item exists with the requested identifier under this restaurant."""
 
 
 class RestaurantService:
@@ -85,3 +90,23 @@ class RestaurantService:
         saved = self.repository.mutate_records(add)
         parent = next(record for record in saved if record.id == restaurant_id)
         return next(item for item in parent.menu_items if item.id == created_id)
+
+    def update_menu_item(
+        self, restaurant_id: str, item_id: str, request: MenuItemUpdate
+    ) -> MenuItem:
+        changes = request.model_dump(exclude_unset=True)
+
+        def update(records: list[RestaurantRecord]) -> None:
+            # Resolve both IDs against current state inside the shared mutation lock.
+            parent = next((r for r in records if r.id == restaurant_id), None)
+            if parent is None:
+                raise RestaurantNotFoundError(restaurant_id)
+            item = next((i for i in parent.menu_items if i.id == item_id), None)
+            if item is None:
+                raise MenuItemNotFoundError(item_id)
+            for field, value in changes.items():
+                setattr(item, field, value)
+
+        saved = self.repository.mutate_records(update)
+        parent = next(record for record in saved if record.id == restaurant_id)
+        return next(item for item in parent.menu_items if item.id == item_id)

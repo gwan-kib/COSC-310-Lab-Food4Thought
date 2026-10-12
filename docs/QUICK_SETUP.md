@@ -69,6 +69,7 @@ Useful implemented checks:
 - `POST /restaurants` (creates a persistent record; use `/docs` with an isolated data copy for experiments)
 - `PATCH /restaurants/restaurant-001` (updates supplied fields; use `/docs` with an isolated data copy and, for example, `{"description":"Seasonal bowls and noodles"}`)
 - `POST /restaurants/restaurant-001/menu/items` (adds a persistent item; use `/docs` with an isolated data copy and `{"name":"Soup","description":"Hot soup","price":"4.50"}`, then GET the menu)
+- `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` (use IDs from the menu response and an isolated data copy; `{"price":"7.5"}` saves `"7.50"` and preserves omitted fields)
 - `GET /docs`
 - `GET /openapi.json`
 
