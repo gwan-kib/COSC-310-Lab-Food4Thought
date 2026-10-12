@@ -39,6 +39,10 @@ python -m uvicorn app.main:app --reload
 
 The API starts at `http://127.0.0.1:8000`. Stop it with `Ctrl+C`.
 
+### Customer frontend
+
+The same command serves the basic customer page at **`http://127.0.0.1:8000/app/`** (`http://127.0.0.1:8000/` redirects there). It is plain HTML, CSS, and JavaScript in `frontend/`; there is no Node.js or build step. The page lists restaurants, filters them by cuisine, and shows the selected restaurant's details and menu. All data comes from the REST API (`GET /restaurants`, `GET /restaurants/{restaurant_id}`, `GET /restaurants/{restaurant_id}/menu`); nothing is hard-coded or read from the JSON file. The selected restaurant is kept in the URL (for example `/app/#/restaurants/restaurant-001`), so links and the browser back button work. Loading, empty, not-found, and server-error states are shown on the page. API text is rendered as text, never as HTML.
+
 ## API endpoints
 
 | Method and path | Purpose |
@@ -81,7 +85,7 @@ python -m pytest
 
 ```text
 app/
-  main.py               FastAPI application; registers routers and error handling
+  main.py               FastAPI application; registers routers, error handling, and the frontend
   api/routes/           HTTP routes (health.py, restaurants.py)
   api/errors.py         JSON-safe validation-error responses for rejected input
   api/openapi.py        OpenAPI post-processing (removes 422 only from contract-listed operations)
@@ -89,6 +93,7 @@ app/
   repositories/         Data access for JSON files (restaurant.py)
   schemas/              Pydantic models (restaurant.py)
   core/config.py        Configurable data-file location
+frontend/               Customer page served at /app/ (index.html, app.js, styles.css)
 data/restaurants.json   Representative restaurant data
 tests/                  pytest suite and shared fixtures
 scrum/                  Team agreement

@@ -63,6 +63,7 @@ http://127.0.0.1:8000
 
 Useful implemented checks:
 
+- `GET /app/` (customer frontend in the browser)
 - `GET /health`
 - `GET /restaurants`
 - `GET /restaurants?cuisine=japanese`
