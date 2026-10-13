@@ -51,9 +51,3 @@ These are reasonable **comparison alternatives**, not a claim that the team form
 ## Consequences and limits
 
 A future requirement for items over 999.00 would require revisiting the cap, schemas, stored-data policy, and tests. The current design does not define tax, currency conversion, payments, or an order-total calculation. It validates *menu-item prices*, not entire transactions.
-
-## Short explanation for the TA
-
-“We chose to send prices as strings and validate them with `Decimal` so we keep consistent two-decimal prices without floating-point rounding issues. We also set a team limit of 999.00; for example, `"12.5"` becomes `"12.50"`, while `"999.01"` is rejected with 422. The limit can be changed later if requirements change.”
-
-**Before marking the M1 decision task complete:** another teammate should review this receipt against the code, and each presenter should be able to explain the choice and its trade-offs.

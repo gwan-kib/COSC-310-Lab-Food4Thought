@@ -1,3 +1,8 @@
+# Verify that Food4Thought's shared pytest fixtures direct data access to a temporary
+# copy.
+# It checks that each copy starts with representative records and that modifying it
+# leaves the committed data untouched.
+
 import json
 import os
 from pathlib import Path

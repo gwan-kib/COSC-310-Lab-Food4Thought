@@ -1,3 +1,7 @@
+# Verify Food4Thought's partial menu-item updates within the specified restaurant.
+# It covers validation, unchanged identifiers and relationships, persistence failures,
+# error responses, OpenAPI, and overlapping mutations.
+
 import json
 import threading
 from concurrent.futures import ThreadPoolExecutor

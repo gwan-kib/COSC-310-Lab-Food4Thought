@@ -1,3 +1,8 @@
+# Verify that Food4Thought returns a restaurant's public details for an exact stable
+# identifier.
+# It checks current storage selection, missing-resource and data-failure behavior,
+# unchanged storage, service projection, and the documented response contract.
+
 import json
 
 import pytest

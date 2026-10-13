@@ -1,3 +1,8 @@
+# Protect Food4Thought's JSON error responses when invalid requests contain
+# difficult-to-encode values.
+# It checks non-finite numbers, Unicode, raw bytes, nested rejected fields, retained
+# diagnostics, and validation before storage access without writes.
+
 import json
 
 import pytest

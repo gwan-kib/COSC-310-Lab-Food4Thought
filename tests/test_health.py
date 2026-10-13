@@ -1,3 +1,8 @@
+# Verify Food4Thought's basic health endpoint and availability of generated API
+# documentation.
+# It checks the health response, documented HTTP method, and rejection of unsupported
+# methods.
+
 from fastapi.testclient import TestClient
 
 

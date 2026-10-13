@@ -1,3 +1,8 @@
+# Verify Food4Thought's restaurant creation and the shared complete-record persistence
+# foundation.
+# It covers request and stored-data validation, legacy compatibility, stable IDs, saved
+# responses, failed writes, mutation locking, and OpenAPI.
+
 import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
