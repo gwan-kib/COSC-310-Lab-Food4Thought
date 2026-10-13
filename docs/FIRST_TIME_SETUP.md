@@ -2,7 +2,7 @@
 
 Use this guide when setting up Food4Thought on a machine for the first time.
 
-This document describes the application as it exists now. The repository currently contains a FastAPI backend, JSON restaurant data, and a pytest test suite. It does not require a database, frontend build step, API keys, or other secrets.
+This document describes the application as it exists now. The repository currently contains a FastAPI backend serving customer and create-restaurant pages, JSON restaurant data, and a pytest test suite. It does not require a database, frontend build step, API keys, or other secrets.
 
 For later sessions on a machine that is already configured, use [Quick Setup](QUICK_SETUP.md).
 
@@ -133,9 +133,12 @@ With the server running, the currently implemented HTTP surfaces are:
 | `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` | Updates supplied item fields and returns HTTP 200 with the saved item; unknown parent/item returns 404 and invalid input returns 422. |
 | `GET /docs` | FastAPI's interactive OpenAPI documentation. |
 | `GET /app/` | Customer frontend: restaurant list, cuisine filter, and the selected restaurant's details and menu. `GET /` redirects here. |
+| `GET /app/create-restaurant.html` | Management frontend: create a restaurant through the API, with validation/error feedback and a link to the saved restaurant. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
 
 A simple browser check is enough for the GET operations. To try `POST /restaurants`, use the interactive form at `/docs` with a body such as `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. It writes to the configured JSON file, so use a disposable copy through `RESTAURANTS_DATA_PATH` when experimenting.
+
+With a disposable data copy configured, open `/app/` and follow **Create restaurant**. Fill all three fields and submit; confirm the success message, then follow **View restaurant** to see the saved details. Restart with the same data path and verify that the restaurant remains in the list. Whitespace-only values show backend validation feedback; errors keep the form values. Correct a rejected field to a nonblank value and confirm its error clears before submitting again. A stalled request times out after 15 seconds and restores the controls. If creation cannot be confirmed because the connection or response failed or timed out, check **Browse restaurants** before trying again to avoid duplicates.
 
 For `PATCH /restaurants/{restaurant_id}`, use an ID from `GET /restaurants` and a body such as `{"description":"Seasonal bowls and noodles"}` in `/docs`, also with a disposable data copy. Supply at least one of `name`, `cuisine`, or `description`; supplied values must be nonblank strings. Nulls and unsupported fields are rejected. Re-list restaurants to check the saved result. See [README](../README.md#api-endpoints) for the full update/error behavior.
 

@@ -2,7 +2,7 @@
 
 **Team:** Agents Anonymous
 
-Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. The backend includes the Milestone 0 foundation and the M1 cuisine filtering, restaurant details, restaurant creation, restaurant updates, menu browsing, menu-item creation, and menu-item updates, plus a basic customer frontend. The rest of the M1 slice is still in progress.
+Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. The backend includes the Milestone 0 foundation and the M1 cuisine filtering, restaurant details, restaurant creation, restaurant updates, menu browsing, menu-item creation, and menu-item updates, plus basic customer and create-restaurant frontends. M1 integration and release work remain in progress.
 
 - [First-time application setup](docs/FIRST_TIME_SETUP.md)
 - [Quick setup for returning contributors](docs/QUICK_SETUP.md)
@@ -42,6 +42,14 @@ The API starts at `http://127.0.0.1:8000`. Stop it with `Ctrl+C`.
 ### Customer frontend
 
 The same command serves the basic customer page at **`http://127.0.0.1:8000/app/`** (`http://127.0.0.1:8000/` redirects there). It is plain HTML, CSS, and JavaScript in `frontend/`; there is no Node.js or build step. The page lists restaurants, filters them by cuisine, and shows the selected restaurant's details and menu. All data comes from the REST API (`GET /restaurants`, `GET /restaurants/{restaurant_id}`, `GET /restaurants/{restaurant_id}/menu`); nothing is hard-coded or read from the JSON file. The selected restaurant is kept in the URL (for example `/app/#/restaurants/restaurant-001`), so links and the browser back button work. Loading, empty, not-found, and server-error states are shown on the page. If only the menu fails to load, the restaurant's details still show, with a menu-specific error; clicking the restaurant again retries. API text is rendered as text, never as HTML.
+
+### Management frontend
+
+Issue #39 exposes **Create restaurant**, selected by the user on 2026-10-12. Open **`http://127.0.0.1:8000/app/create-restaurant.html`**, or follow **Create restaurant** from the customer page. Enter a name, cuisine, and description, then submit. The page sends JSON to the existing `POST /restaurants` API; the backend validates and saves the record and generates its ID. Success clears the form and offers **View restaurant**, which opens the saved restaurant in the customer page.
+
+The form disables its controls while submitting, identifies fields rejected by the API, and preserves entered values on errors. Correcting a rejected field to a nonblank value clears that field's message and ARIA error state; errors on other fields remain until corrected. The API still validates every submission. Requests that stall are cancelled after 15 seconds and the controls become usable again. If a response is lost, times out, or cannot confirm creation, check **Browse restaurants** before submitting again: the server might already have saved the restaurant, and POST retries can create duplicates. The page never retries automatically. API text is rendered as text, and no authentication is added (outside M1).
+
+The existing Uvicorn command serves both pages; no additional dependencies or build step are required. Creation writes to the configured data file. For experiments, use a disposable copy through `RESTAURANTS_DATA_PATH` as described in [first-time setup](docs/FIRST_TIME_SETUP.md#current-data-configuration). Browser tests exercise this workflow against isolated storage, including validation, storage/network failures, duplicate submissions, keyboard use, and phone layout.
 
 ## API endpoints
 

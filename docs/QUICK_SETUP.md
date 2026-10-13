@@ -66,6 +66,7 @@ http://127.0.0.1:8000
 Useful implemented checks:
 
 - `GET /app/` (customer frontend in the browser)
+- `GET /app/create-restaurant.html` (Create restaurant form; use an isolated data copy for experiments, then follow **View restaurant** after success)
 - `GET /health`
 - `GET /restaurants`
 - `GET /restaurants?cuisine=japanese`

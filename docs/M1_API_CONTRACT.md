@@ -164,7 +164,7 @@ Example `201` response (ID is illustrative, not fixed):
 | [#37](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/37) add item | Item model, parent, IDs | Correct parent; price/text validation; unknown parent; generated ID; reload; existing items preserved; save failure |
 | [#38](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/38) update item | Partial updates, scoped lookup | Correct item updated; wrong parent/missing item; ID/parent preserved; invalid payload; reload; save failure |
 
-The customer frontend in [#34](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/34) consumes list and detail responses. [#39](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/39) still owns choosing the management frontend operation; this backend contract does not select it on the team's behalf.
+The customer frontend in [#34](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/34) consumes list and detail responses. For [#39](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/39), the user selected **Create restaurant** on 2026-10-12, using #35's implemented `POST /restaurants` contract. The selection is a project decision, not a course-prescribed choice.
 
 For every feature, follow [TESTING.md](TESTING.md): tests first, isolated temporary storage, and no writes to committed data. Verify the declared Pydantic response model and generated OpenAPI descriptions, parameters, request bodies, success statuses, and error responses against the relevant row above. Frontend callers can use the stated schemas without depending on JSON file structure. Cross-feature verification belongs to [#40](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/40).
 
