@@ -1,3 +1,8 @@
+# Check Food4Thought's initial restaurant model, representative data, and configurable
+# storage location.
+# It verifies meaningful response fields, valid distinct sample identifiers, and
+# data-path selection for normal use and isolated tests.
+
 import json
 from pathlib import Path
 

@@ -1,3 +1,8 @@
+# Verify Food4Thought's restaurant-menu read flow and the relationship between a
+# restaurant and its items.
+# It covers representative and legacy menus, price serialization, missing resources,
+# corrupt data, service and repository behavior, and OpenAPI.
+
 import json
 from pathlib import Path
 

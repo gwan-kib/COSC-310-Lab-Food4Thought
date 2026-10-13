@@ -1,3 +1,8 @@
+# Create Food4Thought's FastAPI application and connect the backend routes to the
+# frontend pages.
+# It registers request-error handling and OpenAPI customization, serves both pages, and
+# redirects the root URL to restaurant discovery.
+
 from pathlib import Path
 
 from fastapi import FastAPI

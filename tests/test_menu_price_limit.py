@@ -1,3 +1,8 @@
+# Verify Food4Thought's agreed inclusive menu-item price limit for request input and
+# stored records.
+# It checks boundary normalization, rejected writes, dataset-wide storage errors,
+# pre-save revalidation, and matching API-schema descriptions.
+
 import json
 
 import pytest

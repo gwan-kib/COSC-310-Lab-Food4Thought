@@ -1,3 +1,8 @@
+# Check that Food4Thought's restaurant-list service returns the models supplied by its
+# repository.
+# It also verifies that storage failures propagate to the route layer rather than being
+# swallowed by the service.
+
 import json
 
 import pytest

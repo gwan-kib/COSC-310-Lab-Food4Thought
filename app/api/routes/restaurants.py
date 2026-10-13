@@ -1,3 +1,8 @@
+# Expose Food4Thought's restaurant discovery, menu browsing, and management operations
+# through the REST API.
+# It validates HTTP input, delegates work to RestaurantService, and translates missing
+# resources and storage failures into documented responses.
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query

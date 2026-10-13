@@ -1,3 +1,8 @@
+# Verify Food4Thought's partial restaurant updates through the API and isolated
+# persistence.
+# It checks omitted and legacy fields, stable IDs and menus, invalid input, failed
+# saves, error ordering, overlapping updates, and OpenAPI.
+
 import json
 import threading
 from concurrent.futures import ThreadPoolExecutor

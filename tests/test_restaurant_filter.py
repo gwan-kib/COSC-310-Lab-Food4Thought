@@ -1,3 +1,8 @@
+# Verify Food4Thought's optional cuisine filter while preserving the existing
+# restaurant-list behavior.
+# It checks whole-value casefold matching, whitespace handling, result order,
+# blank-query validation, storage failures, and OpenAPI.
+
 import json
 
 import pytest

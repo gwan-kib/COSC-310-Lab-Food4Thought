@@ -1,3 +1,7 @@
+# Protect Food4Thought's targeted customization of generated OpenAPI error responses.
+# It verifies that only contract-listed operations lose the automatic 422 response while
+# genuinely validated path operations retain it.
+
 from typing import Annotated
 
 from fastapi import FastAPI, Path
