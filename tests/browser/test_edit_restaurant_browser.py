@@ -95,7 +95,7 @@ def test_multiline_name_is_omitted_when_only_description_changes(
     page, live_server, isolated_restaurants_path
 ):
     restaurants = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
-    restaurants[0]["name"] = "Cedar\\nBowl".replace("\\n", "\n")
+    restaurants[0]["name"] = "Cedar\nBowl"
     isolated_restaurants_path.write_text(json.dumps(restaurants), encoding="utf-8")
 
     page.goto(f"{live_server}/app/edit-restaurant.html?id=restaurant-001")
@@ -108,7 +108,7 @@ def test_multiline_name_is_omitted_when_only_description_changes(
     assert update.value.status == 200
     assert update.value.request.post_data_json == {"description": "New description"}
     saved = RestaurantRepository(isolated_restaurants_path).load_records()[0]
-    assert saved.name == "Cedar\\nBowl".replace("\\n", "\n")
+    assert saved.name == "Cedar\nBowl"
     assert saved.description == "New description"
     expect(page.get_by_role("status")).to_contain_text("Changes saved")
     assert page.page_errors == []
