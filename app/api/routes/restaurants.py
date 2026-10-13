@@ -9,11 +9,16 @@ from app.schemas.restaurant import (
     Menu,
     MenuItem,
     MenuItemCreate,
+    MenuItemUpdate,
     Restaurant,
     RestaurantCreate,
     RestaurantUpdate,
 )
-from app.services.restaurant import RestaurantNotFoundError, RestaurantService
+from app.services.restaurant import (
+    MenuItemNotFoundError,
+    RestaurantNotFoundError,
+    RestaurantService,
+)
 
 router = APIRouter()
 
@@ -183,7 +188,8 @@ def get_menu(
     description=(
         "Add and persist an item under an existing restaurant with a server-generated "
         "stable ID. Supply name, description, and a nonnegative decimal-string price "
-        "with at most two fractional digits. The saved price has two fractional digits."
+        "no greater than 999.00, with at most two fractional digits. "
+        "The saved price has two fractional digits."
     ),
     response_model=MenuItem,
     status_code=201,
@@ -204,6 +210,51 @@ def add_menu_item(
         return service.add_menu_item(restaurant_id, request)
     except RestaurantNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Restaurant not found") from exc
+    except RestaurantDataError as exc:
+        raise HTTPException(
+            status_code=500, detail="Restaurant data is unavailable"
+        ) from exc
+
+
+@router.patch(
+    "/restaurants/{restaurant_id}/menu/items/{item_id}",
+    summary="Update a menu item",
+    description=(
+        "Persist a partial update to name, description, or price under the specified "
+        "restaurant. Supply at least one non-null field. Text must be nonblank; "
+        "price must be a nonnegative decimal string no greater than 999.00, with "
+        "at most two fractional digits. Omitted fields, IDs, parent relationships, "
+        "and unrelated items "
+        "are preserved. Unsupported fields are rejected. Returns the complete item "
+        "with a two-decimal price only after saving."
+    ),
+    response_model=MenuItem,
+    responses={
+        404: {
+            "model": ErrorResponse,
+            "description": "Restaurant not found, or menu item not found under that restaurant",
+        },
+        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
+    },
+)
+def update_menu_item(
+    restaurant_id: Annotated[
+        str,
+        Path(description="Stable restaurant identifier, for example `restaurant-001`."),
+    ],
+    item_id: Annotated[
+        str,
+        Path(description="Stable item identifier from this restaurant's menu response."),
+    ],
+    request: MenuItemUpdate,
+    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+) -> MenuItem:
+    try:
+        return service.update_menu_item(restaurant_id, item_id, request)
+    except RestaurantNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Restaurant not found") from exc
+    except MenuItemNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Menu item not found") from exc
     except RestaurantDataError as exc:
         raise HTTPException(
             status_code=500, detail="Restaurant data is unavailable"
