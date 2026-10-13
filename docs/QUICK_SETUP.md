@@ -71,8 +71,11 @@ Useful implemented checks:
 - `POST /restaurants` (creates a persistent record; use `/docs` with an isolated data copy for experiments)
 - `PATCH /restaurants/restaurant-001` (updates supplied fields; use `/docs` with an isolated data copy and, for example, `{"description":"Seasonal bowls and noodles"}`)
 - `POST /restaurants/restaurant-001/menu/items` (adds a persistent item; use `/docs` with an isolated data copy and `{"name":"Soup","description":"Hot soup","price":"4.50"}`, then GET the menu)
+- `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` (use IDs from the menu response and an isolated data copy; `{"price":"7.5"}` saves `"7.50"` and preserves omitted fields)
 - `GET /docs`
 - `GET /openapi.json`
+
+Menu-item prices must be decimal strings from `0` through `999.00` inclusive. Over-limit request values return 422; over-limit prices in the configured data file cause generic 500 data errors and must be corrected in that file. The committed sample data is within the limit.
 
 Stop the server with `Ctrl+C`.
 

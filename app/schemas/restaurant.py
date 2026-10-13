@@ -2,11 +2,11 @@ from decimal import Decimal
 from typing import Annotated, Self
 
 from pydantic import (
+    AfterValidator,
     BaseModel,
     ConfigDict,
     Field,
     StringConstraints,
-    field_validator,
     model_validator,
 )
 from pydantic.json_schema import SkipJsonSchema
@@ -14,6 +14,25 @@ from pydantic.json_schema import SkipJsonSchema
 
 WriteText = Annotated[
     str, StringConstraints(strict=True, strip_whitespace=True, min_length=1)
+]
+MAX_MENU_ITEM_PRICE = Decimal("999.00")
+
+
+def normalize_price(value: str) -> str:
+    price = Decimal(value)
+    if price > MAX_MENU_ITEM_PRICE:
+        raise ValueError(f"Price must be at most {MAX_MENU_ITEM_PRICE}")
+    return format(price, ".2f")
+
+
+WritePrice = Annotated[
+    str,
+    StringConstraints(strict=True, pattern=r"^[0-9]+(\.[0-9]{1,2})?$"),
+    AfterValidator(normalize_price),
+    Field(description=(
+        f"Decimal string from 0 to {MAX_MENU_ITEM_PRICE} inclusive, "
+        "with at most two fractional digits."
+    )),
 ]
 
 
@@ -57,12 +76,26 @@ class MenuItemCreate(BaseModel):
 
     name: WriteText
     description: WriteText
-    price: str = Field(strict=True, pattern=r"^[0-9]+(\.[0-9]{1,2})?$")
+    price: WritePrice
 
-    @field_validator("price")
-    @classmethod
-    def normalize_price(cls, value: str) -> str:
-        return format(Decimal(value), ".2f")
+
+class MenuItemUpdate(BaseModel):
+    """Supply only changed item fields; null is not an alternative to omission."""
+
+    model_config = ConfigDict(extra="forbid", json_schema_extra={"minProperties": 1})
+
+    # Match RestaurantUpdate: omission is internal None, never a documented default.
+    name: WriteText | SkipJsonSchema[None] = Field(default_factory=lambda: None)
+    description: WriteText | SkipJsonSchema[None] = Field(default_factory=lambda: None)
+    price: WritePrice | SkipJsonSchema[None] = Field(default_factory=lambda: None)
+
+    @model_validator(mode="after")
+    def validate_changes(self) -> Self:
+        if not self.model_fields_set:
+            raise ValueError("At least one menu item field must be supplied")
+        if any(getattr(self, field) is None for field in self.model_fields_set):
+            raise ValueError("Supplied menu item fields cannot be null")
+        return self
 
 
 class MenuItem(MenuItemCreate):
