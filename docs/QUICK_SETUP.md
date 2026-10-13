@@ -22,11 +22,14 @@ If `.venv` does not exist or no longer works, return to [First-Time Application 
 
 ## 3. Sync the code when starting new work
 
-Before creating a new task branch:
+Before creating a new task branch, inspect the tree and preserve unrelated changes. Switch to `main` only when safe:
 
 ```sh
+git status
+git diff
+git diff --cached
 git checkout main
-git pull
+git pull --ff-only
 ```
 
 Then follow the branch and pull-request workflow in [CONTRIBUTING.md](../CONTRIBUTING.md).
@@ -49,7 +52,7 @@ Running this command again is also safe when you are unsure whether dependencies
 python -m pytest
 ```
 
-Browser tests are skipped unless `requirements-dev.txt` and Playwright's Chromium are installed (see [first-time setup](FIRST_TIME_SETUP.md#6-verify-the-test-suite)); CI always runs them.
+Browser tests skip locally if Playwright or Chromium is unavailable; refresh `requirements-dev.txt` if it changed (see [first-time setup](FIRST_TIME_SETUP.md#6-verify-the-test-suite)); CI always runs them.
 
 ## 6. Start the application
 
@@ -63,23 +66,16 @@ Current local URL:
 http://127.0.0.1:8000
 ```
 
-Useful implemented checks:
+| Check | URL |
+| --- | --- |
+| Customer frontend | `http://127.0.0.1:8000/app/` |
+| Create restaurant frontend | `http://127.0.0.1:8000/app/create-restaurant.html` |
+| Health | `http://127.0.0.1:8000/health` |
+| Restaurant list/filter | `http://127.0.0.1:8000/restaurants?cuisine=japanese` |
+| Restaurant details/menu | `/restaurants/restaurant-001` and `/restaurants/restaurant-001/menu` |
+| API documentation/schema | `http://127.0.0.1:8000/docs` and `/openapi.json` |
 
-- `GET /app/` (customer frontend in the browser)
-- `GET /app/create-restaurant.html` (Create restaurant form; use an isolated data copy for experiments, then follow **View restaurant** after success)
-- `GET /health`
-- `GET /restaurants`
-- `GET /restaurants?cuisine=japanese`
-- `GET /restaurants/restaurant-001`
-- `GET /restaurants/restaurant-001/menu`
-- `POST /restaurants` (creates a persistent record; use `/docs` with an isolated data copy for experiments)
-- `PATCH /restaurants/restaurant-001` (updates supplied fields; use `/docs` with an isolated data copy and, for example, `{"description":"Seasonal bowls and noodles"}`)
-- `POST /restaurants/restaurant-001/menu/items` (adds a persistent item; use `/docs` with an isolated data copy and `{"name":"Soup","description":"Hot soup","price":"4.50"}`, then GET the menu)
-- `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` (use IDs from the menu response and an isolated data copy; `{"price":"7.5"}` saves `"7.50"` and preserves omitted fields)
-- `GET /docs`
-- `GET /openapi.json`
-
-Menu-item prices must be decimal strings from `0` through `999.00` inclusive. Over-limit request values return 422; over-limit prices in the configured data file cause generic 500 data errors and must be corrected in that file. The committed sample data is within the limit.
+Before trying the form or any POST/PATCH operation, stop the server and follow the [disposable data-copy commands](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments). They set `RESTAURANTS_DATA_PATH` to a new temporary copy before running the same startup command. Reuse that path on restart to verify persistence, and clear the override afterward. Full mutation examples and data validation are in [first-time setup](FIRST_TIME_SETUP.md#8-verify-the-current-application) and the [API contract](M1_API_CONTRACT.md).
 
 Stop the server with `Ctrl+C`.
 

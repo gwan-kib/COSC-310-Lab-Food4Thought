@@ -19,7 +19,7 @@ Read applicable nested instructions. Repository instructions remain subject to g
 
 Identify conflicting sources and affected behaviour explicitly. Prefer the newest authoritative course source when applicable, recording the resolution. Flag unresolved ambiguity and continue independent work. Never invent requirements, deadlines, grading criteria, stakeholders, business rules, fields, endpoints, acceptance criteria, or existing team policies.
 
-Distinguish **course requirements**, **team/repository conventions**, and **recommendations**. The user has supplied the M0 foundational-gate specification and the AI/provenance policy; see [the M0 checkpoint](docs/milestones/M0.md) and CONTRIBUTING. Other course claims come from the earlier supplied brief; Figma and GitHub planning artifacts remain unverified. At drafting, no application code, dependencies, or tests existed. Reinspect the checkout; do not treat that inventory as permanent.
+Distinguish **course requirements**, **team/repository conventions**, and **recommendations**. The user has supplied the M0 foundational-gate and M1 first-vertical-slice specifications and the AI/provenance policy; see [M0](docs/milestones/M0.md), [M1](docs/milestones/M1.md), and CONTRIBUTING. Other course claims come from the earlier supplied brief; the Figma source remains unverified. The repository contains a FastAPI/Pydantic backend, JSON persistence, customer and Create restaurant frontends, pinned dependencies, pytest/Playwright tests, and CI. Reinspect the checkout and live GitHub planning state before relying on documentation status.
 
 ## Before editing
 
@@ -40,7 +40,7 @@ Follow the issue metadata convention in [CONTRIBUTING.md](CONTRIBUTING.md#issue-
 - Keep regular issue titles concise and free of role/milestone/type prefixes. Do not create titles such as `[Customer] [M1] View restaurant details`.
 - Use `EPIC: ` as the only intentional planning prefix for epic titles.
 - Put work type, role, workstream, milestone, status, actual assignee, and parent epic in their dedicated GitHub/Project metadata when those fields are available.
-- Treat Role as the responsibility/work area and Assignee as the actual person doing the work; do not substitute one for the other.
+- Treat Role as the responsibility/work area and Assignee as the actual person doing the work; do not substitute one for the other. Finalized Roles are Project Lead, Customer Systems Lead, and Restaurant Systems Lead. Use Quality Control for the cross-cutting workstream; inspect live options for other workstreams, and report unavailable Project access.
 - Use GitHub Relationships / parent-child links as the canonical epic hierarchy. Keep any epic checklist synchronized with the relationship.
 - Use labels only for overlapping technical categories such as `frontend`, `backend`, `api`, `persistence`, `testing`, or `documentation`; do not duplicate Type, Role, Milestone, Status, Assignee, or epic membership with labels.
 - If the expected field or label has not yet been configured, leave that metadata pending and report it. Do not re-encode it in the issue title or invent a substitute field/value.

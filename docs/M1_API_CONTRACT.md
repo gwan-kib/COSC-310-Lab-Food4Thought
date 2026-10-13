@@ -4,7 +4,7 @@
 
 Adopted contract for [issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30). The team agreed to the contract by merging [PR #48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48) on 2026-10-02 at revision [d4850b8](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/d4850b8caece7098fbaa3b660e8d7769984fda77), as the user clarified on 2026-10-04. The previous pending-adoption wording was stale. The contract was drafted and checked against the user-supplied **Milestone 1 – First Vertical Slice** specification on 2026-10-02.
 
-[PR #51](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/51) merged the #35 subset and the mutation-result clarification below. [PR #52](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/52) merged menu browsing. [PR #53](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53) merged #37's menu-item creation. [PR #54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54) merged #36's restaurant updates. PR #56 merged restaurant details and PR #59 merged cuisine filtering. [PR #55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55) implements #38 menu-item updates using that shared foundation; `gwan-kib` approved the implementation on 2026-10-12. See the PR for integration status. Contract adoption does not mean every endpoint is implemented. Merged code and generated OpenAPI describe implemented behavior.
+As of 2026-10-13 (America/Vancouver), all eight operations below are merged and present in `main`; [the M1 checkpoint](milestones/M1.md#source-and-status) maintains the feature-to-PR inventory. [PR #55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55) was approved again by `gwan-kib` after the earlier approval was dismissed and merged at `915e297d19709d0b2263b0669f84bedd32266d1c`. PR #61 also merged the selected Create restaurant frontend. Contract adoption, implementation, peer approval, student understanding, and milestone submission remain distinct. Generated OpenAPI describes the implemented schemas; cross-feature audit remains in #40.
 
 The [M1 checkpoint](milestones/M1.md) records the supplied course source and its scope. Sections 1–2, Required Vertical Slice, Pydantic Models, Persistence, and API Documentation ground this contract. Trace implementation through [discovery epic #27](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/27), [management epic #28](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/28), [quality epic #29](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/29), and their child stories. The pasted specification was verified directly; its linked downloads and live Canvas page were not supplied or inspected.
 
@@ -37,7 +37,7 @@ One cuisine filter satisfies the search-or-filter choice described in #32 withou
 
 ## Pydantic model responsibilities
 
-Keep models in the existing `app/schemas/` layer. Names below are the agreed shared names; introduce the shared persistence models in #35 as specified below, and other models with their consuming features, not as unused placeholders in #30.
+Keep models in the existing `app/schemas/` layer. Names below are the adopted shared names and are now implemented. The ownership notes preserve how #35 established the shared foundation for dependent features.
 
 | Model | Fields and responsibilities |
 | --- | --- |
@@ -67,9 +67,9 @@ Duplicate restaurant IDs or duplicate item IDs within a restaurant in stored dat
 
 ## Persistence and layer boundaries
 
-Continue using UTF-8 JSON at `data/restaurants.json`, the `RESTAURANTS_DATA_PATH` override, and explicit repository path injection. Keep one top-level array and add `menu_items` to each restaurant record when menu support is implemented. No second file, environment variable, database, or schema-version mechanism is required by this contract.
+Continue using UTF-8 JSON at `data/restaurants.json`, the `RESTAURANTS_DATA_PATH` override, and explicit repository path injection. Keep the implemented top-level array with `menu_items` embedded in each restaurant record. No second file, environment variable, database, or schema-version mechanism is required by this contract.
 
-Illustrative stored record (not a change to committed representative data in #30):
+Illustrative stored record (documentation only):
 
 ```json
 [

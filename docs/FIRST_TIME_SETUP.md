@@ -95,13 +95,15 @@ python -m pytest
 
 The tests use temporary restaurant-data copies and are designed not to modify committed files under `data/`.
 
-The real-browser frontend tests in `tests/browser/` are skipped unless the optional development dependencies are installed. CI always runs them. To run them locally as well:
+The real-browser frontend tests in `tests/browser/` skip if Playwright or Chromium is unavailable locally. CI always runs them. To run them locally as well:
 
 ```sh
 python -m pip install -r requirements-dev.txt
 python -m playwright install chromium
 python -m pytest
 ```
+
+Set `REQUIRE_BROWSER_TESTS=1` to fail instead of skip when the browser cannot run; see [Testing](TESTING.md#current-setup-and-commands) for shell-specific commands. On Linux, if Chromium reports missing system libraries, CI's `python -m playwright install --with-deps chromium` installs them where supported.
 
 ## 7. Run the application
 
@@ -140,11 +142,11 @@ A simple browser check is enough for the GET operations. To try `POST /restauran
 
 With a disposable data copy configured, open `/app/` and follow **Create restaurant**. Fill all three fields and submit; confirm the success message, then follow **View restaurant** to see the saved details. Restart with the same data path and verify that the restaurant remains in the list. Whitespace-only values show backend validation feedback; errors keep the form values. Correct a rejected field to a nonblank value and confirm its error clears before submitting again. A stalled request times out after 15 seconds and restores the controls. If creation cannot be confirmed because the connection or response failed or timed out, check **Browse restaurants** before trying again to avoid duplicates.
 
-For `PATCH /restaurants/{restaurant_id}`, use an ID from `GET /restaurants` and a body such as `{"description":"Seasonal bowls and noodles"}` in `/docs`, also with a disposable data copy. Supply at least one of `name`, `cuisine`, or `description`; supplied values must be nonblank strings. Nulls and unsupported fields are rejected. Re-list restaurants to check the saved result. See [README](../README.md#api-endpoints) for the full update/error behavior.
+For `PATCH /restaurants/{restaurant_id}`, use an ID from `GET /restaurants` and a body such as `{"description":"Seasonal bowls and noodles"}` in `/docs`, also with a disposable data copy. Supply at least one of `name`, `cuisine`, or `description`; supplied values must be nonblank strings. Nulls and unsupported fields are rejected. Re-list restaurants to check the saved result. See the [API contract](M1_API_CONTRACT.md#responses-and-failure-precedence) for the full update/error behavior.
 
 With that disposable data copy configured, try the add-menu-item operation in `/docs` using an existing restaurant ID and `{"name":"Soup","description":"Hot soup","price":"4.50"}`. It returns HTTP 201 with a generated item ID. Fetch that restaurant's menu to see the appended item; restart the server with the same data path and fetch it again to verify persistence. Unknown restaurants return 404 and invalid item bodies return 422. Create/update prices must be decimal strings from `0` through `999.00` inclusive; `"999.00"` is accepted and `"999.01"` returns 422.
 
-To update that item, use its returned ID and the same restaurant ID in `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` with `{"price":"7.5"}`. The response contains the complete saved item with price `"7.50"`; its ID, name, and description remain unchanged. Fetch the menu after restarting with the same disposable data path to verify the update persisted. Supply at least one of `name`, `description`, or `price`; nulls and unsupported fields are rejected. See [README](../README.md#api-endpoints) for validation and parent-scoping behavior.
+To update that item, use its returned ID and the same restaurant ID in `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` with `{"price":"7.5"}`. The response contains the complete saved item with price `"7.50"`; its ID, name, and description remain unchanged. Fetch the menu after restarting with the same disposable data path to verify the update persisted. Supply at least one of `name`, `description`, or `price`; nulls and unsupported fields are rejected. See the [API contract](M1_API_CONTRACT.md#pydantic-model-responsibilities) for validation and parent-scoping behavior.
 
 ## Current data configuration
 
@@ -156,21 +158,49 @@ data/restaurants.json
 
 No environment variable is required for normal local use.
 
-The implemented repository layer also supports overriding that file with `RESTAURANTS_DATA_PATH`. This is used by the test suite for isolated temporary data and can also be set manually when needed:
+The repository supports `RESTAURANTS_DATA_PATH` for another existing UTF-8 JSON file. Its parent directory must be writable for atomic replacement. The value is read per request; set it before starting the server. Tests configure their own temporary copies.
+
+If the variable is not set, the application uses `data/restaurants.json`. Stored menu-item prices must also be at most `999.00`. An over-limit stored price makes the file invalid, causing generic HTTP 500 data errors without changing the file; correct it before starting normal use. The committed sample data already satisfies this rule.
+
+### Disposable data for manual experiments
+
+Stop any existing server first. From the repository root, with the virtual environment active, make a uniquely named temporary directory and copy the sample into it. These commands create a new copy each time; to verify persistence after restarting, reuse the printed path instead of repeating the copy step.
 
 Windows PowerShell:
 
 ```powershell
-$env:RESTAURANTS_DATA_PATH = "C:\path\to\restaurants.json"
+$manualDataDir = Join-Path ([System.IO.Path]::GetTempPath()) ('food4thought-manual-' + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $manualDataDir | Out-Null
+$manualDataPath = Join-Path $manualDataDir 'restaurants.json'
+Copy-Item -LiteralPath 'data/restaurants.json' -Destination $manualDataPath
+$env:RESTAURANTS_DATA_PATH = $manualDataPath
+Write-Output $env:RESTAURANTS_DATA_PATH
+python -m uvicorn app.main:app --reload
 ```
 
 macOS/Linux:
 
 ```sh
-export RESTAURANTS_DATA_PATH=/path/to/restaurants.json
+manual_data_dir=$(mktemp -d)
+cp data/restaurants.json "$manual_data_dir/restaurants.json"
+export RESTAURANTS_DATA_PATH="$manual_data_dir/restaurants.json"
+printf '%s\n' "$RESTAURANTS_DATA_PATH"
+python -m uvicorn app.main:app --reload
 ```
 
-If the variable is not set, the application uses `data/restaurants.json`. Stored menu-item prices must also be at most `999.00`. An over-limit stored price makes the file invalid, causing generic HTTP 500 data errors without changing the file; correct it before starting normal use. The committed sample data already satisfies this rule.
+Open `http://127.0.0.1:8000/app/create-restaurant.html` or `/docs` and use the POST/PATCH examples above. Confirm saved values with GET, stop with `Ctrl+C`, then run the same Uvicorn command in the same terminal to verify persistence. All experiments in that server use the copy.
+
+After stopping the experiment server, clear the override before returning to normal sample-data use:
+
+```powershell
+Remove-Item Env:RESTAURANTS_DATA_PATH
+```
+
+```sh
+unset RESTAURANTS_DATA_PATH
+```
+
+The temporary directory remains available for inspection; these instructions do not delete data. New terminals need the same data-path setting to reuse an experiment.
 
 ## Setup complete
 
@@ -181,6 +211,8 @@ A first-time setup is complete when:
 - `requirements.txt` installs successfully.
 - `python -m pytest` completes successfully.
 - `python -m uvicorn app.main:app --reload` starts the API.
-- `/health` responds successfully.
+- `/health`, `/restaurants`, `/docs`, and `/openapi.json` respond successfully.
+- Both `/app/` and `/app/create-restaurant.html` load.
+- Browser tests run successfully when their optional dependencies are installed and required-browser mode is selected.
 
 For normal future sessions, continue with [Quick Setup](QUICK_SETUP.md).

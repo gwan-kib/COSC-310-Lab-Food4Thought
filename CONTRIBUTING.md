@@ -2,11 +2,13 @@
 
 ## Purpose and authority
 
-This is the human team workflow for Food4Thought, the four-student, 12-week UBC Okanagan COSC 310 food-delivery project. Engineering work includes requirements, design, code, tests, documentation, review, integration, provenance, and contribution evidence.
+This is the human team workflow for Food4Thought, the 12-week UBC Okanagan COSC 310 food-delivery project. Engineering work includes requirements, design, code, tests, documentation, review, integration, provenance, and contribution evidence.
 
 Unless labelled otherwise, this document establishes **team/repository conventions**, not grading requirements. **Course/project constraints reported in the supplied brief** are identified below and must be checked against current authoritative course material. Recommendations are labelled explicitly. See [AGENTS.md](AGENTS.md#sources-and-authority) for source priority and conflict handling.
 
-At drafting, the checkout has no application implementation, dependency file, test suite, or verified setup commands. No frontend framework, Python version, endpoint schema, CI, or merge strategy is selected by these documents.
+The current repository uses Python 3.12, FastAPI/Pydantic, JSON persistence, pytest and Playwright, plain HTML/CSS/JavaScript frontends, and GitHub Actions CI. Dependencies are pinned in `requirements.txt` and `requirements-dev.txt`; [first-time setup](docs/FIRST_TIME_SETUP.md) and [quick setup](docs/QUICK_SETUP.md) describe the implemented environment. API/persistence decisions are maintained in the [adopted M1 contract](docs/M1_API_CONTRACT.md).
+
+**Roster clarification pending:** the earlier course brief describes a four-student team, while the signed [Team Agreement V1](scrum/team-agreement.md) lists three members. Confirm the roster or an approved exception with the team/instructor; this document does not alter the signed agreement or assert approval.
 
 The supplied M0 specification is summarized in [the M0 checkpoint](docs/milestones/M0.md), including scope, required evidence, submission, and unresolved source questions. Use that checkpoint for M0; the full-project workflows below are not all M0 deliverables.
 
@@ -40,9 +42,9 @@ Use the following metadata model when the corresponding fields are available:
 | Metadata | Purpose | Values / examples |
 | --- | --- | --- |
 | **Type** | What kind of work is this? | Epic, User Story, Technical Task, Bug |
-| **Role** | Which project responsibility area owns the work? | Customer, Restaurant User, System Administrator, Shared / Team |
+| **Role** | Which project responsibility area owns the work? | Project Lead, Customer Systems Lead, Restaurant Systems Lead |
 | **Assignee** | Which actual person is responsible for doing the work? | GitHub assignee(s) |
-| **Workstream** | Which coherent area does the work belong to? | Restaurant Discovery, Restaurant Management, Engineering / Release, Foundation |
+| **Workstream** | Which coherent area does the work belong to? | Quality Control for cross-cutting work; select other values from the live Project configuration |
 | **Milestone** | Which course delivery checkpoint is this due for? | Use the native GitHub milestone, e.g. M1 – First Vertical Slice |
 | **Parent epic** | Which major capability contains this work? | Use GitHub Relationships / parent-child links |
 | **Status** | Where is the work in the team workflow? | Use the Project Board Status field |
@@ -52,6 +54,8 @@ Use the following metadata model when the corresponding fields are available:
 GitHub Relationships are the canonical epic hierarchy. An epic may keep a child-issue checklist for readability, but the checklist must not replace or contradict the parent-child relationship.
 
 Use labels only when they add overlapping technical information that does not fit a single-select field. Recommended technical categories are `frontend`, `backend`, `api`, `persistence`, `testing`, and `documentation` once those labels are configured. Do not create labels that duplicate Type, Role, Milestone, Status, Assignee, or epic membership.
+
+The finalized Role names and Quality Control terminology are supplied in issue #62 and the current M1 issues. During the 2026-10-12–13 reconciliation, `gh project list --owner gwan-kib --format json` failed because the credential lacks `read:project`; the complete live Workstream option list and field assignments remain unverified. Do not substitute older examples or create new options.
 
 The Project fields and labels may be configured separately from this document. If a documented field is not available yet, leave that metadata pending rather than putting bracket prefixes back into the title.
 
@@ -70,7 +74,7 @@ Use actual references, paths, and test names. Do not fabricate requirement IDs, 
 
 **Course workflow reported in the brief:** no implementation commits directly to `main`; implementation enters through PRs. Use focused, short-lived branches.
 
-**Team naming convention:** use `feature/<issue>-<short-description>`, `fix/<issue>-<short-description>`, or `chore/<issue>-<short-description>` as appropriate. For example, `feature/23-cart-total`. This is a team convention, not an exact course-mandated rule. If no issue number exists yet, omit it and record the pending issue link.
+**Team naming convention:** use `feature/<issue>-<short-description>`, `fix/<issue>-<short-description>`, `chore/<issue>-<short-description>`, or `docs/<issue>-<short-description>` as appropriate. For example, `feature/23-cart-total`. This is a team convention, not an exact course-mandated rule. If no issue number exists yet, omit it and record the pending issue link.
 
 Inspect before changing branches:
 
@@ -106,7 +110,7 @@ Do not casually rewrite teammates' commits. Force-pushing a shared branch requir
 
 ## Engineering constraints
 
-**Course/project constraints reported in the brief:** use Python, FastAPI, Pydantic, pytest, and JSON and/or CSV persistence. Do not introduce a database unless later authoritative course material changes that constraint. Use a Python virtual environment. M0 permits `requirements.txt` or `pyproject.toml`; this repository's convention is to maintain `requirements.txt` once dependencies are selected.
+**Course/project constraints reported in the brief:** use Python, FastAPI, Pydantic, pytest, and JSON and/or CSV persistence. Do not introduce a database unless later authoritative course material changes that constraint. Use a Python virtual environment. M0 permits `requirements.txt` or `pyproject.toml`; this repository's convention is to maintain the existing pinned `requirements.txt` and development-only `requirements-dev.txt`.
 
 Required workflows are Discover a Restaurant, Build a Cart, Place an Order, Manage an Order and Delivery, and Manage the Platform. Functional areas include authentication/roles, restaurant discovery, menu management, customer accounts, carts, checkout/orders, order management, delivery management, and reporting. The instructor's Figma mockup is a specification and starting point, not a completed frontend.
 
@@ -128,7 +132,7 @@ Frontend → FastAPI routes → Services → Repositories → JSON / CSV
 | Repositories | Storage operations and serialization; hide JSON/CSV details from routes and services. |
 | Persistence | Survive restarts with stable IDs, valid relationships, and preserved historical meaning. |
 
-Routes and services must not directly open persistence files. Pydantic structural validation does not replace state-dependent service checks. This is the required boundary model, not a claim that corresponding modules already exist.
+Routes and services must not directly open persistence files. Pydantic structural validation does not replace state-dependent service checks. The implemented restaurant/menu slice uses these boundaries; later workflows must preserve them.
 
 ### Backend authority and reliability
 
@@ -154,18 +158,18 @@ Keep comments focused on why, business constraints, edge cases, and unusual orde
 
 Update affected documentation in the same PR as code. Keep README concise and useful for setup, running, testing, and navigation. Do not document secrets or commands that do not exist. Keep dependency information reproducible; never generate requirements from an unrelated global environment or assume global packages.
 
-Create the following documents when real content warrants them, rather than filling speculative files now:
+Maintain the existing documents below. Create additional documents only when real content warrants them; link existing sources rather than duplicating setup or API details. The M1 Decision Receipt belongs to issue #41 and is not replaced by the API contract.
 
-| Future document | Trigger and content |
+| Document | Maintenance or creation scope |
 | --- | --- |
-| `docs/DEVELOPMENT.md` | Verified clone/setup instructions, Python version, virtual environments, dependencies, startup commands, environment variables, troubleshooting, and structure. |
+| `docs/FIRST_TIME_SETUP.md` and `docs/QUICK_SETUP.md` (existing) | Maintain current prerequisites, environment, dependencies, commands, configuration, and verification URLs in the same PR as setup-relevant changes; distinguish executed commands from inspection. |
 | `docs/ARCHITECTURE.md` | Actual components, responsibilities, interfaces, dependencies, and data flow; update diagrams with implementation. |
 | `docs/REQUIREMENTS.md` | Source-grounded requirements index with IDs when adopted, issue/PR links, implementation/tests, and status. Avoid duplicating the entire specification. |
 | `docs/DATA_MODEL.md` | Agreed fields, identifiers, relationships, mutable data, historical snapshots, formats, and compatibility/migration considerations. |
-| `docs/API.md` | Implemented API semantics, rules, errors, and cross-layer contracts. Prefer generated OpenAPI for raw schemas once available. |
+| `docs/M1_API_CONTRACT.md` (existing) | Maintain adopted API/data decisions and implemented semantics; use generated OpenAPI for raw schemas. |
 | `docs/CODE_REVIEW.md` | Extract the review guidance below if it grows enough to warrant a separate handbook. |
 | `docs/DECISIONS.md` | Significant decisions: date, problem/source, decision/status, rationale, alternatives, trade-offs, and consequences. Avoid a large empty ADR system. |
-| `docs/milestones/M1.md` through `M3.md` | Create each when its actual specification arrives: source/version, deliverables, acceptance checklist, issues, dependencies, risks, ownership, required evidence, and contribution notes. M0 is recorded in the linked checkpoint above. |
+| `docs/milestones/M0.md` and `M1.md` (existing), later milestones when supplied | Preserve source requirements and update evidence-based implementation/release status; create later checkpoints only when their specifications arrive. |
 
 **Milestone orientation from the brief, not a substitute for specifications:** M0 establishes foundations and layer connections; M1 delivers a complete vertical slice; M2 integrates major workflows and business rules; M3 stabilizes, tests, refactors, documents, and prepares release. Do not infer deadlines or rubric details.
 
