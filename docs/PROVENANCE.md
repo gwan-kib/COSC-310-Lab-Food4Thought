@@ -17,6 +17,8 @@ Use exactly one label per entry, based on AI's role rather than how much its out
 
 Students remain responsible for understanding, validating, testing, correcting, and explaining submitted work. Git authorship and agent verification do not establish student review or understanding. The review-status field below is a repository convention for tracking that distinction, in addition to the guide's required fields.
 
+On 2026-10-13, Gwantana Kiboigo confirmed that all team members have looked through their own sections. The updated individual-review statuses below record his report. This confirmation does not assert new test runs, formal peer approvals, or demonstration readiness; historical validation results retain their original context.
+
 ## Entry template
 
 Copy this template for each relevant contribution. Replace placeholders with evidence; explicitly identify unknown facts and outstanding checks. Link a PR or commit when practical, adding it later if the work is still local.
@@ -205,7 +207,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: ChatGPT drafted both setup guides from the current repository state, replaced duplicated README setup instructions with links to the guides, and added AGENTS.md maintenance rules requiring setup documentation to change alongside setup-relevant implementation changes. The documentation intentionally excludes planned or unimplemented features.
 - Validation: The documentation was checked against the current `requirements.txt`, `app/main.py`, health and restaurant routes, restaurant data configuration/repository, pytest isolation fixture, README, and CI workflow. The documented runtime surface is limited to the currently implemented `/health`, `/restaurants`, `/docs`, and `/openapi.json` endpoints. No application code changed. Runtime commands were not executed by ChatGPT; CI and human review remain required before merge.
 - PR or commit: [Issue #21](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/21); [PR #22](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/22); branch `chore/21-setup-docs`.
-- Student review status: Pending. Gwantana requested the documentation work, but no post-change student review is inferred from that request.
+- Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections.
 
 ### Entry 15: Epic issue template
 
@@ -217,7 +219,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: ChatGPT drafted the epic template, added contributor guidance describing when to use it, and recorded this provenance entry. The template keeps feature-level acceptance criteria in child user stories rather than duplicating them at epic level.
 - Validation: The template was checked against the existing user-story, technical-task, and bug templates and against Milestone 1's requirement that implemented features originate from user stories with acceptance criteria. YAML front matter, Markdown structure, repository paths, and the intended issue-to-epic hierarchy were reviewed. No application code or runtime behaviour changed.
 - PR or commit: [Issue #23](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/23); [PR #24](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/24); branch `chore/23-epic-template`.
-- Student review status: Pending. Gwantana requested the change, but no post-change student review is inferred from that request.
+- Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections.
 
 ### Entry 16: M0/M1 epic and issue planning
 
@@ -229,7 +231,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: ChatGPT created two retrospective M0 epics (#25–#26), three M1 epics (#27–#29), a shared API/data-contract task (#30), the required M1 customer and restaurant-management user stories (#31–#39), and cross-cutting M1 verification/design-decision/submission tasks (#40–#42). The issue bodies include source-grounded scope, acceptance criteria, dependencies, testing expectations, and explicit M1 exclusions. No application code or runtime behaviour was changed.
 - Validation: The issue set was checked against the supplied M1 sections for Functional Scope, Required Vertical Slice, Pydantic Models, Persistence, Automated Tests, API Documentation, Frontend, GitHub Collaboration Expectations, Canvas Submission, and Live Demonstration. Existing M0 issues #2–#8 and the current repository tree were inspected so already-implemented M0 work was grouped retrospectively rather than recreated. M1-excluded authentication/authorization, carts, checkout, orders, and deliveries were kept out of implementation scope.
 - PR or commit: [M0 Platform epic #25](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/25), [M0 Restaurant epic #26](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/26), [M1 Discovery epic #27](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/27), [M1 Management epic #28](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/28), [M1 Quality epic #29](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/29), and child issues #30–#42; [PR #43](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/43).
-- Student review status: Pending. Gwantana requested the planning work, but no post-creation student review of all issue contents is inferred from that request.
+- Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections.
 
 ### Entry 17: Structured issue metadata workflow
 
@@ -253,7 +255,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: ChatGPT removed role/milestone bracket prefixes from open issue titles, retained `EPIC: ` as the only planning prefix, shortened selected technical-task titles, and added consistent Project Metadata sections recording Type, Role, Workstream, Assignee state, M1 delivery target, parent epic, and board-status reference. Existing requirements, acceptance criteria, dependencies, testing expectations, and implementation scope were preserved.
 - Validation: All open issues were re-queried after the migration. Issues #27–#29 use `EPIC: `; regular issues #30–#42 and #46 have concise titles without bracket prefixes. Project Metadata sections were fetched and checked for the expected Type, Role, Workstream, unassigned state, M1 target, and parent-epic mapping. No assignee, label, implementation behaviour, API contract, test, or persistence change was invented.
 - PR or commit: [Issue #46](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/46); [PR #47](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/47); branch `docs/46-issue-metadata-migration`.
-- Student review status: Pending. Gwantana requested the migration, but no separate post-migration review is inferred from that request.
+- Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections.
 
 ### Entry 19: M1 restaurant and menu contract
 
@@ -265,7 +267,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex drafted the endpoint inventory, request/read/update model responsibilities, cuisine filter, partial-update semantics, identifier ownership, menu containment, JSON persistence compatibility, errors, examples, and child-story verification mapping. Codex summarized the user-supplied M1 specification and recorded that its required search/filter operation supersedes the earlier brief's optional-filtering wording. Engineering choices are explicitly proposed for team review; no feature code, models, tests, or persisted data were changed.
 - Validation: Compared the contract with issue #30, child stories #31–#39, the supplied M1 source, and the existing restaurant route/service/repository/schema/configuration/data. A Python documentation check validated 31 relative links, four fenced JSON examples, all eight operation rows, and seven backend child-story mappings. `git diff --check` and `git diff --exit-code -- app tests data requirements.txt` passed. Application tests and test-first failing/passing evidence are not applicable to this documentation-only change. Both setup guides were inspected; current setup behavior remains unchanged. Board status was unavailable because the token lacks `read:project`.
 - PR or commit: [Issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30); [PR #48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48); branch `chore/30-restaurant-menu-contract`.
-- Student review status: The user clarified on 2026-10-04 that merging PR #48 on 2026-10-02 recorded team adoption. Individual responsible-student review and understanding remain unconfirmed.
+- Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections. The user clarified on 2026-10-04 that PR #48's 2026-10-02 merge recorded team adoption.
 
 
 ### Entry 20: M1 contract review revisions
@@ -278,11 +280,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex assigned the shared persistence foundation to #35 before #33/#36 merge, specified a module-level lock covering complete mutations across per-request repository instances, and removed unsupported GET 422 responses. Added future preservation/concurrency checks and explicit adoption evidence requirements.
 - Validation: Inspected the current per-request dependency and complete documentation diff. Relative-link and JSON-example checks, `git diff --check`, and `git diff --exit-code -- app tests data requirements.txt` passed. No application behavior or setup changed; application tests are not applicable locally to this documentation-only revision.
 - PR or commit: [PR #48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48), issue #30, branch `chore/30-restaurant-menu-contract`.
-- Student review status: Review feedback supplied by the user on 2026-10-02. The user clarified on 2026-10-04 that merging PR #48 recorded adoption of the revised contract. Individual responsible-student confirmation remains pending.
+- Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections. Review feedback was supplied on 2026-10-02; the user clarified on 2026-10-04 that merging PR #48 recorded adoption of the revised contract.
 
 ### Entry 21: Create restaurant and shared persistence foundation
 
-- Student(s): `Tc2006415`, verified issue #35 assignee and PR #51 author; responsible-student review and confirmation remain pending.
+- Student(s): `Tc2006415`, verified issue #35 assignee and PR #51 author.
 - Artifact: `app/schemas/restaurant.py`, `app/repositories/restaurant.py`, `app/services/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_restaurant_create.py`, `tests/test_restaurants.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, and `docs/milestones/M1.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -290,11 +292,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex created the request, menu-item, stored-record, and error models; added full-record validation, a process-wide mutation lock and atomic file replacement; added server-generated IDs and the create route; and wrote isolated behavior, failure, concurrency, and OpenAPI tests plus README updates. After PR #51 review, Codex changed the mutation boundary to return the final validated records and made the create response derive from that saved result. The user subsequently clarified that PR #48's merge recorded team adoption; Entry 22 records the status correction.
 - Validation: The new tests were run before implementation and failed for the missing POST operation and repository/model methods. A legacy-field regression test then failed with HTTP 500 before the compatibility fix and passed afterward. Using this worktree's Python 3.12 virtual environment, `python -m pytest tests/test_restaurant_create.py -q` passed 24 tests before that added regression, and `python -m pytest -q` passed 51 tests after it. A new review regression test failed with `TypeError` because `mutate_records()` returned the callback's `None`; after the change, `python -B -m pytest -p no:cacheprovider -q tests/test_restaurant_create.py` passed 26 tests and `python -B -m pytest -p no:cacheprovider -q` passed 52 tests. `python -m compileall -q app`, `python -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. A separate Codex review found the legacy-field regression and a concurrency-test timing weakness; both were addressed. GitHub review by `gwan-kib` requested changes; no approval or responsible-student validation is inferred.
 - PR or commit: [PR #51](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/51); branch `feature/35-create-restaurant`.
-- Student review status: Pending. PR #51 has a requested-changes review by `gwan-kib`; the follow-up correction is on this branch, and re-review remains pending. Passing agent-run checks do not establish student understanding or approval.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. Peer review: `gwan-kib` requested changes, approved the corrected PR #51, and it merged on 2026-10-05 (America/Vancouver).
 
 ### Entry 22: M1 contract status follow-up and correction
 
-- Student(s): Pending confirmation. Issue #30 is assigned to `gwan-kib`, and PR #51 is authored by `Tc2006415`; neither assignment proves review of this follow-up.
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #30 owner; Thomas Chen (`Tc2006415`), author of associated PR #51. Their issue/PR roles do not by themselves establish authorship of every part of this follow-up.
 - Artifact: [Issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30), PR #51 description, `docs/M1_API_CONTRACT.md`, `docs/milestones/M1.md`, `README.md`, `CONTRIBUTING.md`, and this entry.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -302,7 +304,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex initially reopened #30 because the documentation still said adoption was pending. The user then clarified that PR #48's merge meant the team agreed to the contract. Codex corrected the contract, README, CONTRIBUTING, M1 checkpoint, provenance statuses, and PR #51 description to record adoption at merge revision d4850b8; corrected the issue-body follow-up; and restored #30 to closed. The separate persistence correction in PR #51 is unchanged.
 - Validation: The GitHub API verified PR #48 merged on 2026-10-02 at d4850b8. Adoption is recorded from the user's explicit clarification on 2026-10-04. Documentation diff and relative-link checks passed; application code, tests, and data were unchanged in this correction, so application tests were not rerun. Individual student understanding remains unverified.
 - PR or commit: [PR #51](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/51); [issue #30](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/30).
-- Student review status: Pending; issue ownership, PR authorship, and agent checks do not establish approval of this follow-up.
+- Student review status: Gwantana Kiboigo reported on 2026-10-13 that each team member reviewed their own sections, including the contract/status and associated implementation work. This records review of each student's own contract/status or associated implementation contributions; PR authorship and issue ownership are retained separately.
 
 ### Entry 23: Restaurant menu browsing
 
@@ -318,7 +320,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 24: Add menu item
 
-- Student(s): `Tc2006415`, verified issue #37 assignee; responsible-student review and confirmation remain pending.
+- Student(s): `Tc2006415`, verified issue #37 assignee.
 - Artifact: `app/schemas/restaurant.py`, `app/services/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_menu_item_create.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, `docs/M1_API_CONTRACT.md`, and `docs/milestones/M1.md`.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -326,11 +328,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex added the strict `MenuItemCreate` model, reused its validators for `MenuItem`, implemented parent-scoped item creation inside the existing repository mutation lock, and added the documented POST route. It wrote isolated API/service tests for validation, stable IDs and collision retries, parent scoping, preservation, reload/menu retrieval, failure precedence, failed saves, and OpenAPI. It updated API/setup documentation and corrected stale prerequisite status descriptions; no dependency, storage format, or representative-data change was needed.
 - Validation: The Python 3.12 virtual environment was created with `py -3.12 -m venv .venv` and dependencies installed with `.\.venv\Scripts\python.exe -m pip install -r requirements.txt`. Baseline `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q` passed 75 tests. Before route/service implementation, the new route tests failed 44 cases for the absent endpoint/OpenAPI operation; three service tests then failed for the missing service method. After implementation, the full command passed 122 tests (47 new), including a separate Codex reviewer's independent run. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. An isolated live Uvicorn check using a temporary data copy verified POST 201, subsequent menu GET, unknown-parent 404, invalid-price 422, `/docs`, OpenAPI, and identical menu contents after stopping and restarting the server. The browser's interactive Swagger form was not manually exercised. The Codex code/test review found no actionable defects; this is not student peer approval.
 - PR or commit: [Issue #37](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/37); [PR #53](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53); implementation commit `964e03d`; branch `codex/37-add-menu-item`.
-- Student review status: Pending. Agent-run checks do not establish student understanding, approval, or completion of the team's peer-review and integration workflow.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. Peer review: `gwan-kib` approved PR #53, which merged on 2026-10-07.
 
 ### Entry 25: Safe request-validation responses for issue 37 review
 
-- Student(s): `Tc2006415`, issue #37 assignee; responsible-student confirmation remains pending.
+- Student(s): `Tc2006415`, issue #37 assignee.
 - Artifact: `app/api/errors.py`, `app/main.py`, `tests/test_validation_errors.py`, `README.md`, `docs/M1_API_CONTRACT.md`, and the issue #37 PR description.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -338,11 +340,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex implemented a shared `RequestValidationError` handler that preserves diagnostic fields, converts non-finite floats to strings, and JSON-escapes Unicode. Request validation and storage behavior remain unchanged. Regression tests cover both POST endpoints, nested invalid inputs, ordinary validation diagnostics, storage isolation, and validation-before-storage precedence.
 - Validation: On 2026-10-06, the baseline suite passed 122 tests. Before the fix, `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q tests/test_validation_errors.py --tb=short` produced 12 failures from HTTP 500 instead of 422 and one passing compatibility case. After the fix, `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q` passed 135 tests. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, and `git diff --exit-code -- data/` passed. Earlier self-review compared every existing OpenAPI operation/schema with a temporary `origin/main` snapshot and exercised 60 concurrent mixed requests without lost writes; those checks preceded this error-handler fix. See Entry 24 for the item-creation test-first and live-restart evidence. After the fix, a fresh isolated live Uvicorn check confirmed 422 responses for overflow, NaN, and invalid Unicode without storage writes, then successful item creation/menu retrieval and persistence after restart. A final independent Codex review found no actionable defects and reran the full suite successfully (135 passed). Agent checks are not student peer approval.
 - PR or commit: [Issue #37](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/37); [PR #53](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53); implementation commit `964e03d`; branch `codex/37-add-menu-item`.
-- Student review status: Pending. The user requested this correction and preparation for peer review; that instruction does not establish responsible-student validation or approval.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. The original handoff requested preparation for peer review; `gwan-kib` subsequently approved PR #53 and it merged on 2026-10-07.
 
 ### Entry 26: Return the created menu item by ID
 
-- Student(s): `Tc2006415`, issue #37 assignee and PR #53 author; responsible-student confirmation remains pending.
+- Student(s): `Tc2006415`, issue #37 assignee and PR #53 author.
 - Artifact: `app/services/restaurant.py`, `tests/test_menu_item_create.py`, and the PR #53 description.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -350,11 +352,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex captured the final collision-free ID inside the existing locked mutation and selected that ID from the validated saved parent's items. A regression test uses real repository validation and persistence while placing the new item first, covering both immediate ID generation and a collision retry. API, storage format, locking, and normal insertion order are unchanged; neither setup guide needs an update for this internal service change.
 - Validation: On 2026-10-07, `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q tests/test_menu_item_create.py -k saved_order --tb=short` failed both cases before the fix because the service returned the existing item's ID. After the fix, `.\.venv\Scripts\python.exe -B -m pytest -p no:cacheprovider -q` passed 137 tests. `.\.venv\Scripts\python.exe -m compileall -q app`, `git diff --check`, and `git diff --exit-code -- data/` passed. No live-server check was repeated for this internal selection change; route behavior remains covered by the full suite.
 - PR or commit: [PR #53](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53); branch `codex/37-add-menu-item`.
-- Student review status: Pending. The reviewer requested this change on 2026-10-06; the updated implementation still requires re-review. Agent verification is not student approval.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. The reviewer requested the ID-selection change on 2026-10-06, then approved the corrected PR #53 before its 2026-10-07 merge.
 
 ### Entry 27: Partial restaurant updates
 
-- Student(s): `Tc2006415`, verified issue #36 assignee; responsibility for this AI contribution and student review remain pending confirmation.
+- Student(s): `Tc2006415`, verified issue #36 assignee.
 - Artifact: `app/schemas/restaurant.py`, `app/services/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_restaurant_update.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, `docs/M1_API_CONTRACT.md`, `docs/milestones/M1.md`, and this entry.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -362,11 +364,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex added the strict partial-update model, service mutation, PATCH route, isolated tests, and documentation. The service checks existence and updates only explicitly supplied fields inside the existing shared mutation boundary, then projects the validated saved record into its response. IDs, menus, omitted fields, legacy fields, and unrelated restaurants are preserved. No repository, dependency, configuration, or representative-data changes were needed.
 - Validation: On 2026-10-06 with Python 3.12.10, `.\.venv\Scripts\python.exe -m pytest -q` passed the 75-test baseline at `b39f71a`. Before implementation, `.\.venv\Scripts\python.exe -m pytest tests/test_restaurant_update.py -q --tb=short` failed all 48 new cases because the PATCH operation and update model were missing. After implementation, that command passed 48 tests and the full suite passed 123 tests. Tests cover partial/multiple/unchanged updates, reloads, menu and legacy preservation, invalid/empty/null/unsupported input, unknown IDs, error precedence, failed atomic replacement and retry, overlapping independent-service updates, and generated OpenAPI. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. A separate read-only Codex review found no actionable issues and independently passed all 123 tests. An inline Python smoke script launched Uvicorn with a temporary data copy, verified PATCH 200/404/422 and `/docs`/OpenAPI, stopped and restarted the server, then verified the updated list and unchanged menu. The interactive Swagger form itself was not manually exercised. A documentation check passed for six files, 24 relative links, and balanced Markdown fences. Both setup guides were updated for the implemented PATCH operation; setup commands were otherwise unchanged.
 - PR or commit: [Issue #36](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/36); [PR #54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54); branch `codex/36-update-restaurant` based on `b39f71a`.
-- Student review status: Pending. Agent checks do not establish student understanding, peer approval, or integration.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. Peer review: `gwan-kib` approved PR #54, which merged on 2026-10-07.
 
 ### Entry 28: Restaurant update review and validation-error correction
 
-- Student(s): `Tc2006415`, verified issue #36 assignee; responsibility for this follow-up and student review remain pending confirmation.
+- Student(s): `Tc2006415`, verified issue #36 assignee.
 - Artifact: `app/api/errors.py`, `app/main.py`, `tests/test_validation_errors.py`, `README.md`, and this entry.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -374,11 +376,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex traced invalid-input HTTP 500 responses to FastAPI's default validation-error renderer. Rejected JSON numbers such as `1e400` become nonfinite floats, lone surrogates cannot be emitted directly as UTF-8, and rejected raw bytes may not decode as UTF-8. A shared validation-error handler now renders those values safely while retaining the `detail` array, error types, messages, and locations. The existing POST endpoint had the same defect and receives the same fix; request-validation rules, success responses, persistence, and authentication scope are unchanged. The README now lists the error-handling module. Both setup guides were checked and need no further changes because setup/run commands and endpoint contracts are unchanged.
 - Validation: `.\.venv\Scripts\python.exe -m pytest tests/test_validation_errors.py -q --tb=short` initially failed all ten JSON-input cases with 500 rather than 422. After correcting serialization, three test assertions were corrected to allow Pydantic's existing union-branch suffix in error locations; no production error paths were removed. Two additional raw-byte cases were then observed failing with 500 before adding safe byte decoding. The final focused run passed all 12 tests; `.\.venv\Scripts\python.exe -m pytest -q` passed 135 tests. All error cases verify unchanged isolated storage. Additional temporary-data probes confirmed rejection of mixed valid/invalid fields, exact ID matching, duplicate restaurant/item IDs, and invalid unrelated menus without writes. A separate Codex review checked the initial shared-handler correction and independently passed the then-current 133-test suite; it requested recording the correction here. That review preceded the additional two raw-byte tests and safe byte decoding.
 - PR or commit: [Issue #36](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/36); [PR #54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54); branch `codex/36-update-restaurant`.
-- Student review status: Pending. This self-review and agent verification do not replace human peer review.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. Agent self-review did not replace peer review; `gwan-kib` subsequently approved PR #54 before its 2026-10-07 merge.
 
 ### Entry 29: Reconcile PR 54 with merged menu-item creation
 
-- Student(s): `Tc2006415`, issue #36 assignee and PR #54 author; responsible-student confirmation remains pending.
+- Student(s): `Tc2006415`, issue #36 assignee and PR #54 author.
 - Artifact: Restaurant route/schema/service, shared validation-error handler and tests, README, both setup guides, M1 API contract/checkpoint, this record, and PR #54 description.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -386,11 +388,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex merged `origin/main` into `codex/36-update-restaurant`, preserving restaurant PATCH and menu-item POST, including PR #53's saved-item lookup by ID. It retained main's shared handler name and registration while preserving PR #54's safe byte decoding, combined both validation-test suites without removing cases, and reconciled documentation for both operations. Main's provenance entries 24–26 remain intact; the two issue #36 entries were renumbered 27–28. No API contract, persistence format, dependency, configuration, or committed-data changes were introduced by the resolution.
 - Validation: On 2026-10-07, `.\.venv\Scripts\python.exe -m pytest -q` passed 135 tests before merging and 197 after conflict resolution. `.\.venv\Scripts\python.exe -m compileall -q app` and `.\.venv\Scripts\python.exe -m pip check` passed. Both existing test suites were retained for this behaviour-preserving integration; no new feature or new red-green cycle was required. The complete integration diff and both setup guides were reviewed. Live-server checks were not repeated; the combined operations, error cases, persistence, and OpenAPI are covered by the suite.
 - PR or commit: [PR #54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54); merged base `e26e29e`; branch `codex/36-update-restaurant`.
-- Student review status: Pending. Conflict resolution and agent checks do not establish student understanding or human approval.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. The conflict-resolution checks were agent verification; PR #54 subsequently received `gwan-kib`'s approval and merged on 2026-10-07.
 
 ### Entry 30: Partial menu-item updates
 
-- Student(s): `Tc2006415`, confirmed by the user on 2026-10-12 as the responsible student for issue #38; student review remains pending.
+- Student(s): `Tc2006415`, confirmed by the user on 2026-10-12 as the responsible student for issue #38.
 - Artifact: `app/schemas/restaurant.py`, `app/services/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_menu_item_update.py`, `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, `docs/M1_API_CONTRACT.md`, `docs/milestones/M1.md`, this entry, and the issue #38 PR description.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -398,11 +400,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex added `MenuItemUpdate`, a scoped service update inside the existing repository mutation lock, and the PATCH route. The shared `WritePrice` type retains the existing decimal-string validation/normalization for creation and applies it to updates. Only supplied fields change; the response selects the item by parent and item IDs from validated saved records. Tests cover partial/multiple/unchanged updates, strict invalid input, missing/wrong-parent items, empty/legacy menus, corruption, error precedence, failed saves and retry, OpenAPI, and overlapping item updates with item additions and restaurant edits. Both setup guides and implementation-status documentation were updated. No persistence format, repository implementation, dependency, configuration, or representative-data changes were needed.
 - Validation: On 2026-10-12 with Python 3.12.10, `.\.venv\Scripts\python.exe -m pytest` passed the 197-test baseline at refreshed `origin/main` (`701e94f`). Before implementation, `.\.venv\Scripts\python.exe -m pytest tests/test_menu_item_update.py -q --tb=short` failed all 72 new cases because the route/model was missing; afterward the same command passed all 72. `.\.venv\Scripts\python.exe -m pytest -q` passed 269 tests. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. An inline Python compatibility check compared generated OpenAPI with a temporary `origin/main` snapshot: all five existing paths and nine existing schemas were unchanged. An isolated live Uvicorn smoke script verified restaurant/item creation, item PATCH 200/404/422, restaurant edits preserving the updated item, `/docs`, `/openapi.json`, and saved values after stopping/restarting the server; original records were preserved. The interactive Swagger form itself was not manually exercised. Codex self-review and an independent read-only Codex review found no actionable defects; the independent reviewer also passed all 269 tests. Setup/run configuration was inspected and unchanged; the new endpoint example was exercised by the live smoke script. Agent checks do not establish student understanding or peer approval.
 - PR or commit: [Issue #38](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/38); [PR #55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55); implementation commit `2089dbb`; branch `codex/38-update-menu-item`, based on `701e94f`.
-- Student review status: Pending. The user authorized implementation and a PR for student review, not student validation, approval, or merging.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. Peer review: `gwan-kib` approved the final PR #55 revision and it merged on 2026-10-12.
 
 ### Entry 31: Address menu-item update review feedback
 
-- Student(s): `Tc2006415`, confirmed responsible student for issue #38; validation and final student approval remain pending.
+- Student(s): `Tc2006415`, confirmed responsible student for issue #38.
 - Artifact: `tests/test_menu_item_service.py`, `tests/test_menu_item_update.py`, `docs/M1_API_CONTRACT.md`, this entry, and the PR #55 description.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -410,11 +412,11 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex added seven focused service unit cases using a controlled mock repository that executes the real service callback against in-memory models. These check supplied-field-only changes, parent/item scoping, missing-resource errors, preserved unrelated state, and propagation of repository failures. The existing OpenAPI assertion now requires the agreed responses as a subset while retaining response-model checks. The API contract explicitly records full-dataset write cost and process-wide write serialization. The user selected a separately documented price-bound follow-up on 2026-10-12; its record covers team choice, input length/leading zeros, create/update consistency, stored-data compatibility, and future boundary tests. Production behavior and the accepted price syntax remain unchanged. Both setup guides were inspected; no further changes were needed because commands, configuration, and endpoint behavior are unchanged.
 - Validation: `.\.venv\Scripts\python.exe -m pytest -q` passed the 269-test baseline, then 276 tests after these changes. `.\.venv\Scripts\python.exe -m pytest tests/test_menu_item_service.py tests/test_menu_item_update.py -q` passed 79 tests. `.\.venv\Scripts\python.exe -m compileall -q app`, `git diff --check`, and `git diff --exit-code -- data/` passed. The added tests characterize existing service behavior; they passed without production edits, so no artificial failing-before cycle was introduced. The complete follow-up diff, including the new test file, was self-reviewed. Live server checks were not repeated for this tests/documentation-only change; earlier runtime evidence is in Entry 30.
 - PR or commit: [PR #55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55); branch `codex/38-update-menu-item`.
-- Student review status: Changes requested by `gwan-kib` on 2026-10-12. These revisions await re-review; neither agent tests nor the user's price-deferral decision constitute final student approval or a merge.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. `gwan-kib` requested changes on 2026-10-12; revised PR #55 subsequently received approval and merged that day.
 
 ### Entry 32: Enforce the agreed maximum menu-item price
 
-- Student(s): `Tc2006415`, confirmed responsible student for issue #38; student validation and final approval remain pending.
+- Student(s): `Tc2006415`, confirmed responsible student for issue #38.
 - Artifact: `app/schemas/restaurant.py`, `app/api/routes/restaurants.py`, `tests/test_menu_price_limit.py`, `README.md`, both setup guides, `docs/M1_API_CONTRACT.md`, this entry, and PR #55 updates.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -422,7 +424,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex added an inclusive `Decimal("999.00")` check to the shared price validator used by create/update requests and persisted menu items. The value is checked before two-decimal formatting. Request violations return 422; invalid stored prices follow the existing repository-data-error path to generic 500 responses without rewriting the file. The user chose strict stored-data validation rather than grandfathering older prices. The contract replaces the earlier deferral with this decision and explicitly records that no separate input-length limit is introduced. OpenAPI descriptions, README, and both setup guides explain the limit and stored-data behavior. The committed sample values were checked (12.50, 14.00, 15.00, 13.50), so no sample-data migration was needed.
 - Validation: Before implementation, `.\.venv\Scripts\python.exe -m pytest tests/test_menu_price_limit.py -q --tb=short` produced 25 failures and 12 passing compatibility cases: above-limit values were accepted, stored invalid prices were not rejected, and limit documentation was absent. After implementation, `.\.venv\Scripts\python.exe -m pytest tests/test_menu_price_limit.py -q` passed all 37 cases, and `.\.venv\Scripts\python.exe -m pytest -q` passed 313 tests. Tests cover inclusive bounds, normalization/leading zeros, the first invalid cent, very large values, rejection without writes, pre-save revalidation, generic failures across all six data operations, validation-before-storage precedence, and request/read OpenAPI models. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. Runtime verification used isolated TestClient/repository tests; live Uvicorn checks were not repeated for this shared-validator change. The complete change was self-reviewed before pushing.
 - PR or commit: [PR #55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55); branch `codex/38-update-menu-item`.
-- Student review status: Re-review pending. The user requested a new review before merging; neither the agreed price rule nor agent verification is student approval.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. The requested re-review was completed: `gwan-kib` approved final revision `296af04` of PR #55 before its 2026-10-12 merge.
 
 ### Entry 33: Restaurant details endpoint
 
@@ -438,7 +440,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 34: Integrate restaurant details with menu-item updates and price validation
 
-- Student(s): `Tc2006415`, responsible for issue #38; student validation and re-review remain pending.
+- Student(s): `Tc2006415`, responsible for issue #38.
 - Artifact: Integration of `origin/main` into `codex/38-update-menu-item`, README, this record, `tests/test_menu_price_limit.py`, and PR #55 updates.
 - Label: `AI-REVISED`.
 - AI tool: Codex.
@@ -446,7 +448,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex merged main at `c3c8b4a`, retaining the restaurant-details route, service, OpenAPI entry, tests, and setup-guide additions. README conflicts were combined to describe both features. Both provenance records were retained; the imported restaurant-details entry was numbered 33 to avoid the concurrent Entry 30 collision, with its original content and student-review statement preserved. The price-limit regression matrix now also covers the restaurant-details GET operation, checking generic 500 and unchanged storage when another restaurant contains an invalid price. No runtime changes beyond combining the existing implementations were required.
 - Validation: `.\.venv\Scripts\python.exe -m pytest -q` passed 328 tests after integration (including the imported 14 restaurant-details cases and one additional price-limit compatibility case). `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --cached --check`, and `git diff --exit-code -- data/` passed. The entire integration diff, including the imported test file and both setup guides, was reviewed. The added compatibility case passed against the combined implementations; no artificial failing-before change was introduced for this behavior-preserving merge. Live-server verification was not repeated.
 - PR or commit: [PR #55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55); integrates [PR #56](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/56) at `c3c8b4a` into branch `codex/38-update-menu-item`.
-- Student review status: Re-review requested from `gwan-kib`; final approval remains pending. Merging main into the feature branch does not merge or approve PR #55.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. Integrating main into the feature branch was separate from approval; `gwan-kib` later approved PR #55's final revision before its 2026-10-12 merge.
 
 ### Entry 35: Cuisine filter for the restaurant list
 
@@ -470,7 +472,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex merged main at `5a4f14e`, preserving the cuisine-filter route, service, tests, and setup-guide changes alongside menu-item updates and the agreed price limit. README and provenance conflicts were combined; the imported cuisine-filter entry is numbered 35 to avoid the concurrent Entry 31 collision, preserving its content and historical review status. Added one compatibility case confirming a cuisine-filtered read still returns generic 500 without rewriting data when an excluded restaurant contains an above-limit price. Updated implementation-status documentation to reflect the merged discovery features and actual PR #55 peer approval. No new runtime policy or persistence change was introduced during conflict resolution.
 - Validation: `.\.venv\Scripts\python.exe -m pytest -q` passed 347 tests after integration, including the 18 imported cuisine-filter cases and one added price-limit compatibility case. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --cached --check`, and `git diff --exit-code -- data/` passed. Both setup guides and the integration diff were reviewed. This preserves existing behavior, so the compatibility case passed without a new failing-before implementation cycle. Live-server checks were not repeated.
 - PR or commit: [PR #55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55); integrates [PR #59](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/59) at `5a4f14e` into `codex/38-update-menu-item`.
-- Student review status: `gwan-kib` [approved PR #55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55#pullrequestreview-5496808324) at `8206225`. The user subsequently relayed the reviewer's permission to merge after fixing the new conflicts and authorized that integration. Agent checks do not certify the responsible student's individual understanding. The PR records final merge status and CI evidence.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. The earlier approval at `8206225` was dismissed after a push. After the authorized conflict resolution, `gwan-kib` approved `296af04` and PR #55 merged on 2026-10-12.
 
 ### Entry 37: Basic restaurant-discovery frontend
 
@@ -510,7 +512,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Entry 40: Create-restaurant management frontend
 
-- Student(s): Thomas Chen (`Tc2006415`), issue #39 assignee. Individual review and understanding remain pending.
+- Student(s): Thomas Chen (`Tc2006415`), issue #39 assignee.
 - Artifact: `frontend/create-restaurant.html`, `frontend/create-restaurant.js`, navigation in `frontend/index.html`, `frontend/styles.css`, `tests/browser/test_create_restaurant_browser.py`, README, both setup guides, testing documentation, M1 checkpoint/API-contract selection notes, and this record.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
@@ -519,7 +521,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: Python 3.12 virtual environment created with `py -3.12 -m venv .venv`; installed the existing `requirements.txt` and `requirements-dev.txt` and Playwright Chromium. An initial baseline attempt ran before the browser download finished (355 passed, 6 browser setup errors); after installation, `$env:REQUIRE_BROWSER_TESTS = '1'; .\.venv\Scripts\python.exe -m pytest -q --ignore=tests/browser/test_create_restaurant_browser.py` passed all 361 existing tests. The new module failed all 10 cases before implementation because the page/navigation did not exist. Its first implementation run passed 9 cases, with one assertion corrected to include the empty, CSS-hidden error region. The full required-browser suite (`$env:REQUIRE_BROWSER_TESTS = '1'; .\.venv\Scripts\python.exe -m pytest -q`) then passed 371 tests. Browser coverage includes real persisted creation/reload, API 422 correction, storage failure/retry, lost response after a real save without an automatic retry, malformed responses, duplicate-submit protection, safe HTML-like text, and phone/keyboard interaction. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. Agent validation does not certify student understanding; hosted CI has not run for this branch.
 - Additional validation: Desktop (1100px) and phone (390px) screenshots of the form, validation errors, and success were generated against disposable storage and visually inspected. An independent Codex reviewer reported no actionable defects and reran all 10 new browser tests successfully. Actual screen-reader announcements were not tested; keyboard interaction and validation associations were checked. This agent review is not student peer approval.
 - PR or commit: [Issue #39](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/39); [implementation commit a64684f](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/a64684f); branch `feature/39-create-restaurant-frontend`, based on merged PR #58 at `636275d`. Integration with `main` preserves PR #60's review-status updates alongside this entry.
-- Student review status: Pending. The user selected the operation, authorized continuation after PR #58 merged, and subsequently reported that the implementation works locally and requested a PR. No specific manual test cases, student code review, approval, or individual understanding are inferred from that report.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. The earlier local-use report did not specify test cases. Separately, `gwan-kib` approved corrected PR #61, which merged on 2026-10-12.
 
 ### Entry 41: Address create-restaurant peer-review feedback
 
@@ -531,25 +533,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Influence: Codex added a 15-second AbortController timeout covering the POST and response-body read, retained the uncertain-save warning and entered values on cancellation, and cleared the timer/restored controls in `finally` without automatic retry. Input listeners remove a previously rejected field's message and ARIA error attributes once its text is nonblank, retaining other errors and keeping backend validation authoritative. Added browser regressions for a never-responding request and correction before resubmission. Updated behavior/testing documentation; reviewed both setup guides, with no change needed to quick setup because commands, dependencies, and URLs are unchanged.
 - Validation: With `$env:REQUIRE_BROWSER_TESTS = '1'`, `.\.venv\Scripts\python.exe -m pytest -q tests/browser/test_create_restaurant_browser.py -k 'corrected_field or stalled_post' --tb=short` failed both new cases before the fixes: a corrected name retained `aria-invalid`, and a stalled request kept controls disabled. After the timeout fix, the focused stalled-request case passed; after the field correction fix, the full management module passed all 12 cases. `.\.venv\Scripts\python.exe -m pytest -q` passed 373 tests with no skips. `.\.venv\Scripts\python.exe -m compileall -q app`, `.\.venv\Scripts\python.exe -m pip check`, `git diff --check`, and `git diff --exit-code -- data/` passed. The stalled-request test advances the browser clock, checks preserved values/no automatic retry, then performs a successful manual submission. The correction case checks each field independently, leaves still-blank fields invalid, and confirms no new write before resubmission. Independent agent review found no actionable defects. Response-body timeout handling was inspected but not separately exercised with a streaming-response test; actual screen-reader announcements were not tested.
 - PR or commit: [PR #61](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/61), branch `feature/39-create-restaurant-frontend`.
-- Student review status: `gwan-kib` requested these two changes; re-review and approval of the fixes remain pending. Agent tests/review do not certify student understanding or peer approval.
-
-## Status reconciliation — 2026-10-13
-
-Dates here use America/Vancouver. Entries 1–41 preserve their original contribution/review chronology; statements such as “re-review pending” or “hosted CI has not run” describe that entry's historical handoff. The live merge/review evidence below supersedes integration/peer-review status only; it does not replace responsible-student confirmation or rerun historical validation.
-
-| Entries / work | Verified later GitHub status |
-| --- | --- |
-| 19–20 / adopted contract | PR #48 approved by `Tc2006415` and merged on 2026-10-02 at `d4850b8`; individual confirmation remains unestablished. |
-| 21–22 / restaurant creation | PR #51 approved by `gwan-kib` and merged on 2026-10-05 at `41d0567`; Thomas's individual confirmation remains pending. |
-| 23 / menu browsing | PR #52 approved by `gwan-kib` and merged on 2026-10-05 at `b39f71a`; retain Sreeram's reported 2026-10-05 review. |
-| 24–26 / item creation | PR #53 approved by `gwan-kib` and merged on 2026-10-07 at `e26e29e`; Thomas's individual confirmation remains pending. |
-| 27–29 / restaurant updates | PR #54 approved by `gwan-kib` and merged on 2026-10-07 at `701e94f`; Thomas's individual confirmation remains pending. |
-| 30–32, 34, 36 / item updates and revisions | PR #55's earlier approval was dismissed after a push. `gwan-kib` approved the final `296af04` revision again on 2026-10-12, then it merged at `915e297`. Keep the requested changes, prior approval/dismissal, and conflict-resolution history; Thomas's individual understanding remains unconfirmed. |
-| 33, 35, 37–39 / discovery work | PRs #56 and #57 were approved by `Tc2006415`. #57 merged into the details branch; integration PR #59 merged into `main` with no separate submitted review. PR #58 received `gwan-kib` approval after fixes and merged at `636275d`. PR #60 merged the explicit Sreeram review statements; retain their stated source/date. |
-| 40–41 / management frontend | `gwan-kib` requested two changes, then approved fixed revision `c3ac7db` on 2026-10-12; PR #61 merged at `88d238a`. The pre-merge pending wording is historical. Thomas's individual review/understanding remains pending. |
-| Sprint planning | PR #50 merged at `09638a9` on 2026-10-12; no submitted formal review is recorded. Planning ownership/member markers do not establish new attendance or commitment confirmation. |
-
-Sources: live GitHub merge/review records for [#48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48), [#51](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/51), [#52](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/52), [#53](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/53), [#54](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/54), [#55](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/55), [#56](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/56), [#57](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/57), [#58](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/58), [#59](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/59), [#60](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/60), [#61](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/61), and [#50](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/50). Historical PR #61/Entry 41 reports 373 passing tests with browsers required; #62 has not rerun the application suite. Latest integrated-main CI was still running when inspected; final audit/submission/individual readiness remain in #40–#42.
+- Student review status: Reviewed by Thomas Chen (`Tc2006415`), as reported by Gwantana Kiboigo on 2026-10-13. `gwan-kib` requested the two fixes, then approved corrected revision `c3ac7db`; PR #61 merged on 2026-10-12.
 
 ### Entry 42: Issue 62 preparation
 
@@ -561,16 +545,18 @@ Sources: live GitHub merge/review records for [#48](https://github.com/gwan-kib/
 - Influence: The user confirmed that AI supplied guidance and he wrote the final issue content. ChatGPT's guidance influenced the documentation audit/task scope; it is classified `AI-ASSISTED` because the student authored the final artifact.
 - Validation: Codex read the full live issue and compared its scope against repository documents, implementation, merged PRs, and pending release issues. The user's explicit confirmation establishes the AI role and student authorship; no original preparation transcript or separate post-draft peer review was supplied.
 - PR or commit: [Issue #62](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/62); recorded in [PR #63](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/63), branch `docs/62-m1-documentation-reconciliation`.
-- Student review status: Pending; requesting the task does not establish post-draft review or individual understanding.
+- Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections.
 
 ### Entry 43: Reconcile M0/M1 repository documentation
 
-- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #62 assignee; individual review remains pending.
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #62 assignee.
 - Artifact: `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `docs/milestones/M0.md`, `docs/milestones/M1.md`, `docs/M1_API_CONTRACT.md`, `docs/PROVENANCE.md`, `docs/TESTING.md`, `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md`, `scrum/SPRINT-Planning-M1.md`, and issue #62's parent relationship/epic checklist.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
 - Purpose: Complete issue #62's documentation-only reconciliation using current implementation, merged PR/review/tag evidence, course checkpoints, and the authorized scope.
-- Influence: Codex corrected stale drafting and PR-integration claims, preserved milestone requirements and dated provenance chronology, reconciled implementation/sprint progress, updated finalized Role/Quality Control terminology while flagging unavailable live Project fields, reduced README/API duplication, repaired navigation, and supplied a disposable-data procedure. The signed Team Agreement V1 and application/test/config/data files are unchanged. Roster, individual confirmations, review gaps, deadline metadata, Decision Receipt, and submission remain explicit human/release follow-ups.
+- Influence: Codex corrected stale drafting and PR-integration claims, preserved milestone requirements and dated provenance chronology, reconciled implementation/sprint progress, updated finalized Role/Quality Control terminology while flagging unavailable live Project fields, reduced README/API duplication, repaired navigation, and supplied a disposable-data procedure. The signed Team Agreement V1 and application/test/config/data files are unchanged. Roster, review gaps, deadline metadata, Decision Receipt, and submission remain explicit human/release follow-ups.
 - Validation: A temporary Python validator checked all 17 tracked Markdown files, 74 local links/anchors, four fenced JSON examples, balanced fences, route/command/URL references, both new entries' required fields/labels, and exactly 11 Markdown-only changed files. It verified that the original provenance prefix and all application/test/frontend/config/data files and the signed agreement are unchanged. `git diff --check` passed. With Python 3.12.13, the documented PowerShell disposable-copy commands ran successfully; an isolated Uvicorn `--reload` smoke helper checked 10 GET surfaces (both pages, health/list/filter/details/menu, Swagger/OpenAPI, root redirect) and the contract's OpenAPI response codes. Data stayed unchanged. Helpers were run with `.\.venv\Scripts\python.exe -B` from the repository root and kept in the temporary directory. Dependency installation, new-machine setup, macOS/Linux shell examples, manual POST/PATCH experiments, interactive Swagger/browser workflows, and the pytest/Playwright suite were inspected or left to #40/#42, not executed in this task. Latest integrated-main CI was in progress; historical results remain attributed above.
 - PR or commit: [Issue #62](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/62); [PR #63](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/63); [documentation commit afc6c18](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/afc6c18b8962c079897d5a21210bab2d5e98f54b); branch `docs/62-m1-documentation-reconciliation`.
-- Student review status: Pending; agent checks do not certify student understanding or teammate approval. The documentation PR must receive review and merge before #62 is complete.
+- Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections. Formal teammate approval and merge of PR #63 remain separate; issue #62 is not complete until those requirements are met.
+
+- Follow-up (2026-10-13): At the user's request, Codex removed the standalone Status reconciliation section and updated outstanding individual-review statements using Gwantana's explicit report that all members reviewed their own sections. Verified later peer-approval/merge facts are retained in the relevant entries. The temporary review-status validator passed for all 43 entries, preserved their labels/artifacts/purposes/validation/PR references, and confirmed the 23 updated review records and single-file follow-up scope. Markdown verification passed for 17 files, 74 local links/anchors, four JSON examples, and balanced fences; git diff --check passed. No application tests were rerun.
