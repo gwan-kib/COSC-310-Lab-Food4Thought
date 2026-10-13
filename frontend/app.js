@@ -1,5 +1,5 @@
-// Customer restaurant-discovery page. Every piece of restaurant data comes from
-// the REST API; nothing here reads the JSON file or hard-codes restaurants.
+// Customer restaurant-discovery page with navigation to the REST-backed edit form.
+// Restaurant and menu data comes from the API, never directly from JSON storage.
 // API text is always rendered with textContent, never parsed as HTML, because
 // restaurants can be created by anyone through POST /restaurants.
 
@@ -43,6 +43,7 @@ const detailsContent = document.getElementById("details-content");
 const detailsName = document.getElementById("details-name");
 const detailsCuisine = document.getElementById("details-cuisine");
 const detailsDescription = document.getElementById("details-description");
+const editRestaurantLink = document.getElementById("edit-restaurant-link");
 const menuStatus = document.getElementById("menu-status");
 const menuList = document.getElementById("menu-list");
 
@@ -145,6 +146,8 @@ async function showDetails(selection) {
   const restaurantId = selection.id;
   markSelected(restaurantId);
   detailsContent.hidden = true;
+  editRestaurantLink.hidden = true;
+  editRestaurantLink.removeAttribute("href");
 
   if (!selection.valid) {
     setStatus(detailsStatus, "That restaurant link isn't valid.", true);
@@ -191,6 +194,8 @@ function renderRestaurant(restaurant) {
   detailsName.textContent = restaurant.name;
   detailsCuisine.textContent = restaurant.cuisine;
   detailsDescription.textContent = restaurant.description;
+  editRestaurantLink.href = `edit-restaurant.html?id=${encodeURIComponent(restaurant.id)}`;
+  editRestaurantLink.hidden = false;
   menuList.replaceChildren();
   setStatus(menuStatus, "Loading menu…");
   setStatus(detailsStatus, "");
