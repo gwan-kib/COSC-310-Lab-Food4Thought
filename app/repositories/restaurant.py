@@ -1,3 +1,8 @@
+# Load, validate, and persist Food4Thought's complete restaurant records and embedded
+# menu items.
+# It coordinates mutations with a process-wide lock and atomic file replacement while
+# reporting data failures to the service and route layers.
+
 import json
 import os
 import tempfile

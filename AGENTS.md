@@ -58,6 +58,13 @@ Follow the issue metadata convention in [CONTRIBUTING.md](CONTRIBUTING.md#issue-
 - Keep GitHub writes within user authorization. If posting is unavailable or unauthorized, prepare the content and report it as unposted. Do not invent issues, ownership, comments, reviews, or board updates.
 - Do not impersonate a peer reviewer, self-approve on a student's behalf, or certify student understanding without student involvement.
 
+## File purpose descriptions
+
+- Add a concise purpose description (about two sentences) near the top of every new file containing meaningful code. Explain its role in Food4Thought and its main responsibility or connection to other components; cover application modules, tests, scripts, frontend markup/styles, and executable workflows.
+- Whenever a file is changed, review its purpose description and update it in the same change if its role or responsibilities have changed. Retain an existing accurate description rather than adding a duplicate.
+- Use the file format's comment syntax or an appropriate module docstring. Preserve required leading syntax such as a shebang, encoding declaration, or HTML doctype; place the description immediately after it where necessary.
+- Keep descriptions specific and short. Do not narrate syntax, list every function, add speculative behavior, or insert headers into empty package markers, generated/vendor files, data, or dependency manifests merely to satisfy this convention.
+
 ## Setup documentation maintenance
 
 Treat [docs/FIRST_TIME_SETUP.md](docs/FIRST_TIME_SETUP.md) and [docs/QUICK_SETUP.md](docs/QUICK_SETUP.md) as maintained operational documentation, not one-time onboarding notes.

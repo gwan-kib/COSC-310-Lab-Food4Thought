@@ -1,3 +1,8 @@
+# Keep Food4Thought's generated API documentation aligned with the adopted restaurant
+# and menu contract.
+# It removes automatic 422 responses only from explicitly listed GET operations whose
+# opaque path identifiers require no format validation.
+
 from collections.abc import Collection
 from typing import Any
 

@@ -1,3 +1,8 @@
+# Check that Food4Thought serves its customer page and shared assets through the backend
+# application.
+# It also verifies the redirect, static-directory resolution, API-only data access, and
+# source safeguards for rendering restaurant text.
+
 import json
 from pathlib import Path
 

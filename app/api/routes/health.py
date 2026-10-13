@@ -1,3 +1,8 @@
+# Expose Food4Thought's health endpoint so contributors and tooling can check whether
+# the API process responds.
+# This liveness route does not depend on restaurant storage, allowing it to work even
+# when the data file is unavailable.
+
 from fastapi import APIRouter
 
 router = APIRouter(tags=["health"])

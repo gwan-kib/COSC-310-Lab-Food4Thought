@@ -1,3 +1,7 @@
+# Run Food4Thought's automated checks on pushes and pull requests to main.
+# It installs the Python and browser-test dependencies, compiles the application, runs
+# required-browser pytest, and checks that committed data remains unchanged.
+
 name: CI
 
 on:
