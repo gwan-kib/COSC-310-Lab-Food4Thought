@@ -10,7 +10,7 @@ The test-first cycle below is a team convention; the supplied M0 specification r
 
 ## Current setup and commands
 
-Follow the [README setup](../README.md#development-setup). CI installs `requirements.txt` on Python 3.12, runs `python -m compileall app` and `python -m pytest`, then fails if any file under `data/` was modified. Run the suite from the repository root in its virtual environment:
+Follow the [README setup](../README.md#development-setup). CI installs `requirements.txt` and `requirements-dev.txt` plus Playwright's Chromium on Python 3.12, runs `python -m compileall app` and `python -m pytest` with `REQUIRE_BROWSER_TESTS=1`, then fails if any file under `data/` was modified. Browser tests in `tests/browser/` are skipped where Playwright is not installed and fail in CI if they cannot run. Run the suite from the repository root in its virtual environment:
 
 ```sh
 python -m pytest

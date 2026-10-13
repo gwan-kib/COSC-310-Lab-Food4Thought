@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Food4Thought – Restaurants</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Food4Thought</h1>
+      <p>Find a restaurant and browse its menu.</p>
+    </header>
+
+    <main class="layout">
+      <section class="panel" aria-labelledby="list-heading">
+        <h2 id="list-heading">Restaurants</h2>
+
+        <form id="filter-form" class="filter" role="search">
+          <label for="cuisine-input">Cuisine</label>
+          <input id="cuisine-input" name="cuisine" type="search" placeholder="e.g. Japanese" />
+          <button type="submit">Filter</button>
+          <button type="button" id="clear-filter">Clear</button>
+        </form>
+
+        <p id="list-status" class="status" role="status"></p>
+        <ul id="restaurant-list" class="restaurant-list"></ul>
+      </section>
+
+      <section id="restaurant-details" class="panel" aria-labelledby="details-heading" aria-live="polite">
+        <h2 id="details-heading">Restaurant details</h2>
+        <p id="details-status" class="status">Select a restaurant to see its details and menu.</p>
+
+        <div id="details-content" hidden>
+          <h3 id="details-name"></h3>
+          <p class="cuisine" id="details-cuisine"></p>
+          <p id="details-description"></p>
+
+          <h4>Menu</h4>
+          <p id="menu-status" class="status"></p>
+          <ul id="menu-list" class="menu-list"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

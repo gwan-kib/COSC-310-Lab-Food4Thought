@@ -95,6 +95,14 @@ python -m pytest
 
 The tests use temporary restaurant-data copies and are designed not to modify committed files under `data/`.
 
+The real-browser frontend tests in `tests/browser/` are skipped unless the optional development dependencies are installed. CI always runs them. To run them locally as well:
+
+```sh
+python -m pip install -r requirements-dev.txt
+python -m playwright install chromium
+python -m pytest
+```
+
 ## 7. Run the application
 
 ```sh
@@ -124,6 +132,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | `POST /restaurants/{restaurant_id}/menu/items` | Adds a menu item from `name`, `description`, and a decimal-string `price`; returns HTTP 201 with its generated ID. |
 | `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` | Updates supplied item fields and returns HTTP 200 with the saved item; unknown parent/item returns 404 and invalid input returns 422. |
 | `GET /docs` | FastAPI's interactive OpenAPI documentation. |
+| `GET /app/` | Customer frontend: restaurant list, cuisine filter, and the selected restaurant's details and menu. `GET /` redirects here. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
 
 A simple browser check is enough for the GET operations. To try `POST /restaurants`, use the interactive form at `/docs` with a body such as `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. It writes to the configured JSON file, so use a disposable copy through `RESTAURANTS_DATA_PATH` when experimenting.

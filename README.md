@@ -2,7 +2,7 @@
 
 **Team:** Agents Anonymous
 
-Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. The backend includes the Milestone 0 foundation and the M1 cuisine filtering, restaurant details, restaurant creation, restaurant updates, menu browsing, menu-item creation, and menu-item updates. The rest of the M1 slice is still in progress.
+Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. The backend includes the Milestone 0 foundation and the M1 cuisine filtering, restaurant details, restaurant creation, restaurant updates, menu browsing, menu-item creation, and menu-item updates, plus a basic customer frontend. The rest of the M1 slice is still in progress.
 
 - [First-time application setup](docs/FIRST_TIME_SETUP.md)
 - [Quick setup for returning contributors](docs/QUICK_SETUP.md)
@@ -38,6 +38,10 @@ python -m uvicorn app.main:app --reload
 ```
 
 The API starts at `http://127.0.0.1:8000`. Stop it with `Ctrl+C`.
+
+### Customer frontend
+
+The same command serves the basic customer page at **`http://127.0.0.1:8000/app/`** (`http://127.0.0.1:8000/` redirects there). It is plain HTML, CSS, and JavaScript in `frontend/`; there is no Node.js or build step. The page lists restaurants, filters them by cuisine, and shows the selected restaurant's details and menu. All data comes from the REST API (`GET /restaurants`, `GET /restaurants/{restaurant_id}`, `GET /restaurants/{restaurant_id}/menu`); nothing is hard-coded or read from the JSON file. The selected restaurant is kept in the URL (for example `/app/#/restaurants/restaurant-001`), so links and the browser back button work. Loading, empty, not-found, and server-error states are shown on the page. If only the menu fails to load, the restaurant's details still show, with a menu-specific error; clicking the restaurant again retries. API text is rendered as text, never as HTML.
 
 ## API endpoints
 
@@ -82,11 +86,19 @@ python -m pytest
 
 `tests/conftest.py` gives each test a temporary copy of the restaurant data and fails the run if any committed file under `data/` changes. GitHub Actions runs the same command on pushes and pull requests to `main`.
 
+`tests/browser/` drives the customer frontend in a real Chromium browser against a local test server with the same isolated data. Those tests need the development-only dependencies; without them they are skipped and the rest of the suite still runs. CI installs them and requires the browser tests to pass. To run them locally:
+
+```sh
+python -m pip install -r requirements-dev.txt
+python -m playwright install chromium
+python -m pytest
+```
+
 ## Repository structure
 
 ```text
 app/
-  main.py               FastAPI application; registers routers and error handling
+  main.py               FastAPI application; registers routers, error handling, and the frontend
   api/routes/           HTTP routes (health.py, restaurants.py)
   api/errors.py         JSON-safe validation-error responses for rejected input
   api/openapi.py        OpenAPI post-processing (removes 422 only from contract-listed operations)
@@ -94,12 +106,14 @@ app/
   repositories/         Data access for JSON files (restaurant.py)
   schemas/              Pydantic models (restaurant.py)
   core/config.py        Configurable data-file location
+frontend/               Customer page served at /app/ (index.html, app.js, styles.css)
 data/restaurants.json   Representative restaurant data
-tests/                  pytest suite and shared fixtures
+tests/                  pytest suite and shared fixtures (tests/browser/: real-browser frontend tests)
 scrum/                  Team agreement
 docs/                   Milestones, testing, and provenance records
 .github/                CI workflow, issue and PR templates
 requirements.txt        Pinned dependencies
+requirements-dev.txt    Development-only dependencies (Playwright for browser tests)
 ```
 
 The repository contains no passwords, tokens, or API keys, and none are needed to run it.
