@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Food4Thought – Create restaurant</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Food4Thought</h1>
+      <p>Restaurant management</p>
+      <nav aria-label="Main navigation"><a href="./">Browse restaurants</a></nav>
+    </header>
+
+    <main class="management-layout">
+      <section class="panel" aria-labelledby="create-heading">
+        <h2 id="create-heading">Create restaurant</h2>
+        <p>All fields are required.</p>
+        <form id="create-form">
+          <fieldset id="create-fields" class="create-fields">
+            <legend class="visually-hidden">Restaurant information</legend>
+            <label for="restaurant-name">Name</label>
+            <input id="restaurant-name" name="name" type="text" required />
+
+            <label for="restaurant-cuisine">Cuisine</label>
+            <input id="restaurant-cuisine" name="cuisine" type="text" required />
+
+            <label for="restaurant-description">Description</label>
+            <textarea id="restaurant-description" name="description" rows="4" required></textarea>
+
+            <button type="submit">Create restaurant</button>
+          </fieldset>
+        </form>
+        <p id="create-status" class="status" role="status"></p>
+        <div id="create-errors" class="status error" role="alert"></div>
+        <a id="created-link" hidden>View restaurant</a>
+      </section>
+    </main>
+
+    <script src="create-restaurant.js" defer></script>
+  </body>
+</html>
