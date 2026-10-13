@@ -1,6 +1,7 @@
-# Test Food4Thought's JSON repository reads against isolated copies of restaurant data.
-# It checks configured paths and rejects missing files, malformed JSON, and invalid
-# restaurant records instead of treating them as empty results.
+# Test Food4Thought's JSON repository directly with temporary files, independently
+# of HTTP status handling. Check configured-path selection and rejection of missing,
+# malformed, or invalid data so storage failures cannot be mistaken for an empty
+# restaurant list.
 
 import json
 from pathlib import Path

@@ -1,6 +1,7 @@
-# Verify Food4Thought's partial menu-item updates within the specified restaurant.
-# It covers validation, unchanged identifiers and relationships, persistence failures,
-# error responses, OpenAPI, and overlapping mutations.
+# Verify Food4Thought's partial menu-item updates across the API and isolated
+# persistence. Check preserved IDs and parent relationships, validation and
+# storage-error ordering, failed-save recovery, and overlapping writes that must
+# retain both changes.
 
 import json
 import threading

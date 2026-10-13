@@ -1,7 +1,7 @@
-// Customer restaurant-discovery page with navigation to the REST-backed edit form.
-// Restaurant and menu data comes from the API, never directly from JSON storage.
-// API text is always rendered with textContent, never parsed as HTML, because
-// restaurants can be created by anyone through POST /restaurants.
+// Drive Food4Thought's customer discovery page through the REST API, keeping
+// presentation separate from backend rules and JSON storage. Render API text safely
+// with textContent and ignore superseded requests so late responses cannot replace
+// the current filter or selection.
 
 class ApiError extends Error {
   constructor(status, message) {

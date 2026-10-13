@@ -1,8 +1,7 @@
-"""Fixtures for real-browser frontend tests.
-
-These tests need Playwright and a Chromium build, which are development-only
-dependencies (`requirements-dev.txt`). Without them the tests are skipped
-locally; CI sets REQUIRE_BROWSER_TESTS=1 so a missing browser fails instead.
+"""Serve Food4Thought's real application for Chromium tests with per-test browser
+contexts and the root fixtures' isolated storage. Missing Playwright or Chromium
+skips locally but fails when REQUIRE_BROWSER_TESTS=1, so CI cannot silently omit
+frontend verification.
 """
 
 import os

@@ -1,7 +1,7 @@
-# Verify that Food4Thought returns a restaurant's public details for an exact stable
-# identifier.
-# It checks current storage selection, missing-resource and data-failure behavior,
-# unchanged storage, service projection, and the documented response contract.
+# Verify Food4Thought's restaurant lookup by exact ID and projection from stored
+# records to public details. API and direct service checks distinguish missing
+# resources from unusable storage, preserve read-only behavior, and check the
+# documented response contract.
 
 import json
 

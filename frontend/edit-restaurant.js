@@ -1,6 +1,7 @@
-// Load a restaurant from the REST API and submit only edited fields through PATCH.
-// Keep the stable ID and menu untouched; preserve entered values on validation,
-// storage, and uncertain network failures so the user can verify before retrying.
+// Load Food4Thought's selected restaurant through the API and send only changed
+// fields with PATCH. Compare against values displayed by the form controls, preserve
+// edits on failures, and require user verification after an uncertain save instead
+// of automatically retrying.
 
 const editForm = document.getElementById("edit-form");
 const editFields = document.getElementById("edit-fields");

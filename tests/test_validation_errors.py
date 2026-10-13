@@ -1,7 +1,7 @@
-# Protect Food4Thought's JSON error responses when invalid requests contain
-# difficult-to-encode values.
-# It checks non-finite numbers, Unicode, raw bytes, nested rejected fields, retained
-# diagnostics, and validation before storage access without writes.
+# Protect Food4Thought's validation-error responses when rejected input is itself
+# difficult to encode. Send raw malformed or non-finite values through HTTP to check
+# usable JSON diagnostics, validation before storage access, and unchanged files on
+# rejected writes.
 
 import json
 

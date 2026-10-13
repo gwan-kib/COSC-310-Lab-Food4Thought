@@ -1,7 +1,7 @@
-# Verify Food4Thought's restaurant creation and the shared complete-record persistence
-# foundation.
-# It covers request and stored-data validation, legacy compatibility, stable IDs, saved
-# responses, failed writes, mutation locking, and OpenAPI.
+# Verify Food4Thought's restaurant creation through HTTP and the complete-record
+# JSON persistence boundary. Check legacy/menu preservation and saved responses,
+# with controlled write failures and overlapping mutations protecting file integrity
+# and updates from separate repository instances.
 
 import json
 import threading

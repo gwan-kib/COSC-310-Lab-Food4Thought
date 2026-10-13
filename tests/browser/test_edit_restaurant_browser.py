@@ -1,9 +1,8 @@
-# Verify Food4Thought's Edit restaurant page using Chromium, the real API, and
-# isolated JSON storage.
-# Cover navigation, PATCH persistence, partial payloads, validation, missing records,
-# request failures, timeout recovery, safe rendering, and narrow screens.
-
-"""Browser regression tests for editing an existing restaurant."""
+"""Verify Food4Thought's Edit restaurant workflow through Chromium, the real API, and
+isolated JSON storage. Protect partial updates and unchanged submissions, including
+regressions for browser newline normalization and valid Unicode API responses,
+alongside failure recovery and safe rendering.
+"""
 
 import json
 import os

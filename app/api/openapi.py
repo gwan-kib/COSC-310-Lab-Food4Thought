@@ -1,7 +1,7 @@
-# Keep Food4Thought's generated API documentation aligned with the adopted restaurant
-# and menu contract.
-# It removes automatic 422 responses only from explicitly listed GET operations whose
-# opaque path identifiers require no format validation.
+# Align Food4Thought's generated OpenAPI responses with the adopted restaurant and
+# menu contract. Remove automatic 422 documentation only from explicitly listed
+# operations with opaque string IDs, leaving runtime validation and other
+# operations' schemas intact.
 
 from collections.abc import Collection
 from typing import Any

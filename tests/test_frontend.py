@@ -1,7 +1,7 @@
-# Check that Food4Thought serves its customer page and shared assets through the backend
-# application.
-# It also verifies the redirect, static-directory resolution, API-only data access, and
-# source safeguards for rendering restaurant text.
+# Check that Food4Thought serves the customer page and assets alongside its API
+# without exposing page routes in OpenAPI. Source checks protect API-only data
+# access and safe text rendering; actual interactions and layout are exercised
+# separately in browser tests.
 
 import json
 from pathlib import Path

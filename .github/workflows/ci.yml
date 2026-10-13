@@ -1,6 +1,7 @@
-# Run Food4Thought's automated checks on pushes and pull requests to main.
-# It installs the Python and browser-test dependencies, compiles the application, runs
-# required-browser pytest, and checks that committed data remains unchanged.
+# Check Food4Thought's application and tests on pushes and pull requests to main
+# using Python 3.12 and pinned dependencies. Require Chromium browser tests
+# alongside backend checks and reject changes to committed data so unavailable
+# browser coverage or unsafe test writes cannot pass silently.
 
 name: CI
 

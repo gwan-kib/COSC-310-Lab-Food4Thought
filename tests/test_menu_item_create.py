@@ -1,7 +1,7 @@
-# Verify Food4Thought's menu-item creation flow through the API, service, and isolated
-# JSON storage.
-# It covers parent scoping, generated IDs, validation, persistence and reloads, failure
-# ordering, saved-item selection, and the OpenAPI contract.
+# Verify Food4Thought's menu-item creation across HTTP, service operations, and
+# isolated JSON storage. Reload saved items to check persistence and parent scoping,
+# and exercise invalid input, write failures, ID collisions, and saved-item
+# selection independently of list position.
 
 import json
 from uuid import UUID

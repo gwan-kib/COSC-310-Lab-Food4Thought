@@ -1,7 +1,7 @@
-// Connect Food4Thought's management form to the restaurant-creation API and display the
-// saved result.
-// It manages field errors and submission state, preserves values on failures, and
-// handles uncertain or timed-out responses without automatically retrying a POST.
+// Submit Food4Thought's Create restaurant form to the API, which owns validation and
+// persistence. Manage accessible feedback and pending submissions while preserving
+// input on failures; an unconfirmed POST is never retried automatically because the
+// server may already have saved it.
 
 const form = document.getElementById("create-form");
 const fieldset = document.getElementById("create-fields");

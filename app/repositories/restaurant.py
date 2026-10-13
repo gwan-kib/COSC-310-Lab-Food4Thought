@@ -1,7 +1,7 @@
-# Load, validate, and persist Food4Thought's complete restaurant records and embedded
-# menu items.
-# It coordinates mutations with a process-wide lock and atomic file replacement while
-# reporting data failures to the service and route layers.
+# Persist Food4Thought's complete restaurant records and embedded menus in JSON,
+# validating stored data and reporting read/write failures. A shared lock
+# coordinates read-change-save cycles within one process, and atomic file
+# replacement prevents readers from seeing a partially written file.
 
 import json
 import os

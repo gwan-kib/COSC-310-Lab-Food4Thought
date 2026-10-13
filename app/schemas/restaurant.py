@@ -1,7 +1,7 @@
-# Define Food4Thought's Pydantic request, response, and persistence models for
-# restaurants and menu items.
-# It centralizes text and decimal-string price validation, partial-update rules, and the
-# projection from stored records to public responses.
+# Define Food4Thought's request models, public restaurant/menu responses, and
+# complete stored records. Write models validate text, prices, and supplied update
+# fields; stored restaurant records retain legacy values and project to restaurant
+# responses without exposing embedded menus or extras.
 
 from decimal import Decimal
 from typing import Annotated, Self

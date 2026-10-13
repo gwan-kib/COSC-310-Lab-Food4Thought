@@ -1,7 +1,7 @@
-# Expose Food4Thought's restaurant discovery, menu browsing, and management operations
-# through the REST API.
-# It validates HTTP input, delegates work to RestaurantService, and translates missing
-# resources and storage failures into documented responses.
+# Translate Food4Thought's restaurant and menu operations between HTTP requests and
+# RestaurantService. FastAPI and request models validate input, while these routes
+# build the service/repository dependency and map missing resources to 404 or
+# storage failures to a generic 500.
 
 from typing import Annotated
 
