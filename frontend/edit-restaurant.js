@@ -89,6 +89,17 @@ function validRestaurant(body) {
     );
 }
 
+function populateFields(restaurant) {
+  for (const [name, field] of Object.entries(editableFields)) {
+    field.value = restaurant[name];
+  }
+  // Browser controls can normalize the API text (e.g., CRLF or newlines).
+  // Compare edits with what was actually displayed, not the raw API value.
+  original = Object.fromEntries(
+    Object.entries(editableFields).map(([name, field]) => [name, field.value])
+  );
+}
+
 async function loadRestaurant() {
   if (loading || saving || !requestedId) return;
   loading = true;
@@ -113,12 +124,7 @@ async function loadRestaurant() {
       throw new Error("The server returned unexpected restaurant data.");
     }
 
-    original = Object.fromEntries(
-      Object.keys(editableFields).map(name => [name, body[name]])
-    );
-    for (const [name, field] of Object.entries(editableFields)) {
-      field.value = original[name];
-    }
+    populateFields(body);
     returnLink.href = `./#/restaurants/${encodeURIComponent(requestedId)}`;
     returnLink.hidden = false;
     editFields.disabled = false;
@@ -176,18 +182,14 @@ editForm.addEventListener("submit", async event => {
       }
       return;
     }
-    if (response.status !== 200 || !validRestaurant(body) ||
-        Object.entries(changes).some(([name, value]) => body[name] !== value.trim())) {
+    // The API owns whitespace normalization; JavaScript trim() differs from
+    // Pydantic (including for U+0085). Trust the validated 200 response.
+    if (response.status !== 200 || !validRestaurant(body)) {
       editErrors.textContent = uncertainUpdate;
       return;
     }
 
-    original = Object.fromEntries(
-      Object.keys(editableFields).map(name => [name, body[name]])
-    );
-    for (const [name, field] of Object.entries(editableFields)) {
-      field.value = original[name];
-    }
+    populateFields(body);
     editStatus.textContent = "Changes saved.";
   } catch {
     editStatus.textContent = "";
