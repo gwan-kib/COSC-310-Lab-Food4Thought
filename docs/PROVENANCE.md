@@ -560,3 +560,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Student review status: Reviewed by Gwantana Kiboigo (`gwan-kib`), confirmed by his 2026-10-13 report that every team member reviewed their own sections. Formal teammate approval and merge of PR #63 remain separate; issue #62 is not complete until those requirements are met.
 
 - Follow-up (2026-10-13): At the user's request, Codex removed the standalone Status reconciliation section and updated outstanding individual-review statements using Gwantana's explicit report that all members reviewed their own sections. Verified later peer-approval/merge facts are retained in the relevant entries. The temporary review-status validator passed for all 43 entries, preserved their labels/artifacts/purposes/validation/PR references, and confirmed the 23 updated review records and single-file follow-up scope. Markdown verification passed for 17 files, 74 local links/anchors, four JSON examples, and balanced fences; git diff --check passed. No application tests were rerun.
+
+### Entry 44: M1 menu-item price validation Decision Receipt
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), who requested this documentation; student verification and acceptance are pending.
+- Artifact: `docs/DECISION_RECEIPT.md`, supporting README navigation, and `docs/milestones/M1.md` reference.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Document the menu-price representation and validation decision already adopted for M1, in support of issues #41 and #64.
+- Influence: ChatGPT drafted the concise receipt, including code-grounded rationale, examples, alternative approaches labeled as comparisons, trade-offs, and links to existing implementation/tests. It also linked the receipt from README and the M1 checkpoint. No application code, tests, API contract, or data were changed.
+- Validation: Inspected `app/schemas/restaurant.py`, `tests/test_menu_price_limit.py`, the adopted M1 contract, the price-bound review in PR #55, and issue #41 against the documented behavior. The documentation links and diff require final verification on the PR. This is documentation-only work; no application tests have been run as part of this task. Teammate review and ability to explain the receipt remain to be confirmed.
+- PR or commit: [Issue #64](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/64); [existing Decision Receipt task #41](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/41); [receipt commit b5c6630](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/b5c66302db7a7e815b180625d482fbca3a2f07cd); branch `docs/64-menu-price-decision`. PR link to be added after opening.
+- Student review status: Pending: Gwantana and at least one teammate should read the receipt, check it against the code and agreed price rule, and be able to explain its rationale. No review or approval is claimed.
