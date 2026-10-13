@@ -90,6 +90,86 @@ def test_unchanged_form_does_not_send_empty_patch(page, live_server, isolated_re
     assert isolated_restaurants_path.read_bytes() == original
 
 
+
+def test_multiline_name_is_omitted_when_only_description_changes(
+    page, live_server, isolated_restaurants_path
+):
+    restaurants = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
+    restaurants[0]["name"] = "Cedar\\nBowl".replace("\\n", "\n")
+    isolated_restaurants_path.write_text(json.dumps(restaurants), encoding="utf-8")
+
+    page.goto(f"{live_server}/app/edit-restaurant.html?id=restaurant-001")
+    # Single-line inputs strip line breaks from the API value on assignment.
+    expect(page.get_by_label("Name", exact=True)).to_have_value("CedarBowl")
+    page.get_by_label("Description", exact=True).fill("New description")
+    with page.expect_response(lambda response: response.request.method == "PATCH") as update:
+        page.get_by_role("button", name="Save changes").click()
+
+    assert update.value.status == 200
+    assert update.value.request.post_data_json == {"description": "New description"}
+    saved = RestaurantRepository(isolated_restaurants_path).load_records()[0]
+    assert saved.name == "Cedar\\nBowl".replace("\\n", "\n")
+    assert saved.description == "New description"
+    expect(page.get_by_role("status")).to_contain_text("Changes saved")
+    assert page.page_errors == []
+
+
+def test_crlf_description_does_not_cause_spurious_patch(
+    page, live_server, isolated_restaurants_path
+):
+    restaurants = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
+    restaurants[0]["description"] = "Line one\r\nLine two"
+    isolated_restaurants_path.write_text(json.dumps(restaurants), encoding="utf-8")
+    before = isolated_restaurants_path.read_bytes()
+    patches = []
+    page.on("request", lambda req: patches.append(req) if req.method == "PATCH" else None)
+
+    page.goto(f"{live_server}/app/edit-restaurant.html?id=restaurant-001")
+    expect(page.get_by_label("Description", exact=True)).to_have_value("Line one\nLine two")
+    page.get_by_role("button", name="Save changes").click()
+    expect(page.get_by_role("status")).to_contain_text("No changes")
+    assert patches == []
+    assert isolated_restaurants_path.read_bytes() == before
+
+    page.get_by_label("Cuisine", exact=True).fill("Fusion")
+    with page.expect_response(lambda response: response.request.method == "PATCH") as update:
+        page.get_by_role("button", name="Save changes").click()
+    assert update.value.request.post_data_json == {"cuisine": "Fusion"}
+    expect(page.get_by_role("status")).to_contain_text("Changes saved")
+    assert RestaurantRepository(isolated_restaurants_path).load_records()[0].description == (
+        "Line one\r\nLine two"
+    )
+    page.get_by_role("button", name="Save changes").click()
+    expect(page.get_by_role("status")).to_contain_text("No changes")
+    assert len(patches) == 1
+    assert page.page_errors == []
+
+
+def test_valid_unicode_whitespace_normalization_confirms_save_and_resets_baseline(
+    page, live_server, isolated_restaurants_path
+):
+    open_editor(page, live_server)
+    patches = []
+    page.on("request", lambda req: patches.append(req) if req.method == "PATCH" else None)
+    # Pydantic strips U+0085, but JavaScript String.trim() does not.
+    page.get_by_label("Name", exact=True).fill("\u0085Updated\u0085")
+    with page.expect_response(lambda response: response.request.method == "PATCH") as update:
+        page.get_by_role("button", name="Save changes").click()
+
+    assert update.value.status == 200
+    assert update.value.request.post_data_json == {"name": "\u0085Updated\u0085"}
+    assert update.value.json()["name"] == "Updated"
+    expect(page.get_by_role("status")).to_contain_text("Changes saved")
+    expect(page.get_by_role("alert", include_hidden=True)).to_be_empty()
+    expect(page.get_by_label("Name", exact=True)).to_have_value("Updated")
+    assert RestaurantRepository(isolated_restaurants_path).load_records()[0].name == "Updated"
+
+    page.get_by_role("button", name="Save changes").click()
+    expect(page.get_by_role("status")).to_contain_text("No changes")
+    assert len(patches) == 1
+    assert page.page_errors == []
+
+
 def test_invalid_values_display_backend_field_errors_and_recover(
     page, live_server, isolated_restaurants_path
 ):
