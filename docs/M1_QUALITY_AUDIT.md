@@ -64,10 +64,12 @@ The pinned Playwright dependency and Chromium installed successfully. Compileall
 
 The temporary schema/workflow checker was executed with the virtual-environment Python interpreter and passed both its full OpenAPI comparison and isolated workflow/error checks. It is an audit aid, not a committed/reusable test command. Standard reproduction uses the commands above and the linked existing feature/OpenAPI assertions.
 
-Integrated-main CI: pending final result for [run 38370585544](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/38370585544), exact head acccb0bbecb94ab23b727808d95787daadfc2e82. CI requires browser tests, compiles the application, and checks the data diff on Ubuntu/Python 3.12.
+Integrated-main [CI run 38370585544, attempt 2](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/38370585544/attempts/2) passed for exact head acccb0bbecb94ab23b727808d95787daadfc2e82 on Ubuntu/Python 3.12.15: compileall, required-browser pytest (**373 passed, two warnings in 7.46s**) and the data diff all passed. [PR #68's initial CI run](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/38372392112) also passed all 373 tests with two warnings in 7.66s for audit commit 711f126.
+
+The original main CI attempt stalled after the health tests without reporting a failed test and was cancelled after roughly 17 minutes in pytest; the unchanged revision passed on rerun. Its cause remains unknown. Both successful Ubuntu runs reported browser callback/teardown warnings (PytestUnraisableExceptionWarning and an unawaited Connection.wrap_api_call coroutine). The audit does not claim those warnings or the intermittent stall are fixed, nor infer that they have the same cause. No reproducible API/persistence contract defect was found.
 
 ## Documentation and remaining checks
 
 No prerequisites, dependencies, commands, configuration, endpoints, or application behavior changed. Both setup guides remain consistent; their commands were inspected, with the test/browser commands above actually executed. [Provenance Entry 47](PROVENANCE.md#entry-47-m1-tests-persistence-errors-and-openapi-audit) records Codex's audit/report contribution.
 
-Project Board access remains unavailable because the token lacks read:project; no Board status update is claimed. This audit does not complete issue #42's release, submission, collaboration, or human demonstration checks. Issue #40 remains open until its required CI result and audit-record integration are verified.
+Project Board access remains unavailable because the token lacks read:project; no Board status update is claimed. This audit does not complete issue #42's release, submission, collaboration, or human demonstration checks. Issue #40's local and integrated-main CI verification is complete; the issue remains open pending review and integration of [PR #68](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/68).
