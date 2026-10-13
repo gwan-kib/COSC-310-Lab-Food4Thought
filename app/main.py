@@ -1,5 +1,5 @@
 # Compose Food4Thought's FastAPI application from the health and restaurant routers,
-# shared validation-error handler, and OpenAPI customization. Serve both frontend
+# shared validation-error handler, and OpenAPI customization. Serve the frontend
 # pages alongside the API so their relative request URLs use the same application.
 
 from pathlib import Path
