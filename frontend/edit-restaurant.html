@@ -1,0 +1,51 @@
+<!doctype html>
+<!--
+Provide Food4Thought's edit-restaurant management page for an existing restaurant.
+It presents the API-loaded fields, safe feedback, and navigation back to details.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Food4Thought – Edit restaurant</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Food4Thought</h1>
+      <p>Restaurant management</p>
+      <nav aria-label="Main navigation">
+        <a href="./">Browse restaurants</a>
+      </nav>
+    </header>
+
+    <main class="management-layout">
+      <section class="panel" aria-labelledby="edit-heading">
+        <h2 id="edit-heading">Edit restaurant</h2>
+        <p>Update the restaurant information below.</p>
+        <p id="edit-status" class="status" role="status"></p>
+        <div id="edit-errors" class="status error" role="alert"></div>
+        <button id="retry-load" type="button" hidden>Retry loading</button>
+
+        <form id="edit-form">
+          <fieldset id="edit-fields" class="create-fields" disabled>
+            <legend class="visually-hidden">Restaurant information</legend>
+            <label for="restaurant-name">Name</label>
+            <input id="restaurant-name" name="name" type="text" required />
+
+            <label for="restaurant-cuisine">Cuisine</label>
+            <input id="restaurant-cuisine" name="cuisine" type="text" required />
+
+            <label for="restaurant-description">Description</label>
+            <textarea id="restaurant-description" name="description" rows="4" required></textarea>
+
+            <button type="submit">Save changes</button>
+          </fieldset>
+        </form>
+        <p><a id="return-link" hidden>Back to restaurant</a></p>
+      </section>
+    </main>
+
+    <script src="edit-restaurant.js" defer></script>
+  </body>
+</html>
