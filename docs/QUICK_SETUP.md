@@ -70,6 +70,7 @@ http://127.0.0.1:8000
 | --- | --- |
 | Customer frontend | `http://127.0.0.1:8000/app/` |
 | Create restaurant frontend | `http://127.0.0.1:8000/app/create-restaurant.html` |
+| Edit restaurant frontend | Select a restaurant at `http://127.0.0.1:8000/app/` and follow **Edit restaurant** |
 | Health | `http://127.0.0.1:8000/health` |
 | Restaurant list/filter | `http://127.0.0.1:8000/restaurants?cuisine=japanese` |
 | Restaurant details/menu | `/restaurants/restaurant-001` and `/restaurants/restaurant-001/menu` |
