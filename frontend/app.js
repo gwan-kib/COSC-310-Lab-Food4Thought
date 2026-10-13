@@ -158,48 +158,68 @@ async function showDetails(selection) {
   const path = `/restaurants/${encodeURIComponent(restaurantId)}`;
   setStatus(detailsStatus, "Loading restaurant…");
 
+  // Start both requests together, but handle them separately: the details are
+  // the core requirement, so a menu failure must not hide them.
+  const detailsPromise = getJson(path);
+  const menuPromise = getJson(`${path}/menu`);
+  menuPromise.catch(() => {}); // Handled below; ignored if the details fail first.
+
+  let restaurant;
   try {
-    const [restaurant, menu] = await Promise.all([getJson(path), getJson(`${path}/menu`)]);
-    if (request !== detailsRequest) return;
-    renderDetails(restaurant, menu);
+    restaurant = await detailsPromise;
   } catch (error) {
     if (request !== detailsRequest) return;
     const message =
       error.status === 404 ? "That restaurant doesn't exist." : `Could not load restaurant: ${error.message}`;
     setStatus(detailsStatus, message, true);
+    return;
+  }
+  if (request !== detailsRequest) return;
+  renderRestaurant(restaurant);
+
+  try {
+    const menu = await menuPromise;
+    if (request !== detailsRequest) return;
+    renderMenu(menu);
+  } catch (error) {
+    if (request !== detailsRequest) return;
+    setStatus(menuStatus, `Could not load the menu: ${error.message}`, true);
   }
 }
 
-function renderDetails(restaurant, menu) {
+function renderRestaurant(restaurant) {
   detailsName.textContent = restaurant.name;
   detailsCuisine.textContent = restaurant.cuisine;
   detailsDescription.textContent = restaurant.description;
+  menuList.replaceChildren();
+  setStatus(menuStatus, "Loading menu…");
+  setStatus(detailsStatus, "");
+  detailsContent.hidden = false;
+}
 
+function renderMenu(menu) {
   menuList.replaceChildren();
   if (menu.items.length === 0) {
     setStatus(menuStatus, "This restaurant has no menu items yet.");
-  } else {
-    setStatus(menuStatus, "");
-    for (const menuItem of menu.items) {
-      const item = document.createElement("li");
-      const heading = document.createElement("div");
-      heading.className = "menu-item-heading";
-      const name = document.createElement("span");
-      name.className = "menu-item-name";
-      name.textContent = menuItem.name;
-      const price = document.createElement("span");
-      price.className = "price";
-      price.textContent = `$${menuItem.price}`;
-      heading.append(name, price);
-      const description = document.createElement("p");
-      description.textContent = menuItem.description;
-      item.append(heading, description);
-      menuList.append(item);
-    }
+    return;
   }
-
-  setStatus(detailsStatus, "");
-  detailsContent.hidden = false;
+  setStatus(menuStatus, "");
+  for (const menuItem of menu.items) {
+    const item = document.createElement("li");
+    const heading = document.createElement("div");
+    heading.className = "menu-item-heading";
+    const name = document.createElement("span");
+    name.className = "menu-item-name";
+    name.textContent = menuItem.name;
+    const price = document.createElement("span");
+    price.className = "price";
+    price.textContent = `$${menuItem.price}`;
+    heading.append(name, price);
+    const description = document.createElement("p");
+    description.textContent = menuItem.description;
+    item.append(heading, description);
+    menuList.append(item);
+  }
 }
 
 filterForm.addEventListener("submit", (event) => {

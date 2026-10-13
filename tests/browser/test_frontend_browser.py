@@ -22,6 +22,23 @@ def _restaurant_buttons(page):
     return page.locator("#restaurant-list button.restaurant")
 
 
+def _wait_until(page, condition, description, timeout_ms=5000):
+    """Poll the page until condition() is true, failing clearly instead of hanging."""
+    waited = 0
+    while not condition():
+        assert waited < timeout_ms, f"Timed out after {timeout_ms} ms waiting for {description}"
+        page.wait_for_timeout(20)
+        waited += 20
+
+
+def _fail_with_500(route):
+    route.fulfill(
+        status=500,
+        content_type="application/json",
+        body=json.dumps({"detail": "Restaurant data is unavailable"}),
+    )
+
+
 def test_list_details_and_menu_load(page, live_server):
     page.goto(f"{live_server}/app/")
     expect(_restaurant_buttons(page)).to_have_count(2)
@@ -45,8 +62,7 @@ def test_clearing_selection_ignores_late_detail_responses(page, live_server):
     page.goto(f"{live_server}/app/")
     _restaurant_buttons(page).filter(has_text="Cedar Bowl").click()
     expect(page.locator("#details-status")).to_have_text("Loading restaurant…")
-    while len(held) < 2:
-        page.wait_for_timeout(20)
+    _wait_until(page, lambda: len(held) == 2, "the details and menu requests to be sent")
 
     page.go_back()
     expect(page.locator("#details-status")).to_have_text(
@@ -74,14 +90,7 @@ def test_malformed_deep_link_keeps_list_usable(page, live_server):
 
 
 def test_same_restaurant_can_be_retried_after_an_error(page, live_server):
-    def fail(route):
-        route.fulfill(
-            status=500,
-            content_type="application/json",
-            body=json.dumps({"detail": "Restaurant data is unavailable"}),
-        )
-
-    page.route(CEDAR_BOWL_DETAILS, fail)
+    page.route(CEDAR_BOWL_DETAILS, _fail_with_500)
     page.goto(f"{live_server}/app/")
     cedar_bowl = _restaurant_buttons(page).filter(has_text="Cedar Bowl")
     cedar_bowl.click()
@@ -116,3 +125,26 @@ def test_long_api_text_stays_within_a_phone_viewport(page, live_server, isolated
     for selector in ("#cuisine-input", "#filter-form button[type=submit]", ".price"):
         box = page.locator(selector).first.bounding_box()
         assert box["x"] >= 0 and box["x"] + box["width"] <= 390, selector
+
+
+def test_details_still_show_when_only_the_menu_fails(page, live_server):
+    page.route(CEDAR_BOWL_MENU, _fail_with_500)
+    page.goto(f"{live_server}/app/")
+    cedar_bowl = _restaurant_buttons(page).filter(has_text="Cedar Bowl")
+    cedar_bowl.click()
+
+    # Restaurant details are the M1 requirement, so they must survive a menu error.
+    expect(page.locator("#details-content")).to_be_visible()
+    expect(page.locator("#details-name")).to_have_text("Cedar Bowl")
+    expect(page.locator("#details-cuisine")).to_have_text("Japanese")
+    expect(page.locator("#menu-status")).to_have_text(
+        "Could not load the menu: Restaurant data is unavailable"
+    )
+    expect(page.locator("#menu-list li")).to_have_count(0)
+
+    # Clicking the restaurant again retries the menu once it is available.
+    page.unroute(CEDAR_BOWL_MENU)
+    cedar_bowl.click()
+    expect(page.locator("#menu-list li")).to_have_count(2)
+    expect(page.locator("#menu-status")).to_be_hidden()
+    assert page.page_errors == []

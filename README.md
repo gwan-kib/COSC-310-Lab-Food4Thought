@@ -41,7 +41,7 @@ The API starts at `http://127.0.0.1:8000`. Stop it with `Ctrl+C`.
 
 ### Customer frontend
 
-The same command serves the basic customer page at **`http://127.0.0.1:8000/app/`** (`http://127.0.0.1:8000/` redirects there). It is plain HTML, CSS, and JavaScript in `frontend/`; there is no Node.js or build step. The page lists restaurants, filters them by cuisine, and shows the selected restaurant's details and menu. All data comes from the REST API (`GET /restaurants`, `GET /restaurants/{restaurant_id}`, `GET /restaurants/{restaurant_id}/menu`); nothing is hard-coded or read from the JSON file. The selected restaurant is kept in the URL (for example `/app/#/restaurants/restaurant-001`), so links and the browser back button work. Loading, empty, not-found, and server-error states are shown on the page. API text is rendered as text, never as HTML.
+The same command serves the basic customer page at **`http://127.0.0.1:8000/app/`** (`http://127.0.0.1:8000/` redirects there). It is plain HTML, CSS, and JavaScript in `frontend/`; there is no Node.js or build step. The page lists restaurants, filters them by cuisine, and shows the selected restaurant's details and menu. All data comes from the REST API (`GET /restaurants`, `GET /restaurants/{restaurant_id}`, `GET /restaurants/{restaurant_id}/menu`); nothing is hard-coded or read from the JSON file. The selected restaurant is kept in the URL (for example `/app/#/restaurants/restaurant-001`), so links and the browser back button work. Loading, empty, not-found, and server-error states are shown on the page. If only the menu fails to load, the restaurant's details still show, with a menu-specific error; clicking the restaurant again retries. API text is rendered as text, never as HTML.
 
 ## API endpoints
 
