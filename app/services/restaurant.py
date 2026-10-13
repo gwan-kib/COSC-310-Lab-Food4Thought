@@ -1,7 +1,7 @@
-# Coordinate Food4Thought's restaurant discovery and management rules between HTTP
-# routes and JSON persistence.
-# It filters cuisine, resolves parent-scoped resources, generates stable IDs, and
-# applies changes through the repository's mutation boundary.
+# Coordinate Food4Thought's restaurant filtering, resource lookups, and management
+# operations without depending on HTTP. Apply changes to current records through
+# repository mutation callbacks, keeping generated IDs and menu-item lookups scoped
+# to the appropriate resource.
 
 from uuid import uuid4
 

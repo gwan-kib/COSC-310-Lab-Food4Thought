@@ -1,9 +1,7 @@
-"""Shared pytest fixtures that keep tests away from committed data.
-
-Every test runs with RESTAURANTS_DATA_PATH pointing at a temporary copy of
-data/restaurants.json, so code that uses the default configured path can
-never write to the representative data in the repository. A session-level
-check also fails the run if any file under data/ changed while tests ran.
+"""Isolate Food4Thought tests with a fresh temporary data copy selected through
+RESTAURANTS_DATA_PATH for each test. A session-level hash comparison also detects
+changes to committed data, guarding against code that bypasses the configured test
+path.
 """
 
 import hashlib

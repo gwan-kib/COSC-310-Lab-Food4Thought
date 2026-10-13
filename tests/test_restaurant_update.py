@@ -1,7 +1,7 @@
-# Verify Food4Thought's partial restaurant updates through the API and isolated
-# persistence.
-# It checks omitted and legacy fields, stable IDs and menus, invalid input, failed
-# saves, error ordering, overlapping updates, and OpenAPI.
+# Verify Food4Thought's partial restaurant updates through HTTP and isolated JSON
+# persistence. Protect omitted and legacy values, IDs, and menus, and exercise
+# failure ordering and coordinated concurrent changes so updates cannot erase
+# unrelated state.
 
 import json
 import threading

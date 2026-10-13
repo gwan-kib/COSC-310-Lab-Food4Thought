@@ -1,7 +1,7 @@
-# Verify Food4Thought's agreed inclusive menu-item price limit for request input and
-# stored records.
-# It checks boundary normalization, rejected writes, dataset-wide storage errors,
-# pre-save revalidation, and matching API-schema descriptions.
+# Protect Food4Thought's agreed inclusive menu-price bound in create/update requests
+# and stored records. Exercise normalization at the boundary, unchanged files on
+# rejection, and dataset-wide/pre-save validation so an unrelated operation cannot
+# bypass invalid prices.
 
 import json
 

@@ -1,7 +1,7 @@
-# Verify Food4Thought's restaurant-list endpoint using the current configured data
-# source.
-# It checks representative and empty lists, generic storage-failure responses, and the
-# public Pydantic response model in OpenAPI.
+# Verify Food4Thought's restaurant-list API across the route, service, and
+# configured JSON repository. Distinguish valid empty data from storage failures and
+# protect the public response shape and OpenAPI model against leaking stored menu
+# contents.
 
 import json
 

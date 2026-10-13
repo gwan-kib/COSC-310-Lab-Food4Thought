@@ -1,7 +1,6 @@
-# Verify Food4Thought's basic health endpoint and availability of generated API
-# documentation.
-# It checks the health response, documented HTTP method, and rejection of unsupported
-# methods.
+# Verify Food4Thought's liveness response and availability of generated API
+# documentation through HTTP. Check that health exposes only GET and rejects
+# unsupported methods, without requiring restaurant storage for the response.
 
 from fastapi.testclient import TestClient
 

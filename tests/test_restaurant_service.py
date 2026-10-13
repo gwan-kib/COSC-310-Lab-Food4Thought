@@ -1,7 +1,6 @@
-# Check that Food4Thought's restaurant-list service returns the models supplied by its
-# repository.
-# It also verifies that storage failures propagate to the route layer rather than being
-# swallowed by the service.
+# Check Food4Thought's restaurant-list service directly against an isolated real
+# repository. Verify model results and propagated storage failures independently of
+# the routes that translate those failures into HTTP responses.
 
 import json
 

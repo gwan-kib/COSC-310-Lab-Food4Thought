@@ -1,7 +1,6 @@
-# Expose Food4Thought's health endpoint so contributors and tooling can check whether
-# the API process responds.
-# This liveness route does not depend on restaurant storage, allowing it to work even
-# when the data file is unavailable.
+# Expose Food4Thought's liveness check for local setup and automated checks. This
+# route tests whether the API responds independently of restaurant storage, so
+# success does not prove the data file is usable.
 
 from fastapi import APIRouter
 

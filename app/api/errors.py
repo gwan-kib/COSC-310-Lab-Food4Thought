@@ -1,6 +1,6 @@
-# Render Food4Thought's request-validation failures as usable JSON error responses.
-# It preserves validation diagnostics while safely encoding rejected numbers, Unicode,
-# and bytes that could otherwise break a 422 response.
+# Serialize Food4Thought's request-validation failures as JSON while preserving
+# useful field diagnostics. Safely encode rejected non-finite numbers, Unicode, and
+# bytes so reporting invalid input does not itself turn a 422 into a server error.
 
 import json
 import math

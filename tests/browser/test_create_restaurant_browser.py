@@ -1,10 +1,8 @@
-# Exercise Food4Thought's Create restaurant form through the real API and isolated JSON
-# persistence.
-# It checks creation, validation recovery, storage and network failures, request
-# timeouts, duplicate-submit protection, safe text, and keyboard use on a phone
-# viewport.
-
-"""Management form behavior through the real API and isolated persistence."""
+"""Verify Food4Thought's Create restaurant workflow through the actual page, API, and
+isolated JSON persistence. Cover accessible validation recovery and saved results
+alongside controlled network failures, stalled or lost responses, and
+duplicate-submit protection.
+"""
 
 import json
 import os

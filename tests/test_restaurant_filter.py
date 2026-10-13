@@ -1,7 +1,7 @@
-# Verify Food4Thought's optional cuisine filter while preserving the existing
-# restaurant-list behavior.
-# It checks whole-value casefold matching, whitespace handling, result order,
-# blank-query validation, storage failures, and OpenAPI.
+# Verify Food4Thought's cuisine filtering through HTTP and direct service calls
+# using isolated records. Protect whole-value casefold matching, stored order and
+# spelling, and validation of blank queries before storage access without changing
+# unfiltered results.
 
 import json
 

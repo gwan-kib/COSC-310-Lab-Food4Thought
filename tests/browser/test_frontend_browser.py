@@ -1,9 +1,8 @@
-# Exercise Food4Thought's customer discovery page in Chromium against the real local
-# application.
-# It covers restaurant and menu loading, selection races, invalid links, retries,
-# independent menu failures, and long text at phone widths.
-
-"""Browser regression tests for the customer frontend (PR #58 review findings)."""
+"""Exercise Food4Thought's customer discovery page in Chromium against the real API and
+isolated storage. Regression scenarios from PR #58 review protect selection races,
+malformed links, retries, independent menu errors, and long-text layout at phone
+widths.
+"""
 
 import json
 import os

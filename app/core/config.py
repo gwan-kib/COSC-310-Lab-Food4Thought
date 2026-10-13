@@ -1,6 +1,7 @@
-# Choose the JSON restaurant-data file used by Food4Thought's repository layer.
-# It honors RESTAURANTS_DATA_PATH for isolated tests or manual experiments and otherwise
-# resolves the committed sample relative to the project.
+# Select the JSON data path when Food4Thought creates a repository, keeping storage
+# configuration out of routes and services. RESTAURANTS_DATA_PATH lets tests and
+# manual experiments use disposable files; otherwise the path resolves to the
+# project's representative data.
 
 import os
 from pathlib import Path

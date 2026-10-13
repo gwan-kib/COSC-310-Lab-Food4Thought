@@ -1,7 +1,7 @@
-# Test Food4Thought's menu-item update service separately from HTTP routing and file
-# persistence.
-# A controlled repository mock exercises the real mutation callback to check supplied
-# fields, scoped lookups, preserved records, and propagated failures.
+# Test Food4Thought's menu-item update rules independently of HTTP and file
+# persistence. A repository mock executes the real mutation callback against
+# controlled records, checking parent-scoped lookups and preserved fields rather
+# than merely returning a canned result.
 
 from unittest.mock import Mock
 

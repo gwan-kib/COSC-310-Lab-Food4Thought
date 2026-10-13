@@ -1,7 +1,6 @@
-# Verify that Food4Thought's shared pytest fixtures direct data access to a temporary
-# copy.
-# It checks that each copy starts with representative records and that modifying it
-# leaves the committed data untouched.
+# Verify that Food4Thought's shared fixtures select a fresh temporary copy of
+# representative data. Check the configured location and perform a write to that
+# copy to show that committed data remains untouched.
 
 import json
 import os

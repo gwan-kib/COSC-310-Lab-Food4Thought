@@ -1,6 +1,7 @@
-# Protect Food4Thought's targeted customization of generated OpenAPI error responses.
-# It verifies that only contract-listed operations lose the automatic 422 response while
-# genuinely validated path operations retain it.
+# Protect Food4Thought's contract-specific OpenAPI customization independently of
+# the restaurant workflow. Check the explicit operation allowlist and a genuinely
+# validated integer path so documentation cleanup cannot hide errors that an
+# endpoint can actually return.
 
 from typing import Annotated
 

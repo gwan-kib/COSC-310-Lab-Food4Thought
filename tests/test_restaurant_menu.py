@@ -1,7 +1,7 @@
-# Verify Food4Thought's restaurant-menu read flow and the relationship between a
-# restaurant and its items.
-# It covers representative and legacy menus, price serialization, missing resources,
-# corrupt data, service and repository behavior, and OpenAPI.
+# Verify Food4Thought's menu reads from complete restaurant records through
+# repository, service, and API checks. Protect parent-scoped items, normalized
+# prices, and read-only legacy compatibility while distinguishing an empty menu from
+# a missing restaurant or corrupt storage.
 
 import json
 from pathlib import Path
