@@ -1,5 +1,7 @@
 # Sprint Planning — M1 Completion Sprint
 
+The backlog, meeting dates, ownership, and commitments below preserve the original plan. Task checkboxes reflect the dated [progress update](#2026-10-13-documentation-reconciliation); unchecked final audits and human commitments remain pending.
+
 ## Sprint Information
 
 - **Sprint / Milestone:** Milestone 1 — First Vertical Slice
@@ -71,37 +73,37 @@ The GitHub issues below form the sprint backlog for reaching the end of M1.
 
 ### Shared Contract — #30
 
-- [ ] Agree on exact M1 endpoint paths and HTTP methods.
-- [ ] Define restaurant/menu/menu-item identifiers and relationships.
-- [ ] Define Pydantic request, update, and response model responsibilities.
-- [ ] Define expected success and error responses.
-- [ ] Define persistence format/location and stable-ID behaviour.
-- [ ] Ensure all M1 feature stories implement the same contract.
-- [ ] Review the contract as a team before parallel implementation diverges.
+- [x] Agree on exact M1 endpoint paths and HTTP methods.
+- [x] Define restaurant/menu/menu-item identifiers and relationships.
+- [x] Define Pydantic request, update, and response model responsibilities.
+- [x] Define expected success and error responses.
+- [x] Define persistence format/location and stable-ID behaviour.
+- [x] Ensure all M1 feature stories implement the same contract.
+- [x] Review the contract as a team before parallel implementation diverges.
 
 ### Customer Discovery & Menu Browsing — #31–#34
 
-- [ ] Retrieve a restaurant by stable identifier.
-- [ ] Handle unknown-restaurant behaviour.
-- [ ] Implement at least one documented restaurant search/filter mechanism.
-- [ ] Implement restaurant → menu/menu-item relationships.
-- [ ] Persist representative menu/menu-item data.
-- [ ] Retrieve menu/menu items for a known restaurant.
-- [ ] Build the basic restaurant-list/detail frontend through the REST API.
-- [ ] Add automated tests for successful and failure cases.
+- [x] Retrieve a restaurant by stable identifier.
+- [x] Handle unknown-restaurant behaviour.
+- [x] Implement at least one documented restaurant search/filter mechanism.
+- [x] Implement restaurant → menu/menu-item relationships.
+- [x] Persist representative menu/menu-item data.
+- [x] Retrieve menu/menu items for a known restaurant.
+- [x] Build the basic restaurant-list/detail frontend through the REST API.
+- [x] Add automated tests for successful and failure cases.
 - [ ] Confirm OpenAPI documentation matches the implemented endpoints.
 
 ### Restaurant Management — #35–#39
 
 - [x] Management stories #35–#39 are assigned to Thomas Chen.
-- [ ] Implement create-restaurant behaviour with stable persisted identifiers.
-- [ ] Implement update-restaurant behaviour while preserving stable identifiers.
-- [ ] Implement add-menu-item behaviour with correct restaurant/menu relationships.
-- [ ] Implement update-menu-item behaviour without corrupting relationships.
-- [ ] Confirm create/update changes survive reload/restart.
-- [ ] Select which required management operation will be exposed in the M1 frontend.
-- [ ] Build the basic management frontend operation through the REST API.
-- [ ] Add automated tests for successful and representative invalid/failure cases.
+- [x] Implement create-restaurant behaviour with stable persisted identifiers.
+- [x] Implement update-restaurant behaviour while preserving stable identifiers.
+- [x] Implement add-menu-item behaviour with correct restaurant/menu relationships.
+- [x] Implement update-menu-item behaviour without corrupting relationships.
+- [x] Confirm create/update changes survive reload/restart.
+- [x] Select which required management operation will be exposed in the M1 frontend.
+- [x] Build the basic management frontend operation through the REST API.
+- [x] Add automated tests for successful and representative invalid/failure cases.
 - [ ] Confirm OpenAPI documentation matches the implemented endpoints.
 
 ### Quality, Documentation, and Release — #40–#42
@@ -171,37 +173,37 @@ For the **M1 completion sprint** to be considered done:
 
 ### Functionality
 
-- [ ] Restaurant list functionality continues to work.
-- [ ] A customer can search/filter restaurants.
-- [ ] A customer can retrieve a specific restaurant's details.
-- [ ] A customer can retrieve that restaurant's menu/menu items.
-- [ ] Restaurant-management create/update functionality required by M1 is implemented.
-- [ ] The selected management operation is available through a basic frontend.
-- [ ] Customer discovery functionality is available through a basic frontend.
-- [ ] Frontends communicate through the REST API rather than hard-coded/persistence-file edits.
+- [x] Restaurant list functionality continues to work.
+- [x] A customer can search/filter restaurants.
+- [x] A customer can retrieve a specific restaurant's details.
+- [x] A customer can retrieve that restaurant's menu/menu items.
+- [x] Restaurant-management create/update functionality required by M1 is implemented.
+- [x] The selected management operation is available through a basic frontend.
+- [x] Customer discovery functionality is available through a basic frontend.
+- [x] Frontends communicate through the REST API rather than hard-coded/persistence-file edits.
 
 ### Architecture and Persistence
 
-- [ ] Route → Service → Repository → JSON/CSV boundaries are respected.
-- [ ] Pydantic models are used appropriately for request/response validation.
-- [ ] Stable identifiers are preserved.
-- [ ] Restaurant/menu/menu-item relationships remain consistent.
-- [ ] Required create/update operations persist after reload/restart.
-- [ ] No M1-excluded authentication, cart, checkout, order, or delivery functionality is required for completion.
+- [x] Route → Service → Repository → JSON/CSV boundaries are respected.
+- [x] Pydantic models are used appropriately for request/response validation.
+- [x] Stable identifiers are preserved.
+- [x] Restaurant/menu/menu-item relationships remain consistent.
+- [x] Required create/update operations persist after reload/restart.
+- [x] No M1-excluded authentication, cart, checkout, order, or delivery functionality is required for completion.
 
 ### Testing and Quality
 
-- [ ] Appropriate unit tests are included with code changes.
-- [ ] Appropriate integration/API tests are included.
-- [ ] Meaningful invalid/failure cases are covered.
-- [ ] Test data is isolated from committed application data.
+- [x] Appropriate unit tests are included with code changes.
+- [x] Appropriate integration/API tests are included.
+- [x] Meaningful invalid/failure cases are covered.
+- [x] Test data is isolated from committed application data.
 - [ ] Full pytest suite passes.
 - [ ] CI passes.
 - [ ] No known critical M1 defects remain.
 
 ### Review and Documentation
 
-- [ ] All implementation work is integrated through pull requests.
+- [x] All implementation work is integrated through pull requests.
 - [ ] Required PRs are reviewed by another team member.
 - [ ] Review feedback is addressed.
 - [ ] Generated OpenAPI documentation matches the implementation.
@@ -239,9 +241,9 @@ Before ending the planning meeting, each team member should confirm the sprint p
 ### Decisions Needed
 
 - [x] Ownership confirmed: Thomas Chen owns #35–#39.
-- [ ] Agree the shared API/data contract in #30.
-- [ ] Choose the M1 restaurant search/filter mechanism.
-- [ ] Choose the M1 management frontend operation.
+- [x] Agree the shared API/data contract in #30.
+- [x] Choose the M1 restaurant search/filter mechanism.
+- [x] Choose the M1 management frontend operation.
 - [ ] Identify a real engineering decision suitable for the Decision Receipt once implementation establishes one.
 
 ### Scope Reminder
@@ -253,3 +255,23 @@ M1 is focused on the **first vertical slice**. Authentication/authorization, car
 Use this section for important sprint-level changes, decisions, blockers, or scope clarifications.
 
 Routine check-ins should update the relevant GitHub issues/Project Board rather than creating a new Sprint Planning file.
+
+
+### 2026-10-13 documentation reconciliation
+
+This is a repository/GitHub evidence update, not a new meeting or sign-off. Planning dates, owners, member markers, facilitator TBD, and unconfirmed sprint commitments above are preserved. Task checkmarks indicate implementation or recorded feature-level verification; final assessed-version checks remain pending.
+
+- The team adopted #30 through [PR #48](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/48) on 2026-10-02. Cuisine filtering was selected in that contract and integrated into `main` through [PR #59](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/59), following reviewed PR #57.
+- The user selected **Create restaurant** for #39 on 2026-10-12; [PR #61](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/61) merged it. The dependency/risk entries about an unselected operation above describe the original planning state and are resolved at implementation level.
+- Refreshed `main` at `09638a9` contains all eight API operations and both frontends. See the [M1 evidence table](../docs/milestones/M1.md#source-and-status) for issues and merged PRs #16, #51–#56, #58, #59, and #61. [PR #50](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/50) merged this sprint plan.
+- [Provenance Entries 21–41](../docs/PROVENANCE.md#entry-21-create-restaurant-and-shared-persistence-foundation) retain test-first, isolated-data, persistence/restart, validation, and review-fix evidence. PR #61 reports 373 passing tests with no skips after its fixes. This historical run was not repeated for #62; the latest integrated-main CI was in progress when checked.
+- Live reviews establish final approvals for PRs #48, #51–#58, and #61. PR #50 and integration PR #59 have no submitted formal GitHub review; the #42 collaboration audit must resolve the gaps without invented retrospective approvals.
+- #62 reconciles documentation on a separate branch; its PR still requires teammate review and merge. Live Role/Workstream/Status options could not be inspected because the token lacks `read:project`. Signed Team Agreement V1 lists three students versus the earlier brief's four-person requirement; obtain team/instructor confirmation without rewriting the agreement.
+
+Outstanding release work remains:
+
+- [ ] Finish [#40](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/40): integrated full-suite/CI results, complete generated OpenAPI audit, and any traced defects.
+- [ ] Finish [#41](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/41): an actual Decision Receipt, teammate verification, and team explanation.
+- [ ] Finish [#42](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/42): clean setup/demo verification, collaboration/Scrum/board audit, individual confirmations, and agreed contributions totaling 100%.
+- [ ] Verify the assessed commit, create the immutable `m1-vertical-slice` tag/release, record its full SHA, prepare/submit the Canvas PDF, and confirm each member's demonstration readiness. No submission or grading is established here.
+- [ ] Confirm the course deadline timezone and the native milestone metadata discrepancy recorded in [M1](../docs/milestones/M1.md#source-and-status).

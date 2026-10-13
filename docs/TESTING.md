@@ -6,15 +6,29 @@ These are team testing conventions. The supplied course brief specifies pytest f
 
 The supplied [M0 specification](milestones/M0.md) requires a working pytest suite covering the health endpoint, the restaurant-list operation, restaurant data/repository behaviour, and at least one meaningful invalid or failure case. Tests must use temporary or isolated data and must not modify committed representative data. Document the verified test command in the root README.
 
-The test-first cycle below is a team convention; the supplied M0 specification requires tests but does not explicitly require that development order. This checklist does not mean these tests currently exist or pass.
+The test-first cycle below is a team convention; the supplied M0 specification requires tests but does not explicitly require that development order. The repository contains this coverage; historical results are recorded in [provenance](PROVENANCE.md). Existence of tests does not establish a passing run on the current checkout.
 
 ## Current setup and commands
 
-Follow the [README setup](../README.md#development-setup). CI installs `requirements.txt` and `requirements-dev.txt` plus Playwright's Chromium on Python 3.12, runs `python -m compileall app` and `python -m pytest` with `REQUIRE_BROWSER_TESTS=1`, then fails if any file under `data/` was modified. Browser tests in `tests/browser/` are skipped where Playwright is not installed and fail in CI if they cannot run. Run the suite from the repository root in its virtual environment:
+Follow the [README setup](../README.md#setup) and [first-time setup](FIRST_TIME_SETUP.md#6-verify-the-test-suite). CI installs `requirements.txt` and `requirements-dev.txt` plus Playwright's Chromium on Python 3.12, runs `python -m compileall app` and `python -m pytest` with `REQUIRE_BROWSER_TESTS=1`, then fails if any file under `data/` was modified. Browser tests in `tests/browser/` skip locally if Playwright or Chromium is unavailable and fail instead when `REQUIRE_BROWSER_TESTS=1`. CI installs Chromium with `python -m playwright install --with-deps chromium`; local setup uses `python -m playwright install chromium`. On Linux, if browser launch reports missing system libraries, use the CI installation command where supported. Run the suite from the repository root in its virtual environment:
 
 ```sh
 python -m pytest
 ```
+
+To require both browser modules locally after installing their dependencies:
+
+```powershell
+$env:REQUIRE_BROWSER_TESTS = '1'
+python -m pytest
+Remove-Item Env:REQUIRE_BROWSER_TESTS
+```
+
+```sh
+REQUIRE_BROWSER_TESTS=1 python -m pytest
+```
+
+The fixtures also accept `PLAYWRIGHT_CHROMIUM_EXECUTABLE` as an optional executable-path override; it is not needed for the normal Playwright install.
 
 Target a real test path/node or behaviour name while developing:
 
@@ -91,7 +105,7 @@ When a regression cannot reasonably be automated, explain why and provide reprod
 
 ## Verification before review
 
-Run focused tests during development and broader applicable tests before review. Re-run affected checks after conflict resolution or changes that invalidate earlier evidence. Use actual configured lint, build, and frontend checks when applicable; no such tools are assumed yet.
+Run focused tests during development and broader applicable tests before review. Re-run affected checks after conflict resolution or changes that invalidate earlier evidence. Use actual configured lint, build, and frontend checks when applicable; the current CI uses compileall and pytest, with no separate configured lint or frontend build step.
 
 Record:
 

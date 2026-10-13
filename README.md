@@ -2,99 +2,92 @@
 
 **Team:** Agents Anonymous
 
-Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. The backend includes the Milestone 0 foundation and the M1 cuisine filtering, restaurant details, restaurant creation, restaurant updates, menu browsing, menu-item creation, and menu-item updates, plus basic customer and create-restaurant frontends. M1 integration and release work remain in progress.
+Food4Thought is a food-delivery application for the COSC 310 team term project. The current M1 slice lets customers list restaurants, filter by cuisine, and browse restaurant details and menus. The API supports creating/updating restaurants and adding/updating menu items. A basic management page exposes Create restaurant. Data is persisted in JSON.
 
-- [First-time application setup](docs/FIRST_TIME_SETUP.md)
-- [Quick setup for returning contributors](docs/QUICK_SETUP.md)
-- [M0 checkpoint and submission requirements](docs/milestones/M0.md)
-- [M1 checkpoint and source requirements](docs/milestones/M1.md)
-- [M1 restaurant/menu API and data contract](docs/M1_API_CONTRACT.md) (adopted through PR #48)
-- [Contributing and AI/provenance policy](CONTRIBUTING.md)
-- [Shared AI provenance record](docs/PROVENANCE.md)
-- [Testing conventions](docs/TESTING.md)
-- [Team agreement](scrum/team-agreement.md)
-- [Agent instructions](AGENTS.md)
+The M0 foundation and M1 feature PRs are merged; final verification, the Decision Receipt, collaboration/submission checks, and demonstration readiness remain tracked in [the M1 checkpoint](docs/milestones/M1.md).
 
 ## Requirements
 
-- Python 3.12 (verified with 3.12.3 and 3.12.13). If it is not installed, get it from [python.org](https://www.python.org/downloads/) or, on Windows, run `winget install --id Python.Python.3.12 -e`, then open a new terminal.
-- Git
+- Python 3.12 (the version used by CI).
+- Git.
 
-All Python dependencies are pinned in `requirements.txt`.
+Python dependencies are pinned in `requirements.txt`; browser-test dependencies are in `requirements-dev.txt`. Both frontends are served by FastAPI without Node.js or a build step. No database, API keys, or external services are required.
 
 ## Setup
 
-Use the dedicated setup guides so installation instructions have one source of truth:
+For a new machine or first clone, follow [First-Time Application Setup](docs/FIRST_TIME_SETUP.md). For later sessions, use [Quick Setup](docs/QUICK_SETUP.md).
 
-- **New machine / first clone:** [First-Time Application Setup](docs/FIRST_TIME_SETUP.md)
-- **Already configured:** [Quick Setup](docs/QUICK_SETUP.md)
+From the repository root, create and activate a Python 3.12 virtual environment, then install dependencies:
 
-Both guides describe only the application's current implementation.
+```sh
+python -m venv .venv
+```
+
+If `python` is not 3.12, use `py -3.12 -m venv .venv` on Windows or `python3.12 -m venv .venv` on macOS/Linux.
+
+| Shell | Activate |
+| --- | --- |
+| Windows PowerShell | `.venv\Scripts\Activate.ps1` |
+| Windows Command Prompt | `.venv\Scripts\activate.bat` |
+| macOS/Linux | `source .venv/bin/activate` |
+
+```sh
+python -m pip install -r requirements.txt
+```
+
+If PowerShell blocks activation, use `.\.venv\Scripts\python.exe` in place of `python`. The full guide includes cloning, prerequisites, troubleshooting, and setup verification.
 
 ## Running the application
+
+With the virtual environment active, run from the repository root:
 
 ```sh
 python -m uvicorn app.main:app --reload
 ```
 
-The API starts at `http://127.0.0.1:8000`. Stop it with `Ctrl+C`.
+The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 
-### Customer frontend
+| Page | URL |
+| --- | --- |
+| Customer: list, cuisine filter, details, menu | [Customer frontend](http://127.0.0.1:8000/app/) |
+| Management: Create restaurant | [Management frontend](http://127.0.0.1:8000/app/create-restaurant.html) |
+| Interactive API documentation | [Swagger UI](http://127.0.0.1:8000/docs) |
+| Generated API schema | [OpenAPI JSON](http://127.0.0.1:8000/openapi.json) |
 
-The same command serves the basic customer page at **`http://127.0.0.1:8000/app/`** (`http://127.0.0.1:8000/` redirects there). It is plain HTML, CSS, and JavaScript in `frontend/`; there is no Node.js or build step. The page lists restaurants, filters them by cuisine, and shows the selected restaurant's details and menu. All data comes from the REST API (`GET /restaurants`, `GET /restaurants/{restaurant_id}`, `GET /restaurants/{restaurant_id}/menu`); nothing is hard-coded or read from the JSON file. The selected restaurant is kept in the URL (for example `/app/#/restaurants/restaurant-001`), so links and the browser back button work. Loading, empty, not-found, and server-error states are shown on the page. If only the menu fails to load, the restaurant's details still show, with a menu-specific error; clicking the restaurant again retries. API text is rendered as text, never as HTML.
+The root URL redirects to the customer page. Select a restaurant to view its details and menu; selection is retained in the URL. A menu-loading failure leaves successfully loaded details visible; selecting the restaurant again retries.
 
-### Management frontend
-
-Issue #39 exposes **Create restaurant**, selected by the user on 2026-10-12. Open **`http://127.0.0.1:8000/app/create-restaurant.html`**, or follow **Create restaurant** from the customer page. Enter a name, cuisine, and description, then submit. The page sends JSON to the existing `POST /restaurants` API; the backend validates and saves the record and generates its ID. Success clears the form and offers **View restaurant**, which opens the saved restaurant in the customer page.
-
-The form disables its controls while submitting, identifies fields rejected by the API, and preserves entered values on errors. Correcting a rejected field to a nonblank value clears that field's message and ARIA error state; errors on other fields remain until corrected. The API still validates every submission. Requests that stall are cancelled after 15 seconds and the controls become usable again. If a response is lost, times out, or cannot confirm creation, check **Browse restaurants** before submitting again: the server might already have saved the restaurant, and POST retries can create duplicates. The page never retries automatically. API text is rendered as text, and no authentication is added (outside M1).
-
-The existing Uvicorn command serves both pages; no additional dependencies or build step are required. Creation writes to the configured data file. For experiments, use a disposable copy through `RESTAURANTS_DATA_PATH` as described in [first-time setup](docs/FIRST_TIME_SETUP.md#current-data-configuration). Browser tests exercise this workflow against isolated storage, including validation, storage/network failures, duplicate submissions, keyboard use, and phone layout.
+Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. Authentication is outside this M1 slice.
 
 ## API endpoints
 
 | Method and path | Purpose |
 | --- | --- |
-| `GET /restaurants` | Restaurant list; HTTP 200 with a JSON array of `id`, `name`, `cuisine`, and `description`. Optional `?cuisine=` filter, e.g. `/restaurants?cuisine=japanese`: surrounding whitespace is ignored and the whole cuisine must match, ignoring case (`Japan` does not match `Japanese`). No match returns `[]`; an empty or whitespace-only value returns HTTP 422. |
-| `POST /restaurants` | Create a restaurant; HTTP 201 with its server-generated ID and the same four-field response shape. |
-| `GET /restaurants/{restaurant_id}` | One restaurant by stable ID, e.g. `/restaurants/restaurant-001`; HTTP 200 with the same four fields as the list (no menu items). IDs are compared exactly; an unknown ID returns HTTP 404 with `{"detail": "Restaurant not found"}`. |
-| `PATCH /restaurants/{restaurant_id}` | Partially update a restaurant; HTTP 200 with the complete four-field restaurant response after saving. An unknown ID returns HTTP 404. |
-| `GET /restaurants/{restaurant_id}/menu` | A restaurant's menu, e.g. `/restaurants/restaurant-001/menu`; HTTP 200 with `restaurant_id` and `items` (each item has `id`, `name`, `description`, and a two-decimal `price` string). A restaurant with no items returns `"items": []`; an unknown restaurant returns HTTP 404 with `{"detail": "Restaurant not found"}`. |
-| `POST /restaurants/{restaurant_id}/menu/items` | Add a menu item to an existing restaurant; HTTP 201 with `id`, `name`, `description`, and a two-decimal `price` string. Unknown restaurants return HTTP 404. |
-| `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` | Partially update an item within its restaurant; HTTP 200 with the complete saved item. Unknown restaurants or items under that parent return HTTP 404. |
-| `GET /health` | Liveness check; returns `{"status": "ok"}` with HTTP 200. |
-| `GET /docs` | Interactive OpenAPI (Swagger) documentation. |
-| `GET /openapi.json` | Raw OpenAPI schema. |
+| `GET /health` | Liveness check; HTTP 200 with `{"status":"ok"}` |
+| `GET /restaurants` | List restaurants; optional `?cuisine=japanese` filter |
+| `GET /restaurants/{restaurant_id}` | Retrieve restaurant details |
+| `GET /restaurants/{restaurant_id}/menu` | Retrieve a restaurant's menu and items |
+| `POST /restaurants` | Create a restaurant |
+| `PATCH /restaurants/{restaurant_id}` | Update supplied restaurant fields |
+| `POST /restaurants/{restaurant_id}/menu/items` | Add a menu item |
+| `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` | Update supplied menu-item fields |
 
-Restaurant-create requests require nonempty `name`, `cuisine`, and `description` strings. Surrounding whitespace is removed; unknown fields and invalid values return HTTP 422. A new restaurant starts with an empty menu. An empty restaurant data array returns `[]`. Missing, malformed, or invalid data and failed saves return HTTP 500 with `{"detail": "Restaurant data is unavailable"}`, without exposing file paths or validation details.
-
-Menu-item creation requires `name`, `description`, and `price`, for example `{"name":"Soup","description":"Hot soup","price":"4.50"}`. Text is trimmed and must remain nonempty. Price must be a decimal string from `0` through `999.00` inclusive, with at most two fractional digits; `"4.5"` is saved as `"4.50"`. JSON numbers, unsupported fields (including client-supplied IDs), and invalid values return HTTP 422 before storage is read. A valid request against unavailable storage returns HTTP 500; otherwise an unknown parent returns HTTP 404 with `{"detail":"Restaurant not found"}`. Repeated POSTs create separate items; retries are not idempotent.
-
-Validation errors keep the `detail` array of error locations, types, messages, and rejected inputs. The shared error handler encodes non-finite numeric inputs as diagnostic strings and escapes Unicode so malformed input cannot break the HTTP 422 response itself. This also applies to restaurant creation.
-
-Restaurant-update requests supply one or more of `name`, `cuisine`, and `description`, with the same string validation. For example, `PATCH /restaurants/restaurant-001` with `{"description":"Seasonal bowls and noodles"}` changes only the description. Omitted fields retain their stored values; the ID, menu items, and unrelated records are preserved. Empty bodies, explicit null values, and unsupported fields return HTTP 422. A valid unchanged value succeeds. An unknown ID returns `{"detail":"Restaurant not found"}` with HTTP 404 and is never created. Invalid input is rejected before accessing storage; otherwise corrupt storage returns HTTP 500 even for an unknown ID.
-
-Menu-item updates supply one or more of `name`, `description`, and `price`, using the same text and price validation as creation. Use the restaurant and item IDs from the menu response; for example, send `{"price":"7.5"}` to `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` to save `"7.50"`. Omitted fields, IDs, parent relationships, and unrelated records/items remain unchanged. Empty bodies, explicit nulls, and unsupported fields return 422; unchanged values succeed with 200. Request validation precedes storage validation, then the restaurant lookup, then the item lookup within that restaurant. A missing restaurant returns `{"detail":"Restaurant not found"}`; a missing or wrong-parent item returns `{"detail":"Menu item not found"}`, both with 404 and no write. Storage failures return the generic 500 response described above.
-
-Restaurant requests follow route → `RestaurantService` → `RestaurantRepository` → configured JSON file. The repository owns file access, and the route translates data failures into HTTP errors. Create and update operations persist before returning success; a new repository instance can reload the result. `RestaurantService.update_restaurant()` checks existence and applies supplied fields inside `RestaurantRepository.mutate_records()`'s shared lock, then derives its response from the validated saved records. Filtering follows `GET /restaurants?cuisine=...` → route (rejects a blank value with 422 before storage is read) → `RestaurantService.list_restaurants(cuisine)`, which compares `casefold()`ed values → `RestaurantRepository.list_restaurants()` → configured JSON file. Details requests follow `GET /restaurants/{restaurant_id}` → route → `RestaurantService.get_restaurant()` → `RestaurantRepository.get_record()` → configured JSON file; the service raises `RestaurantNotFoundError` for an unknown ID (HTTP 404) and projects the stored record to the four-field `Restaurant` model. Menu requests follow `GET /restaurants/{restaurant_id}/menu` → route → `RestaurantService.get_menu()` → `RestaurantRepository.get_record()` → configured JSON file; the service raises `RestaurantNotFoundError` for an unknown restaurant, which the route maps to HTTP 404. The restaurant list keeps its four-field shape and never includes menu items.
-
-`RestaurantService.add_menu_item()` checks the parent, generates a UUID4 ID unique within that restaurant, and appends the item inside `RestaurantRepository.mutate_records()`. The shared lock covers this entire change. The service returns the validated saved item only after persistence succeeds; existing items and other restaurants are preserved. The new item is then available through the menu GET operation.
-
-`RestaurantService.update_menu_item()` resolves both the restaurant and item IDs inside that same mutation lock and changes only supplied fields. It returns the item selected by those IDs from the repository's validated saved records. This shares the single-process write coordination with restaurant creation/updates and menu-item creation.
+Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRACT.md) maintains request/response models, cuisine matching, validation, decimal-string prices, partial updates, error precedence, and persistence decisions. `/docs` shows interactive forms and generated schemas.
 
 ## Data
 
-Representative restaurant data is stored in `data/restaurants.json`. `RestaurantRepository` (`app/repositories/restaurant.py`) reads it by default. To use a different file, set the `RESTAURANTS_DATA_PATH` environment variable to that file's path before starting the application, or pass a path to `RestaurantRepository`. The file remains one JSON array. Each representative restaurant stores its menu items in a `menu_items` array inside its record, so items belong to the restaurant that contains them. Existing records without `menu_items` load with an empty menu; creation writes complete records and preserves existing menu items. Missing, malformed, or invalid data raises `RestaurantDataError`. The `999.00` maximum also applies to stored menu-item prices: an over-limit value makes the data invalid and returns the generic HTTP 500 on data operations, without clamping or rewriting the file. Correct such data before using it; the committed sample data is within the limit. Writes use a temporary file and atomic replacement, with one lock shared by repository instances in the application process. This does not coordinate multiple worker processes or external writers. Tests always use a temporary copy and never modify the committed file.
+Representative data lives in `data/restaurants.json`. Set `RESTAURANTS_DATA_PATH` before starting the server to use another JSON file; no environment variable is required for normal use. For manual POST/PATCH experiments, follow the [disposable data-copy procedure](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) so the committed sample stays unchanged.
+
+Menu items are stored inside their restaurant record. Writes persist before returning success and use atomic replacement with a process-wide mutation lock. This supports a single application process; multiple workers and external writers are not coordinated. Invalid/unavailable data produces generic HTTP 500 errors. Stored menu prices above `999.00` are invalid and must be corrected before data operations can succeed; the sample data satisfies the limit.
 
 ## Running tests
+
+From the repository root with the virtual environment active:
 
 ```sh
 python -m pytest
 ```
 
-`tests/conftest.py` gives each test a temporary copy of the restaurant data and fails the run if any committed file under `data/` changes. GitHub Actions runs the same command on pushes and pull requests to `main`.
-
-`tests/browser/` drives the customer frontend in a real Chromium browser against a local test server with the same isolated data. Those tests need the development-only dependencies; without them they are skipped and the rest of the suite still runs. CI installs them and requires the browser tests to pass. To run them locally:
+Tests use temporary data copies and check that committed `data/` files remain unchanged. Browser tests exercise both pages in Chromium against a local test server. Without Playwright/Chromium they skip locally; CI installs both and requires them to run.
 
 ```sh
 python -m pip install -r requirements-dev.txt
@@ -102,26 +95,33 @@ python -m playwright install chromium
 python -m pytest
 ```
 
+See [Testing](docs/TESTING.md) for required-browser mode, focused commands, isolation, and the actual CI steps. These are instructions, not a claim of a test run.
+
 ## Repository structure
 
 ```text
-app/
-  main.py               FastAPI application; registers routers, error handling, and the frontend
-  api/routes/           HTTP routes (health.py, restaurants.py)
-  api/errors.py         JSON-safe validation-error responses for rejected input
-  api/openapi.py        OpenAPI post-processing (removes 422 only from contract-listed operations)
-  services/             Restaurant discovery and management (restaurant.py)
-  repositories/         Data access for JSON files (restaurant.py)
-  schemas/              Pydantic models (restaurant.py)
-  core/config.py        Configurable data-file location
-frontend/               Customer page served at /app/ (index.html, app.js, styles.css)
-data/restaurants.json   Representative restaurant data
-tests/                  pytest suite and shared fixtures (tests/browser/: real-browser frontend tests)
-scrum/                  Team agreement
-docs/                   Milestones, testing, and provenance records
-.github/                CI workflow, issue and PR templates
-requirements.txt        Pinned dependencies
-requirements-dev.txt    Development-only dependencies (Playwright for browser tests)
+app/main.py             FastAPI entry point, routers, frontend serving
+app/api/                Routes, error responses, OpenAPI handling
+app/services/           Restaurant/menu rules and orchestration
+app/repositories/       JSON loading, validation, and persistence
+app/schemas/            Pydantic request, response, and persistence models
+app/core/config.py      Configurable restaurant-data path
+frontend/               Customer and Create restaurant pages and shared styles
+data/restaurants.json   Representative restaurant/menu data
+tests/                  Backend/API tests; tests/browser/ for both frontends
+scrum/                  Signed team agreement and M1 sprint planning
+docs/                   Setup, testing, API contract, milestones, provenance
+.github/                CI, issue templates, and PR template
+requirements.txt        Pinned application/backend-test dependencies
+requirements-dev.txt    Pinned browser-test dependencies
 ```
 
-The repository contains no passwords, tokens, or API keys, and none are needed to run it.
+## Contributing and documentation
+
+- [Contributor workflow and AI/provenance policy](CONTRIBUTING.md)
+- [Testing conventions](docs/TESTING.md)
+- [M0 checkpoint](docs/milestones/M0.md) and [M1 checkpoint](docs/milestones/M1.md)
+- [M1 API/data contract](docs/M1_API_CONTRACT.md)
+- [Shared AI provenance record](docs/PROVENANCE.md)
+- [M1 sprint plan](scrum/SPRINT-Planning-M1.md) and [signed team agreement](scrum/team-agreement.md)
+- [Agent instructions](AGENTS.md)
