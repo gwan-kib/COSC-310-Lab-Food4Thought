@@ -11,6 +11,7 @@ let submitting = false;
 
 // A lost POST response does not tell us whether the server saved the record.
 const uncertainOutcome = "Could not confirm creation. Check the restaurant list before trying again to avoid creating a duplicate.";
+const requestTimeoutMs = 15_000;
 
 function showValidation(details) {
   const summary = document.createElement("p");
@@ -34,6 +35,17 @@ function showValidation(details) {
   return firstInvalid;
 }
 
+for (const [name, field] of Object.entries(fields)) {
+  field.addEventListener("input", () => {
+    // These three text fields require nonblank values; the API still validates on submit.
+    if (field.getAttribute("aria-invalid") !== "true" || !field.value.trim()) return;
+    field.removeAttribute("aria-invalid");
+    field.removeAttribute("aria-describedby");
+    document.getElementById(`${name}-error`)?.remove();
+    if (!errors.querySelector("li")) errors.replaceChildren();
+  });
+}
+
 form.addEventListener("submit", async event => {
   event.preventDefault();
   if (submitting || !form.reportValidity()) return;
@@ -54,9 +66,13 @@ form.addEventListener("submit", async event => {
   form.setAttribute("aria-busy", "true");
   status.textContent = "Creating restaurant…";
   let focusAfter = null;
+  const controller = new AbortController();
+  // Bound both the request and response-body read; cancellation cannot undo a save.
+  const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
 
   try {
     const response = await fetch("/restaurants", {
+      signal: controller.signal,
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -64,7 +80,8 @@ form.addEventListener("submit", async event => {
     let body = null;
     try {
       body = await response.json();
-    } catch {
+    } catch (error) {
+      if (controller.signal.aborted) throw error;
       // Non-JSON failures still need useful feedback, without erasing input.
     }
     status.textContent = "";
@@ -92,6 +109,7 @@ form.addEventListener("submit", async event => {
     status.textContent = "";
     errors.textContent = uncertainOutcome;
   } finally {
+    clearTimeout(timeout);
     submitting = false;
     fieldset.disabled = false;
     form.removeAttribute("aria-busy");

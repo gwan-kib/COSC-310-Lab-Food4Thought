@@ -114,6 +114,62 @@ def test_storage_failure_preserves_input_and_can_be_retried(page, live_server, i
     assert len(RestaurantRepository(isolated_restaurants_path).load_records()) == 3
 
 
+def test_corrected_field_errors_clear_before_resubmission(page, live_server, isolated_restaurants_path):
+    before = isolated_restaurants_path.read_bytes()
+    open_form(page, live_server)
+    fill_form(page, name="   ", cuisine="   ", description="   ")
+    submit(page)
+    expect(page.locator('[aria-invalid="true"]')).to_have_count(3)
+
+    # Another blank value has not corrected the backend's nonblank requirement.
+    page.get_by_label("Name", exact=True).fill(" ")
+    expect(page.get_by_label("Name", exact=True)).to_have_attribute("aria-invalid", "true")
+    for label, value, remaining in [("Name", "New Cafe", 2), ("Cuisine", "Cafe", 1),
+                                    ("Description", "Fresh food", 0)]:
+        field = page.get_by_label(label, exact=True)
+        error_id = field.get_attribute("aria-describedby")
+        assert error_id
+        field.fill(value)
+        expect(field).not_to_have_attribute("aria-invalid", "true")
+        assert field.get_attribute("aria-describedby") is None
+        expect(page.locator(f"#{error_id}")).to_have_count(0)
+        expect(page.locator('[aria-invalid="true"]')).to_have_count(remaining)
+        expect(page.locator("#create-errors li")).to_have_count(remaining)
+    expect(page.get_by_role("alert", include_hidden=True)).to_be_empty()
+    assert isolated_restaurants_path.read_bytes() == before
+    assert page.page_errors == []
+
+
+def test_stalled_post_times_out_without_retrying(page, live_server, isolated_restaurants_path):
+    before = isolated_restaurants_path.read_bytes()
+    requests = []
+    page.clock.install()
+    page.route("**/restaurants", lambda route: requests.append(route.request))
+    open_form(page, live_server)
+    fill_form(page)
+    with page.expect_request(lambda request: request.method == "POST"):
+        submit(page)
+    expect(page.get_by_role("button", name="Create restaurant", exact=True)).to_be_disabled()
+    page.clock.fast_forward(15_000)
+    expect(page.get_by_role("button", name="Create restaurant", exact=True)).to_be_enabled()
+    expect(page.get_by_label("Name", exact=True)).to_be_enabled()
+    expect(page.get_by_label("Name", exact=True)).to_have_value("New Cafe")
+    expect(page.get_by_label("Cuisine", exact=True)).to_have_value("Cafe")
+    expect(page.get_by_label("Description", exact=True)).to_have_value("Fresh food")
+    expect(page.get_by_role("alert")).to_contain_text("Check the restaurant list")
+    expect(page.get_by_role("status", include_hidden=True)).to_be_empty()
+    expect(page.locator("form")).not_to_have_attribute("aria-busy", "true")
+    expect(page.get_by_role("link", name="View restaurant", exact=True)).to_be_hidden()
+    page.clock.fast_forward(30_000)
+    assert len(requests) == 1
+    assert isolated_restaurants_path.read_bytes() == before
+    page.unroute("**/restaurants")
+    submit(page)
+    expect(page.get_by_role("status")).to_contain_text("New Cafe")
+    assert len(RestaurantRepository(isolated_restaurants_path).load_records()) == 3
+    assert page.page_errors == []
+
+
 def test_lost_response_does_not_retry_a_possibly_saved_creation(page, live_server, isolated_restaurants_path):
     attempts = []
 
