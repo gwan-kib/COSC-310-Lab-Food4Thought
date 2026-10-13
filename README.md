@@ -2,7 +2,7 @@
 
 **Team:** Agents Anonymous
 
-Food4Thought is a food-delivery application for the COSC 310 team term project. The current M1 slice lets customers list restaurants, filter by cuisine, and browse restaurant details and menus. The API supports creating/updating restaurants and adding/updating menu items. A basic management page exposes Create restaurant. Data is persisted in JSON.
+Food4Thought is a food-delivery application for the COSC 310 team term project. The current M1 slice lets customers list restaurants, filter by cuisine, and browse restaurant details and menus. The API supports creating/updating restaurants and adding/updating menu items. Management pages support creating a restaurant and editing an existing restaurant's information. Data is persisted in JSON.
 
 The M0 foundation and M1 feature PRs are merged; final verification, the Decision Receipt, collaboration/submission checks, and demonstration readiness remain tracked in [the M1 checkpoint](docs/milestones/M1.md).
 
@@ -50,13 +50,14 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 | Page | URL |
 | --- | --- |
 | Customer: list, cuisine filter, details, menu | [Customer frontend](http://127.0.0.1:8000/app/) |
-| Management: Create restaurant | [Management frontend](http://127.0.0.1:8000/app/create-restaurant.html) |
+| Management: Create restaurant | [Create restaurant](http://127.0.0.1:8000/app/create-restaurant.html) |
+| Management: Edit restaurant | Select a restaurant in the [customer frontend](http://127.0.0.1:8000/app/) and follow **Edit restaurant** |
 | Interactive API documentation | [Swagger UI](http://127.0.0.1:8000/docs) |
 | Generated API schema | [OpenAPI JSON](http://127.0.0.1:8000/openapi.json) |
 
 The root URL redirects to the customer page. Select a restaurant to view its details and menu; selection is retained in the URL. A menu-loading failure leaves successfully loaded details visible; selecting the restaurant again retries.
 
-Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. Authentication is outside this M1 slice.
+Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. To edit an existing restaurant, select it on the customer page and follow **Edit restaurant**. The form loads the current name, cuisine, and description, sends only changed fields with `PATCH /restaurants/{restaurant_id}`, and links back to the updated details. Validation errors preserve input. If the response is lost, check the details page before retrying. Authentication is outside this M1 slice.
 
 ## API endpoints
 
@@ -106,9 +107,9 @@ app/services/           Restaurant/menu rules and orchestration
 app/repositories/       JSON loading, validation, and persistence
 app/schemas/            Pydantic request, response, and persistence models
 app/core/config.py      Configurable restaurant-data path
-frontend/               Customer and Create restaurant pages and shared styles
+frontend/               Customer, Create restaurant, and Edit restaurant pages and shared styles
 data/restaurants.json   Representative restaurant/menu data
-tests/                  Backend/API tests; tests/browser/ for both frontends
+tests/                  Backend/API tests; tests/browser/ for customer and management pages
 scrum/                  Signed team agreement and M1 sprint planning
 docs/                   Setup, testing, API contract, milestones, provenance
 .github/                CI, issue templates, and PR template
