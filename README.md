@@ -122,6 +122,7 @@ requirements-dev.txt    Pinned browser-test dependencies
 - [Testing conventions](docs/TESTING.md)
 - [M0 checkpoint](docs/milestones/M0.md) and [M1 checkpoint](docs/milestones/M1.md)
 - [M1 API/data contract](docs/M1_API_CONTRACT.md)
+- [M1 Engineering Decision Receipt — menu-item price validation](docs/DECISION_RECEIPT.md)
 - [Shared AI provenance record](docs/PROVENANCE.md)
 - [M1 sprint plan](scrum/SPRINT-Planning-M1.md) and [signed team agreement](scrum/team-agreement.md)
 - [Agent instructions](AGENTS.md)

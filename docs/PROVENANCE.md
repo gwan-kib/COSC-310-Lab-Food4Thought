@@ -561,6 +561,18 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 - Follow-up (2026-10-13): At the user's request, Codex removed the standalone Status reconciliation section and updated outstanding individual-review statements using Gwantana's explicit report that all members reviewed their own sections. Verified later peer-approval/merge facts are retained in the relevant entries. The temporary review-status validator passed for all 43 entries, preserved their labels/artifacts/purposes/validation/PR references, and confirmed the 23 updated review records and single-file follow-up scope. Markdown verification passed for 17 files, 74 local links/anchors, four JSON examples, and balanced fences; git diff --check passed. No application tests were rerun.
 
+### Entry 44: M1 menu-item price validation Decision Receipt
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), who requested this documentation; student verification and acceptance are pending.
+- Artifact: `docs/DECISION_RECEIPT.md`, supporting README navigation, and `docs/milestones/M1.md` reference.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Document the menu-price representation and validation decision already adopted for M1, in support of issues #41 and #64.
+- Influence: ChatGPT drafted the concise receipt, including code-grounded rationale, examples, alternative approaches labeled as comparisons, trade-offs, and links to existing implementation/tests. It also linked the receipt from README and the M1 checkpoint. No application code, tests, API contract, or data were changed.
+- Validation: Inspected `app/schemas/restaurant.py`, `tests/test_menu_price_limit.py`, the adopted M1 contract, the price-bound review in PR #55, and issue #41 against the documented behavior. Verified the GitHub compare diff contains four documentation-only files and checked 10 relative links across the changed documents; all links target tracked paths. This is documentation-only work; no application tests have been run as part of this task. Teammate review and ability to explain the receipt remain to be confirmed.
+- PR or commit: [Issue #64](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/64); [existing Decision Receipt task #41](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/41); [receipt commit b5c6630](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/b5c66302db7a7e815b180625d482fbca3a2f07cd); [PR #65](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/65); branch `docs/64-menu-price-decision`.
+- Student review status: Pending: Gwantana and at least one teammate should read the receipt, check it against the code and agreed price rule, and be able to explain its rationale. No review or approval is claimed.
+
 ### Entry 45: Code file purpose descriptions
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue #66 assignee; review of this new contribution remains to be confirmed.
@@ -572,3 +584,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: Baseline `.\.venv\Scripts\python.exe -m pytest -q` and post-change `.\.venv\Scripts\python.exe -m pytest -q -rs` each passed 355 tests with two browser modules skipped because Playwright is not installed, plus one existing Starlette/AnyIO deprecation warning. A temporary Python checker verified all 37 meaningful-code files have descriptions (34 additions, three retained), all 38 tracked Python ASTs are identical to main, and newly commented frontend/workflow contents match main after removing the added headers. It verified the 36-file scope, previous provenance prefix, required entry fields, and nine local Markdown links/anchors. `git diff --check` passed. The initial checker flagged a wrapped hyphenated word in a description; comments were rewrapped without splitting words and the checker then passed. No new behavior or tests were introduced, so a failing-before cycle is not applicable. Setup guides were inspected; prerequisites, commands, data configuration, and URLs are unaffected.
 - PR or commit: [Issue #66](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/66); branch `chore/66-file-purpose-descriptions`; [PR #67](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/67); implementation commit `09510fa`.
 - Student review status: Pending for this new contribution. The earlier confirmation covers previously reviewed work; it does not establish review of these newly generated descriptions. The user requested that the PR be opened without review requests.
+
+### Entry 46: Decision Receipt cleanup and main integration
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #64 assignee and requester; review of this follow-up remains unconfirmed.
+- Artifact: `docs/DECISION_RECEIPT.md`, `docs/PROVENANCE.md` conflict resolution, integration with current main, and PR #65's description.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Remove the receipt's TA explanation and everything beneath it, then resolve PR #65's merge conflicts as requested.
+- Influence: Codex removed the complete final TA section, including its concluding paragraph. It integrated main at `ba2dd7d` and resolved the provenance conflict by retaining the Decision Receipt's Entry 44 and main's code-description Entry 45 in order, without changing their recorded content or student review claims. All code descriptions and agent instructions from main are preserved; no application, test, configuration, dependency, data, or adopted price-contract changes are introduced by this PR.
+- Validation: Documentation validation passed for 18 Markdown files and 80 local links/anchors, including balanced fences, the exact receipt cutoff, no conflict markers or unmerged index entries, unchanged original provenance entries, and ordered Entries 1–46. git diff --check and git diff --cached --check passed; the net diff against main contains only the four intended documentation files, with no code, test, configuration, dependency, data, or agent-instruction differences. Application tests are not rerun for this documentation-only follow-up; historical checks retain their original attribution.
+- PR or commit: [PR #65](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/65); [issue #64](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/64); branch `docs/64-menu-price-decision`; integrates main at `ba2dd7d`.
+- Student review status: Pending for this follow-up. Neither the requested edits nor agent checks establish teammate approval, demonstration readiness, or completion of issue #41.
