@@ -2,7 +2,7 @@
 
 **Team:** Agents Anonymous
 
-Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. The backend includes the Milestone 0 foundation and the M1 cuisine filtering, restaurant details, restaurant creation, restaurant updates, menu browsing, menu-item creation, and menu-item updates. The rest of the M1 slice is still in progress.
+Food4Thought is a food-delivery application built for the COSC 310 team term project: a FastAPI REST backend with JSON persistence, tested with pytest. The backend includes the Milestone 0 foundation and the M1 cuisine filtering, restaurant details, restaurant creation, restaurant updates, menu browsing, menu-item creation, and menu-item updates, plus a basic customer frontend. The rest of the M1 slice is still in progress.
 
 - [First-time application setup](docs/FIRST_TIME_SETUP.md)
 - [Quick setup for returning contributors](docs/QUICK_SETUP.md)
