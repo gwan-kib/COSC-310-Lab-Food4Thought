@@ -1,0 +1,117 @@
+{
+  "contract_status": "Proposed under issue #77; no M2 routes implemented or teammate adoption recorded",
+  "registration_request": {
+    "name": "Example Customer",
+    "email": "customer@example.invalid",
+    "delivery_address": "Example delivery address",
+    "password": "example-only-not-a-real-secret"
+  },
+  "login_request": {
+    "email": "customer@example.invalid",
+    "password": "example-only-not-a-real-secret"
+  },
+  "login_response": {
+    "access_token": "example-token-do-not-use",
+    "token_type": "bearer"
+  },
+  "customer": {
+    "id": "customer-001",
+    "name": "Example Customer",
+    "email": "customer@example.invalid",
+    "delivery_address": "Example delivery address",
+    "status": "active"
+  },
+  "profile_update_request": {
+    "delivery_address": "Another example delivery address"
+  },
+  "add_item_request": {
+    "restaurant_id": "restaurant-001",
+    "item_id": "item-001",
+    "quantity": 2
+  },
+  "quantity_update_request": {"quantity": 3},
+  "availability_update_request": {"available": false},
+  "restaurant": {
+    "id": "restaurant-001",
+    "name": "Cedar Bowl",
+    "cuisine": "Japanese",
+    "description": "Rice bowls and noodles"
+  },
+  "catalog_item": {
+    "id": "item-001",
+    "name": "Vegetable bowl",
+    "description": "Rice and vegetables",
+    "price": "12.50",
+    "available": true
+  },
+  "cart_record": {
+    "id": "cart-001",
+    "customer_id": "customer-001",
+    "revision": 2,
+    "restaurant_id": "restaurant-001",
+    "items": [
+      {"item_id": "item-001", "quantity": 2},
+      {"item_id": "item-002", "quantity": 1}
+    ]
+  },
+  "cart": {
+    "id": "cart-001",
+    "customer_id": "customer-001",
+    "revision": 2,
+    "restaurant_id": "restaurant-001",
+    "items": [
+      {"item_id": "item-001", "name": "Vegetable bowl", "quantity": 2,
+       "unit_price": "12.50", "line_total": "25.00", "available": true},
+      {"item_id": "item-002", "name": "Noodle bowl", "quantity": 1,
+       "unit_price": "14.00", "line_total": "14.00", "available": true}
+    ],
+    "subtotal": "39.00",
+    "total": "39.00",
+    "checkout_order_id": null
+  },
+  "empty_cart": {
+    "id": "cart-001",
+    "customer_id": "customer-001",
+    "revision": 3,
+    "restaurant_id": null,
+    "items": [],
+    "subtotal": "0.00",
+    "total": "0.00",
+    "checkout_order_id": null
+  },
+  "checkout_request": {"cart_id": "cart-001", "cart_revision": 2},
+  "checkout_response": {
+    "order": {
+      "id": "order-001",
+      "customer_id": "customer-001",
+      "restaurant_id": "restaurant-001",
+      "restaurant_name": "Cedar Bowl",
+      "source_cart_id": "cart-001",
+      "source_cart_revision": 2,
+      "delivery_address": "Example delivery address",
+      "status": "placed",
+      "items": [
+        {"item_id": "item-001", "name": "Vegetable bowl", "quantity": 2,
+         "unit_price": "12.50", "line_total": "25.00"},
+        {"item_id": "item-002", "name": "Noodle bowl", "quantity": 1,
+         "unit_price": "14.00", "line_total": "14.00"}
+      ],
+      "subtotal": "39.00",
+      "total": "39.00"
+    },
+    "cart_reset_pending": false
+  },
+  "errors": {
+    "unauthenticated": {"status": 401, "body": {"detail": "Authentication required"}},
+    "forbidden": {"status": 403, "body": {"detail": "Operation not permitted"}},
+    "inactive": {"status": 403, "body": {"detail": "Customer is inactive"}},
+    "cart_missing": {"status": 404, "body": {"detail": "Cart not found"}},
+    "order_missing_or_not_owned": {"status": 404, "body": {"detail": "Order not found"}},
+    "empty_cart": {"status": 409, "body": {"detail": "Cart is empty"}},
+    "mixed_restaurants": {"status": 409, "body": {"detail": "Cart belongs to another restaurant"}},
+    "unavailable_item": {"status": 409, "body": {"detail": "Menu item is unavailable"}},
+    "stale_cart": {"status": 409, "body": {"detail": "Cart revision changed"}},
+    "recovery_required": {"status": 409, "body": {"detail": "Cart checkout recovery required"}},
+    "storage": {"status": 500, "body": {"detail": "Checkout data is unavailable"}}
+  }
+}

@@ -48,6 +48,25 @@ The Edit restaurant browser tests in `tests/browser/test_edit_restaurant_browser
 
 ## Write tests before implementation
 
+### M2 contract handoff support
+
+`tests/contracts/` checks the [proposed M2 contract](M2_API_CONTRACT.md) and
+[example bundle](examples/m2.json). Run `python -m pytest -q tests/contracts`.
+Its models and in-memory customer/catalog/cart/order doubles support independent
+feature development. They do not implement production checkout or authorization
+and must not be imported by application code. The package's `m2_store_paths`
+fixture selects explicit disposable paths for every proposed customer/cart/order
+store and reuses the root fixture's restaurant copy; it does not initialize
+committed data or add working runtime configuration.
+
+The session guard already snapshots every file under `data/`; new stores do not
+need duplicate hash guards. Feature owners still need real path-override,
+save/reload, failure, authorization and service/API tests, and isolated auth
+storage if #78 adds it. Final #95/#101 integration tests must use the real
+implementations, not these doubles.
+
+### Test-first cycle
+
 **Team convention:** use a test-first cycle for new or changed behaviour and bug fixes. Tests come before the implementation code they verify.
 
 1. Derive expected behaviour from the acceptance criteria and confirmed requirements.
