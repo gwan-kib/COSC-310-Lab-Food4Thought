@@ -3,9 +3,10 @@
 ## Status, sources, and limits
 
 Prepared for [#77](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/77)
-on 2026-11-03. **Proposal for implementation and teammate review; not adopted,
-not implemented, and not evidence that M2 is complete.** The requester authorized
-drafting the interface decisions and opening a PR without requesting reviews.
+on 2026-11-03. **Proposed interface contract for M2 implementation.**
+[Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105#pullrequestreview-5791463356) on 2026-11-05 identified the checkout lock ordering,
+adoption criteria and source traceability changes. See the
+[adoption checklist](#contract-adoption) for the decisions still to record.
 
 Source review:
 
@@ -13,7 +14,7 @@ Source review:
   inspected from the text captured on 2026-10-22: §2 workflow; §3 customer,
   authentication, cart, checkout and order scope; §4 cross-subsystem rules;
   §6 persistence; §7 tests; §8 API documentation. The live course page could not
-  be rechecked on 2026-11-03 because computer use could not verify the browser URL.
+  be verified for this revision.
 - Current `main`, `87ce91c1a28648f849063a46620a7321a6d2e637`:
   [routes](../app/api/routes/restaurants.py), [schemas](../app/schemas/restaurant.py),
   [services](../app/services/restaurant.py), [repository](../app/repositories/restaurant.py),
@@ -23,19 +24,34 @@ Source review:
   [testing](TESTING.md), and the live M2 issues. No open PRs existed at inspection.
   Live Project field values were unavailable; no board fields were changed.
 
-**Unresolved source gap:** the original full project authentication/role and
-customer-field specification was not recovered. M2 delegates the authentication
-mechanism to that project source. Exact source-required profile/address fields,
-role names, restaurant ownership provisioning, and management permissions therefore
-remain unverified. The concrete minimal shapes below are proposed engineering
-choices, not claims about those requirements. Reconcile them in
-[#78](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/78) before adoption.
-No administrator permissions or account reactivation are inferred.
+### Requirements verified against available sources
 
-All paths, status literals, transport choices, quantity semantics, money policy,
-and retry details below are **proposed team decisions**. The assignment requires
-the capabilities and rules, not these exact field names or routes. Keep the
-proposal, examples, doubles and feature implementations aligned through review.
+- M2 §3 **Customer Accounts** requires registration, sign-in, retrieval and
+  updates of customer information, updates to the delivery address, and
+  deactivation. The proposed profile schema and PATCH field list below are
+  engineering choices. §3 leaves the exact fields and address shape unspecified.
+- M2 §3 **Authentication and Authorization** requires the backend to identify
+  callers, enforce role restrictions and return appropriate responses for
+  unauthenticated and unauthorized requests. It delegates the sign-in mechanism
+  to the full project brief. Bearer transport is a proposed choice.
+- M2 §3 **Restaurant and Menu** retains restaurant and menu management and adds
+  availability changes or menu-item deactivation where required. The
+  [repository's summary of backend authority](../CONTRIBUTING.md#backend-authority-and-reliability)
+  names customers, restaurant users and system administrators and calls for
+  backend ownership checks. The summary leaves each role's exact permissions and
+  how restaurant ownership is assigned to the project requirements.
+- M2 §4 **Customer → Cart** bars deactivated customers from creating or editing
+  carts. **Customer → Checkout** requires a valid current customer state.
+  The active-customer checks below enforce those constraints.
+
+The repository contains the brief's summary. Exact required profile/address
+fields, sign-in mechanism, role permissions and restaurant ownership assignment
+still need verification against the full brief in
+[#78](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/78).
+The proposed matrix grants no administrator or reactivation capabilities.
+Paths, status literals, transport, quantity semantics, money policy and retry
+details remain proposed design choices. Keep the contract, examples, test
+doubles and feature implementations aligned through review.
 
 ## Ownership and parallel work
 
@@ -204,17 +220,22 @@ unique across orders. No client-supplied order ID or arbitrary retry token.
 Each order also has its own stable ID and customer/restaurant/item relationships;
 snapshot and storage details are in [the proposed data model](DATA_MODEL.md).
 
-1. Authenticate, enforce the customer role/ownership and reload current active
-   customer status. Enter the shared single-process workflow mutation lock.
+1. Authenticate the caller, acquire the shared single-process workflow mutation
+   lock, then reload the customer and validate their current active status, role
+   and ownership. Hold the lock through receipt lookup, checkout validation,
+   order persistence and any conditional cart reset. Account deactivation uses
+   the same lock, so checkout sees a deactivation that completed before it
+   acquired the lock.
 2. Look up an already saved order for the requested cart/revision. Verify its
    customer ownership. If present, return that order unchanged: do not recalculate
    historical prices/address or save another order. Try only the conditional
    reset described below; a later cart revision must remain untouched.
 3. For a new attempt, load/validate the current owned cart and all required stores;
    require matching ID/revision, a nonempty single-restaurant cart, valid parent/
-   item references, quantities and current availability. Re-read current customer
-   address and menu prices. Build and validate the complete order snapshot before
-   the first write. No cart mutation on rejected checkout.
+   item references, quantities and current availability. Use the current address
+   from the customer record reloaded under the lock and read current menu prices.
+   Build and validate the complete order snapshot before the first write.
+   Rejected checkout leaves the cart unchanged.
 4. Persist the order atomically, enforcing unique order ID and unique attempt.
    An order-save failure returns generic 500 and preserves the cart. If a write
    reports an uncertain result, do not reset the cart; retry checks the durable
@@ -300,18 +321,25 @@ conditional-reset behavior including a saved order plus failed reset. They do
 atomic persistence, restart behavior or frontend integration. Feature owners
 must add those tests; #95/#101 integrate real implementations and every store.
 
-Before adoption and before #77 can close:
+### Contract adoption
 
-- [ ] Recover current project source; settle customer fields and complete the
-  role/ownership/authentication matrix in #78 with exact source sections.
-- [ ] Sreeram records agreement or corrections on customer/cart, identity,
-  receipt lookup, mutation locking and isolation contracts.
-- [ ] Thomas records agreement or corrections on availability, order snapshots,
-  durable attempt uniqueness, errors and conditional cart reset.
-- [ ] Update examples/ports/docs and dependent implementations for that feedback;
-  record reviewer/date/comment or PR links, never inferred approval.
-- [ ] Real integration/restart/failure tests, source reconciliation, green CI,
-  peer review and merge evidence are linked from [M2 evidence](milestones/M2.md).
+This checklist records the shared decisions developers need for implementation.
 
-No teammate review has occurred for this proposal. None was requested, per the
-requester. No issue is closed or marked Done by publishing it.
+- [x] Record the customer and authorization requirements verified in M2 §§3–4.
+- [x] Address the checkout lock sequence and separate the adoption and issue
+  completion gates raised in [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105#pullrequestreview-5791463356).
+- [ ] Reconcile the remaining customer fields, sign-in mechanism, role permissions
+  and restaurant ownership rules in #78 and cite the relevant project sections.
+- [ ] Record the scope and evidence of developer agreement on the customer/cart
+  and order/availability interfaces. Carry agreed changes into the contract,
+  examples and test doubles.
+
+### Issue #77 completion
+
+- [ ] Wire the feature implementations to the agreed interfaces and real stores.
+- [ ] Verify the real workflow in #95/#101, including restart, order-save and
+  cart-reset failures, and checkout racing with customer deactivation. When
+  deactivation acquires the lock and finishes first, checkout must reject the
+  now-inactive customer without writing an order or resetting the cart.
+- [ ] Link the integrated tests, passing CI, peer review and final merge from
+  [M2 evidence](milestones/M2.md) before closing #77.

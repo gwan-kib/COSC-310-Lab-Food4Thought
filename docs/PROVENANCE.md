@@ -656,3 +656,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: Test-first `python -u -m pytest -q tests/contracts --basetemp=../pytest-contract-red` failed as expected with missing `contracts.m2` before that support module was written. After implementation, the focused contract run passed 21 tests. Using the existing project Python 3.12.13 environment with normal local access, baseline required-browser pytest passed 386 tests; final `REQUIRE_BROWSER_TESTS=1` plus `python -u -m pytest -q --basetemp=../pytest-final-full` passed 407 tests with no skips and one existing Starlette/AnyIO deprecation warning in 13.94 seconds. `python -m compileall -q app`, the session guard over all `data/` files, `git diff --exit-code -- data/`, `git diff --check`, and local Markdown link/anchor checks passed. Restricted local test runs stalled on the health request and were stopped; successful runs used normal local access. The doubles validate only handoff support and are not real authorization/checkout/restart/concurrency/integration evidence. Both setup guides were checked for impact and remain unchanged because no operational behavior changed. Published-head CI is recorded separately in the PR.
 - PR or commit: [Issue #77](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/77); branch `docs/77-m2-contracts`, based on main `87ce91c1a28648f849063a46620a7321a6d2e637`; the PR links this entry and the outstanding adoption gates.
 - Student review status: Pending. No teammate review has been requested, no approval or student understanding is inferred, and #77 remains open pending source reconciliation, recorded teammate agreement, peer-reviewed merge and actual integration evidence.
+
+### Entry 52: M2 contract review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and #77 coordinator. Thomas Chen (`Tc2006415`) supplied the review findings.
+- Artifact: `docs/M2_API_CONTRACT.md` and `docs/milestones/M2.md`.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Address the checkout sequence, adoption checklist and requirements traceability findings in PR #105.
+- Influence: Codex documented the customer reload inside the workflow lock, separated the adoption and issue completion checklists, and traced the confirmed requirements to M2 §§3–4 and the repository's summary of backend authority. The exact project fields, authentication mechanism, role permissions and ownership assignment still need the original course brief. Developer agreement remains pending documentation.
+- Validation: Checked checkout sequencing and lock scope, separation of the two checklists, the source distinctions, and Markdown links and anchors against the PR tree. Application tests are outside this documentation change's scope. Real checkout concurrency, persistence and restart verification remain integration work.
+- PR or commit: [PR #105](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105) and [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105#pullrequestreview-5791463356).
+- Student review status: Pending for this revision.
