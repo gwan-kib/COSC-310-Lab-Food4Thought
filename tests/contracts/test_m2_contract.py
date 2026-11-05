@@ -126,13 +126,15 @@ def test_empty_cart_and_shared_error_examples_are_usable(examples):
 def test_all_proposed_stores_have_explicit_disposable_paths(m2_store_paths, tmp_path):
     import os
 
-    assert set(m2_store_paths) == {"restaurants", "customers", "carts", "orders"}
-    for store in ("customers", "carts", "orders"):
+    # #78 adds the staff-account and session stores to the #77 store list.
+    stores = ("customers", "carts", "orders", "staff", "sessions")
+    assert set(m2_store_paths) == {"restaurants", *stores}
+    for store in stores:
         path = m2_store_paths[store]
         assert path.read_text(encoding="utf-8") == "[]\n"
         assert os.environ[f"{store.upper()}_DATA_PATH"] == str(path)
     assert all(path.parent == tmp_path for path in m2_store_paths.values())
-    assert len(set(m2_store_paths.values())) == 4
+    assert len(set(m2_store_paths.values())) == 6
 
 
 def test_order_double_keeps_one_receipt_per_cart_revision(examples):
