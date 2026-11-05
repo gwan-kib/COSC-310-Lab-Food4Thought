@@ -46,9 +46,10 @@ Source review:
 
 The repository contains the brief's summary. Exact required profile/address
 fields, sign-in mechanism, role permissions and restaurant ownership assignment
-still need verification against the full brief in
-[#78](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/78).
-The proposed matrix grants no administrator or reactivation capabilities.
+were reconciled against the project brief in
+[#78](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/78); see the
+proposed [authentication and authorization design](AUTH_DESIGN.md), which is
+awaiting review. It grants no reactivation capability.
 Paths, status literals, transport, quantity semantics, money policy and retry
 details remain proposed design choices. Keep the contract, examples, test
 doubles and feature implementations aligned through review.
@@ -92,9 +93,8 @@ and `delivery_address`: at least one supplied, no nulls or unknown fields.
 Proposed email identity: trim and casefold for unique login lookup, preserve the
 trimmed original for display, require one nonempty local and domain part around
 `@`, and reject whitespace/control characters. Passwords are case-sensitive and
-never trimmed. Detailed credential validation, hashing/session library, expiry,
-revocation and test vectors belong to #78/#79/#80; they must be settled against
-the project source before authentication implementation is called conforming.
+never trimmed. Credential rules, the hashing library, the token mechanism, expiry and fixtures
+are proposed in [AUTH_DESIGN.md](AUTH_DESIGN.md#mechanism) (#78).
 No plaintext passwords or tokens may enter public examples, logs or orders;
 the example strings in [m2.json](examples/m2.json) are explicit dummy values.
 
@@ -115,14 +115,14 @@ signing algorithm, or an authentication library.
 | Update own profile | 401 | Name/address only | 403, proposed | 403 |
 | Deactivate own account | 401 | Set inactive; retain related records | 200, already inactive | 403 |
 | Create cart, add/update/remove/clear, checkout | 401 | Allow subject to rules | 403 | 403 |
-| Restaurant/menu management, including availability | Must become protected in M2 | No customer-role grant | No customer-role grant | Required role/ownership mapping unresolved against project source |
+| Restaurant/menu management, including availability | 401 | 403 | 403 | Proposed: owning restaurant user; administrator creates restaurants only ([#78](AUTH_DESIGN.md#access-matrix)) |
 
-This is a conservative customer-only proposal, not a source-certified complete
-role matrix. Restaurant mutation routes retain their paths and payload compatibility
-but M2 must introduce source-grounded backend authorization in #78/#84/#94.
-Until that mapping is resolved, no noncustomer role is granted new rights by
-this document. Do not treat the existing unauthenticated M1 management routes
-as proof that unauthenticated writes are acceptable for final M2 integration.
+This table covers customer operations. The complete matrix, including restaurant
+users and administrators and the protection of the M1 management routes, is in
+[AUTH_DESIGN.md](AUTH_DESIGN.md#access-matrix) (#78). Restaurant mutation routes
+keep their paths and payloads but require a staff token once #84/#94 land. Do not
+treat the existing unauthenticated M1 management routes as proof that
+unauthenticated writes are acceptable for final M2 integration.
 No public role-assignment, customer listing, deletion, password-reset, or
 reactivation endpoint is proposed. Foreign order IDs return the same 404 as
 missing IDs; role denials use 403.
@@ -177,6 +177,7 @@ bodies forbid unknown fields. IDs are opaque nonempty strings, not UUID-only.
 | --- | --- | --- |
 | `POST /customers` | Proposed registration fields above | 201, public customer |
 | `POST /auth/login` | `email`, `password` | 200, `access_token`, `token_type: "bearer"` |
+| `POST /auth/staff/login` | `email`, `password` | 200, same response; restaurant users and administrators ([#78](AUTH_DESIGN.md#mechanism)) |
 | `GET /customers/me` | Bearer identity | 200, public customer |
 | `PATCH /customers/me` | Changed `name` and/or `delivery_address` | 200, persisted customer |
 | `POST /customers/me/deactivate` | No body | 200, inactive customer |
@@ -279,6 +280,7 @@ the current general-purpose handler on passwords without that check.
 | Condition | Status / exact proposed detail |
 | --- | --- |
 | Missing/invalid/expired identity, including unknown customer identity | 401 / `Authentication required`; `WWW-Authenticate: Bearer` |
+| Login with unknown email or wrong password | 401 / `Invalid email or password`; `WWW-Authenticate: Bearer` |
 | Wrong role | 403 / `Operation not permitted` |
 | Inactive customer attempts a restricted mutation | 403 / `Customer is inactive` |
 | Existing normalized email at registration | 409 / `Email is already registered` |
@@ -330,6 +332,7 @@ This checklist records the shared decisions developers need for implementation.
   completion gates raised in [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105#pullrequestreview-5791463356).
 - [ ] Reconcile the remaining customer fields, sign-in mechanism, role permissions
   and restaurant ownership rules in #78 and cite the relevant project sections.
+  Proposed in [AUTH_DESIGN.md](AUTH_DESIGN.md); check this item once its review is recorded.
 - [ ] Record the scope and evidence of developer agreement on the customer/cart
   and order/availability interfaces. Carry agreed changes into the contract,
   examples and test doubles.

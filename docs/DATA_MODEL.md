@@ -17,13 +17,15 @@ source/role questions are recorded in that contract and [M2 evidence](milestones
 | Customer | Proposed `data/customers.json`, `CUSTOMERS_DATA_PATH` | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
 | Cart | Proposed `data/carts.json`, `CARTS_DATA_PATH` | Sreeram; JSON array of `CartRecord` objects |
 | Order | Proposed `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; JSON array of immutable `Order` snapshots |
+| Staff account | Proposed `data/staff.json`, `STAFF_DATA_PATH` | Sreeram (#78); provisioned restaurant users and administrators: `id`, `name`, `email`, `role`, `restaurant_ids`, Argon2id `password_hash` |
+| Session | Proposed `data/sessions.json`, `SESSIONS_DATA_PATH` | Sreeram (#78); `token_sha256`, `account_id`, `account_type`, `issued_at`, `expires_at`; never the token itself |
 
 New repositories should match M1's explicit `path: Path | str | None` injection,
 resolve overrides at construction rather than import time, and keep file I/O out
-of routes/services. Customer credential hashing and any token/session storage are
-unresolved #78 implementation choices; this document does not invent an auth
-file or configure a working session store. Final tests must isolate such a store
-as well if one is added.
+of routes/services. The staff and session stores, Argon2id password hashing and the token design
+are proposed in [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78). They are not configured
+at runtime yet; the [contract fixtures](../tests/contracts/conftest.py) already
+isolate both stores in tests.
 
 Feature PRs must initialize deliberately empty new stores and explain first-run
 configuration in both setup guides when implemented. Once configured, a missing,

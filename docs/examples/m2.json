@@ -103,6 +103,7 @@
   },
   "errors": {
     "unauthenticated": {"status": 401, "body": {"detail": "Authentication required"}},
+    "invalid_credentials": {"status": 401, "body": {"detail": "Invalid email or password"}},
     "forbidden": {"status": 403, "body": {"detail": "Operation not permitted"}},
     "inactive": {"status": 403, "body": {"detail": "Customer is inactive"}},
     "cart_missing": {"status": 404, "body": {"detail": "Cart not found"}},
