@@ -4,7 +4,6 @@
 
 import json
 import math
-import re
 from typing import Any
 
 from fastapi import Request, Response
@@ -55,14 +54,18 @@ def _submitted_secrets(value: Any) -> set[str]:
     return set()
 
 
-def _scrub(value: Any, pattern: re.Pattern[str]) -> Any:
+def _scrub(value: Any, forms: list[str]) -> Any:
     # Cross-field and model validators can quote passwords in their diagnostics.
     if isinstance(value, dict):
-        return {key: _scrub(item, pattern) for key, item in value.items()}
+        return {key: _scrub(item, forms) for key, item in value.items()}
     if isinstance(value, list):
-        return [_scrub(item, pattern) for item in value]
+        return [_scrub(item, forms) for item in value]
     if isinstance(value, (str, Exception)):
-        return pattern.sub(REDACTED, str(value))
+        # Insert the marker after matching so it cannot be matched as a password.
+        parts = [str(value)]
+        for form in forms:
+            parts = [piece for part in parts for piece in part.split(form)]
+        return REDACTED.join(parts)
     return value
 
 
@@ -80,12 +83,12 @@ def _redact_error(error: dict[str, Any], body_secrets: set[str]) -> dict[str, An
     elif "input" in error:
         error["input"] = _redact(error["input"], secrets)
     if secrets:
-        # Include !r output without its surrounding quotes and redact in one pass.
+        # Include !r output without its surrounding quotes.
         forms = secrets | {repr(secret)[1:-1] for secret in secrets}
-        pattern = re.compile("|".join(re.escape(form) for form in sorted(forms, key=len, reverse=True)))
+        longest_first = sorted(forms, key=len, reverse=True)
         for field in ("msg", "ctx"):
             if field in error:
-                error[field] = _scrub(error[field], pattern)
+                error[field] = _scrub(error[field], longest_first)
     return error
 
 
