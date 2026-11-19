@@ -215,6 +215,21 @@ If reset fails after the save, return the same persisted order with
 
 ## Checkout ordering, failures, and retry contract
 
+The [checkout service](../app/services/checkout.py) and [JSON order store](../app/repositories/order.py)
+implement the purchase and replay sequence below. The HTTP route awaits the real
+dependencies. Bind #84's `require_customer(principal, customers, active=True)` as the
+service's active-customer resolver. It executes inside `app.core.workflow.workflow_lock`.
+Cart access must return validated records, distinguish absence from storage failure,
+and signal storage failures with `app.core.storage.StorageFailure`. The active
+customer resolver uses the same signal for storage errors and propagates its
+own authorization errors. A reset storage failure after saving the order triggers
+a fresh cart read to determine whether the purchased revision is still pending.
+Cart, menu and customer writers must adopt the same outer lock before integration.
+
+For review with the other owners, checkout gives the same `Cart not found` domain
+error for a foreign receipt as for an unknown cart. The intended HTTP mapping is
+404 in both cases. A retry never reveals the other customer's order.
+
 The durable attempt identity is **`(source_cart_id, source_cart_revision)`**,
 unique across orders. No client-supplied order ID or arbitrary retry token.
 Each order also has its own stable ID and customer/restaurant/item relationships;

@@ -8,6 +8,7 @@ from typing import Annotated, Literal, Protocol, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
+from app.core.storage import StorageFailure
 from app.schemas.restaurant import Restaurant
 
 
@@ -166,10 +167,6 @@ class OrderAccess(Protocol):
     def save_order(self, order: Order) -> None: ...
     def get_order(self, order_id: str) -> Order | None: ...
     def list_for_customer(self, customer_id: str) -> list[Order]: ...
-
-
-class StorageFailure(Exception):
-    """Test-only injected storage failure; application owners map their errors."""
 
 
 class FakeCustomers:

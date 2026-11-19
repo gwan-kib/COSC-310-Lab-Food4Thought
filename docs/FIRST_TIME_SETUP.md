@@ -167,6 +167,16 @@ If the variable is not set, the application uses `data/restaurants.json`. Stored
 
 ### Disposable data for manual experiments
 
+The order repository resolves `ORDERS_DATA_PATH` when constructed. Its default
+is the included `data/orders.json`, initially an empty JSON array. For manual
+repository experiments, copy that file to a writable temporary directory and
+set `ORDERS_DATA_PATH` to the copy. A configured missing or invalid file is a
+storage error. The focused checkout tests select their own disposable files:
+`python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`.
+Checkout is currently available at the service layer only.
+
+**Restaurant HTTP experiments**
+
 Stop any existing server first. From the repository root, with the virtual environment active, make a uniquely named temporary directory and copy the sample into it. These commands create a new copy each time; to verify persistence after restarting, reuse the printed path instead of repeating the copy step.
 
 Windows PowerShell:
