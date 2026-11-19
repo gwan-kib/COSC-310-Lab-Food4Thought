@@ -9,6 +9,7 @@ import pytest
 
 from contracts.auth import Principal
 from contracts.m2 import CartRecord, CatalogItem, Customer, FakeCartAccess, FakeCatalog
+from contracts.m2 import CheckoutResponse as ContractCheckoutResponse
 from app.core.workflow import workflow_lock
 from app.repositories.order import OrderDataError, OrderRepository
 from app.schemas.order import CheckoutRequest
@@ -74,6 +75,28 @@ def test_reprice_snapshot_save_and_clear_only_purchased_revision(example):
     example.customer.delivery_address = "Unit 10"
     replay = example.checkout()
     assert not replay.created and replay.response == result.response
+
+
+def test_cart_quantity_round_trips_when_total_has_more_digits(example):
+    # The cart quantity fits Python's default 4300-digit conversion limit.
+    # The whole-dollar part of its price times quantity has 4302 digits.
+    quantity = 10**4299 + 1
+    cart = example.carts.carts["buyer"]
+    cart.items[0].quantity = quantity
+    example.carts.carts["buyer"] = CartRecord.model_validate_json(cart.model_dump_json())
+    example.catalog.items["cafe", "s"].price = "999.00"
+
+    purchase = example.checkout()
+    order = purchase.response.order
+    expected = "999" + "0" * 4296 + "999.00"
+    assert purchase.created and not purchase.response.cart_reset_pending
+    assert order.items[0].quantity == quantity
+    assert order.items[0].line_total == order.subtotal == order.total == expected
+    handoff = ContractCheckoutResponse.model_validate_json(purchase.response.model_dump_json())
+    assert handoff.order.total == expected
+    assert OrderRepository(example.path).list_for_customer("buyer") == [order]
+    replay = example.checkout()
+    assert not replay.created and replay.response == purchase.response
 
 
 @pytest.mark.parametrize("new_cart", [False, True])

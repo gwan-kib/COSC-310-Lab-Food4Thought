@@ -210,8 +210,11 @@ Example checkout request: `{"cart_id":"cart-001","cart_revision":2}`.
 The saved order has two Vegetable bowls at `"12.50"` and one Noodle bowl at
 `"14.00"`: line totals `"25.00"` and `"14.00"`, subtotal/total `"39.00"`.
 The response is `{"order": <saved order>, "cart_reset_pending": false}`.
-If reset fails after the save, return the same persisted order with
-`cart_reset_pending: true`; the customer has placed an order, not a failed purchase.
+If the reset reports an error after the save, the customer still receives the
+persisted order. For example, if a fresh read finds cart `cart-001` still at
+revision 2, return `cart_reset_pending: true` so the client can retry that
+revision. If the read confirms the purchased revision is gone, return
+`cart_reset_pending: false`. If the cart cannot be read, return `true`.
 
 ## Checkout ordering, failures, and retry contract
 
@@ -257,8 +260,10 @@ snapshot and storage details are in [the proposed data model](DATA_MODEL.md).
    attempt record to discover whether the order was actually saved.
 5. Only after order persistence succeeds, reset the cart **conditionally** using
    `(customer_id, cart_id, expected_revision)`. Set empty items and null restaurant,
-   increment revision once. Return the persisted order with 201. Reset failure
-   does not delete/compensate the order: 201 with `cart_reset_pending: true`.
+   increment revision once. Return the persisted order with 201. If the reset
+   reports an error, read the cart again. Set `cart_reset_pending` to true if
+   the purchased revision remains or the read fails. Set it to false if the
+   read confirms the purchased revision is gone. In all cases, keep the order.
 6. Retry with the identical cart ID/revision returns 200 and the same order ID.
    This still works after restart, after cart reset, or after later menu/address
    changes. A repeated conditional reset that no longer matches is a no-op.

@@ -2,6 +2,7 @@
 Money is stored in canonical decimal strings and checked with integer cents.
 """
 
+from decimal import Decimal
 from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints, model_validator
@@ -12,11 +13,14 @@ Revision = Annotated[int, Field(ge=0)]
 
 
 def cents(amount: str) -> int:
-    return int(amount.replace(".", ""))
+    """Read validated money exactly, even when a total exceeds int's text limit."""
+    return int(Decimal(amount.replace(".", "")))
 
 
 def money(amount_in_cents: int) -> str:
-    return f"{amount_in_cents // 100}.{amount_in_cents % 100:02d}"
+    whole, fraction = divmod(amount_in_cents, 100)
+    # Decimal converts the integer exactly without rounding to context precision.
+    return f"{Decimal(whole):f}.{fraction:02d}"
 
 
 class OrderModel(BaseModel):
