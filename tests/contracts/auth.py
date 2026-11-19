@@ -34,6 +34,14 @@ class Principal(ContractModel):
     role: Role
 
 
+class LoginResponse(ContractModel):
+    """`POST /auth/login` reply for every role; `role` tells the frontend which screens to show."""
+
+    access_token: Identifier
+    token_type: Literal["bearer"]
+    role: Role
+
+
 class StoredCustomer(Customer):
     """Complete customers.json record; only `public()` may leave the backend."""
 

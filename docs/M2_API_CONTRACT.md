@@ -176,8 +176,7 @@ bodies forbid unknown fields. IDs are opaque nonempty strings, not UUID-only.
 | Method/path | Request | Success |
 | --- | --- | --- |
 | `POST /customers` | Proposed registration fields above | 201, public customer |
-| `POST /auth/login` | `email`, `password` | 200, `access_token`, `token_type: "bearer"` |
-| `POST /auth/staff/login` | `email`, `password` | 200, same response; restaurant users and administrators ([#78](AUTH_DESIGN.md#mechanism)) |
+| `POST /auth/login` | `email`, `password` | 200, `access_token`, `token_type: "bearer"`, `role`; one endpoint for customers, restaurant users and administrators ([#78](AUTH_DESIGN.md#mechanism)) |
 | `GET /customers/me` | Bearer identity | 200, public customer |
 | `PATCH /customers/me` | Changed `name` and/or `delivery_address` | 200, persisted customer |
 | `POST /customers/me/deactivate` | No body | 200, inactive customer |

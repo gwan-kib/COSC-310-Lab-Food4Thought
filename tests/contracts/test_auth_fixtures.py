@@ -12,11 +12,13 @@ from pwdlib import PasswordHash
 from pydantic import ValidationError
 
 from .auth import (
-    FIXED_NOW, Principal, SessionRecord, StaffAccount, StoredCustomer, token_digest,
+    FIXED_NOW, LoginResponse, Principal, SessionRecord, StaffAccount, StoredCustomer,
+    token_digest,
 )
 from .m2 import Customer
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
+EXAMPLES = Path(__file__).resolve().parents[2] / "docs" / "examples" / "m2.json"
 AUTH_STORES = ("customers", "staff", "sessions")
 
 
@@ -106,3 +108,13 @@ def test_principal_is_immutable_and_limited_to_source_roles():
 def test_authorization_header_helper_uses_the_bearer_scheme(auth_accounts):
     account = auth_accounts.accounts["customer_b"]
     assert auth_accounts.headers("customer_b") == {"Authorization": f"Bearer {account.token}"}
+
+
+def test_one_login_response_tells_every_role_where_to_go():
+    # The Figma mockup has one sign-in form for customers, restaurants and admins.
+    example = json.loads(EXAMPLES.read_text(encoding="utf-8"))["login_response"]
+    assert LoginResponse.model_validate(example).role == "customer"
+    for role in ("restaurant_user", "administrator"):
+        assert LoginResponse.model_validate({**example, "role": role}).role == role
+    with pytest.raises(ValidationError):
+        LoginResponse.model_validate({**example, "role": "driver"})

@@ -1,7 +1,7 @@
 """Isolate Food4Thought tests with a fresh temporary data copy selected through
 RESTAURANTS_DATA_PATH for each test. A session-level hash comparison also detects
-changes to committed data, guarding against code that bypasses the configured test
-path.
+changes to committed data, and the shared M2 store and authentication-account
+fixtures are available to every test directory.
 """
 
 import hashlib
@@ -9,6 +9,9 @@ import shutil
 from pathlib import Path
 
 import pytest
+
+# tests/ has no __init__.py, so pytest puts it on sys.path for this conftest.
+from contracts.auth import AuthFixture, build_auth_fixture
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
@@ -36,3 +39,25 @@ def isolated_restaurants_path(tmp_path, monkeypatch) -> Path:
     shutil.copyfile(DATA_DIR / "restaurants.json", path)
     monkeypatch.setenv("RESTAURANTS_DATA_PATH", str(path))
     return path
+
+
+# Stores proposed by the M2 contract (#77) and the authentication design (#78).
+M2_STORES = ("customers", "carts", "orders", "staff", "sessions")
+
+
+@pytest.fixture
+def m2_store_paths(tmp_path, monkeypatch, isolated_restaurants_path) -> dict[str, Path]:
+    """Empty, isolated JSON stores, each selected through its *_DATA_PATH variable."""
+    paths = {"restaurants": isolated_restaurants_path}
+    for store in M2_STORES:
+        path = tmp_path / f"{store}.json"
+        path.write_text("[]\n", encoding="utf-8")
+        monkeypatch.setenv(f"{store.upper()}_DATA_PATH", str(path))
+        paths[store] = path
+    return paths
+
+
+@pytest.fixture
+def auth_accounts(m2_store_paths) -> AuthFixture:
+    """Two active customers, a restaurant user, an administrator and their sessions."""
+    return build_auth_fixture(m2_store_paths)

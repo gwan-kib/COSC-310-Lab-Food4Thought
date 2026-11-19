@@ -12,7 +12,8 @@
   },
   "login_response": {
     "access_token": "example-token-do-not-use",
-    "token_type": "bearer"
+    "token_type": "bearer",
+    "role": "customer"
   },
   "customer": {
     "id": "customer-001",

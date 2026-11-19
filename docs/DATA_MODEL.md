@@ -24,7 +24,7 @@ New repositories should match M1's explicit `path: Path | str | None` injection,
 resolve overrides at construction rather than import time, and keep file I/O out
 of routes/services. The staff and session stores, Argon2id password hashing and the token design
 are proposed in [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78). They are not configured
-at runtime yet; the [contract fixtures](../tests/contracts/conftest.py) already
+at runtime yet; the [shared fixtures](../tests/conftest.py) already
 isolate both stores in tests.
 
 Feature PRs must initialize deliberately empty new stores and explain first-run
@@ -112,7 +112,7 @@ configuration/data files become operational.
 
 ## Verification responsibilities
 
-Use the [disposable store fixture](../tests/contracts/conftest.py) as a starting
+Use the [disposable store fixture](../tests/conftest.py) as a starting
 point for feature tests. It points all proposed customer/cart/order paths into
 `tmp_path` and reuses the existing isolated restaurant copy. The root test guard
 already hashes **all** files under `data/`, so it covers future stores without a
