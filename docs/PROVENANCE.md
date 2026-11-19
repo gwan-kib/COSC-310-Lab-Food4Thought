@@ -692,3 +692,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The new redaction tests failed 2 of 7 before the change and passed after it. The shared-fixture test failed with "fixture 'm2_store_paths' not found" before the move and passed after it. The login-response test failed with an import error before `LoginResponse` existed and passed after it. A probe app on the pinned FastAPI showed an inactive customer's invalid quantity returned 422 with identity-only authentication and 403 with the pre-check dependency, while malformed JSON still returned 422 first. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 425 tests with the committed-data guard; `python -m compileall -q app`, `git diff --check` and a local Markdown link/anchor check passed; `data/` was unchanged. Only the Figma sign-in screen was checked.
 - PR or commit: [PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106); branch `docs/78-auth-design`, review follow-up commit.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain these changes; Thomas's and Gwantana's re-review is required.
+
+### Entry 55: Regression coverage for issue #102
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue coordinator.
+- Artifact: `app/api/errors.py`, credential/restaurant/isolation tests under `tests/`, `.github/workflows/ci.yml`, `docs/AUTH_DESIGN.md`, `docs/FIRST_TIME_SETUP.md`, `docs/TESTING.md`, `docs/milestones/M2.md`, this entry and the task PR.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address the documented cross-field disclosure and keep M1 catalog coverage and isolated storage ready for M2 integration.
+- Influence: Codex continued the task branch's existing edits, wrote the regression and targeted handler fix, adapted write-failure assertions for the shared store fixtures, and documented observed and pending verification.
+- Validation: The cross-field regression failed on the original handler and passed after the fix. Five isolation checks failed with the original fixtures and passed with automatic M2 paths. The final local backend suite passed 400 tests, and a scratch combination with PR #109 passed 413 backend tests. Compilation and local data-guard checks passed. Browser launch in the local environment failed because Chromium could not open a Unix socket. GitHub CI results are tracked in the task PR.
+- PR or commit: [Issue #102](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/102), [PR #106 review finding](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106#pullrequestreview-5984850396), and branch `chore/102-regression-coverage`.
+- Student review status: Pending. Gwantana's review and a teammate's approval are still required.

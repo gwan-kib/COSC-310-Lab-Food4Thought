@@ -93,7 +93,7 @@ The current dependency file installs FastAPI, Uvicorn, Pydantic, pwdlib with Arg
 python -m pytest
 ```
 
-The tests use temporary restaurant-data copies and are designed not to modify committed files under `data/`.
+The tests use a temporary restaurant-data copy and disposable M2 store files. See [test isolation](TESTING.md#one-default-for-file-isolation) for how the fixtures protect `data/`.
 
 The real-browser frontend tests in `tests/browser/` skip if Playwright or Chromium is unavailable locally. CI always runs them. To run them locally as well:
 

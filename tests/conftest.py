@@ -1,7 +1,6 @@
-"""Isolate Food4Thought tests with a fresh temporary data copy selected through
-RESTAURANTS_DATA_PATH for each test. A session-level hash comparison also detects
-changes to committed data, and the shared M2 store and authentication-account
-fixtures are available to every test directory.
+"""Give each Food4Thought test disposable restaurant and M2 store paths.
+A session-level snapshot detects changes under data/, and tests needing seeded
+accounts can request the shared authentication fixture.
 """
 
 import hashlib
@@ -29,7 +28,7 @@ def committed_data_is_unchanged():
     before = _snapshot_data_files()
     yield
     after = _snapshot_data_files()
-    assert after == before, "Tests modified committed files under data/"
+    assert after == before, "Tests changed files under data/"
 
 
 @pytest.fixture(autouse=True)
@@ -45,7 +44,7 @@ def isolated_restaurants_path(tmp_path, monkeypatch) -> Path:
 M2_STORES = ("customers", "carts", "orders", "staff", "sessions")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def m2_store_paths(tmp_path, monkeypatch, isolated_restaurants_path) -> dict[str, Path]:
     """Empty, isolated JSON stores, each selected through its *_DATA_PATH variable."""
     paths = {"restaurants": isolated_restaurants_path}

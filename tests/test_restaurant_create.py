@@ -107,6 +107,7 @@ def test_create_save_failure_keeps_existing_file_and_removes_temp_file(
     isolated_restaurants_path, monkeypatch
 ):
     original = isolated_restaurants_path.read_bytes()
+    files_before = set(isolated_restaurants_path.parent.iterdir())
 
     def fail_replace(source, destination):
         raise OSError("private write failure")
@@ -120,7 +121,7 @@ def test_create_save_failure_keeps_existing_file_and_removes_temp_file(
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
     assert isolated_restaurants_path.read_bytes() == original
-    assert list(isolated_restaurants_path.parent.iterdir()) == [isolated_restaurants_path]
+    assert set(isolated_restaurants_path.parent.iterdir()) == files_before
 
 
 def test_create_openapi_describes_contract():

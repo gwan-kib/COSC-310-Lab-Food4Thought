@@ -160,6 +160,7 @@ def test_add_item_failed_save_preserves_file_and_allows_later_request(
     isolated_restaurants_path, menu_data, monkeypatch
 ):
     before = isolated_restaurants_path.read_bytes()
+    files_before = set(isolated_restaurants_path.parent.iterdir())
 
     def fail_replace(source, destination):
         raise OSError("private storage failure")
@@ -171,7 +172,7 @@ def test_add_item_failed_save_preserves_file_and_allows_later_request(
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
     assert isolated_restaurants_path.read_bytes() == before
-    assert list(isolated_restaurants_path.parent.iterdir()) == [isolated_restaurants_path]
+    assert set(isolated_restaurants_path.parent.iterdir()) == files_before
     assert TestClient(app).post(PATH, json=BODY).status_code == 201
 
 

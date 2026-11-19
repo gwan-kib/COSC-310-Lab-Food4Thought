@@ -10,7 +10,7 @@ The test-first cycle below is a team convention; the supplied M0 specification r
 
 ## Current setup and commands
 
-Follow the [README setup](../README.md#setup) and [first-time setup](FIRST_TIME_SETUP.md#6-verify-the-test-suite). CI installs `requirements.txt` and `requirements-dev.txt` plus Playwright's Chromium on Python 3.12, runs `python -m compileall app` and `python -m pytest` with `REQUIRE_BROWSER_TESTS=1`, then fails if any file under `data/` was modified. Browser tests in `tests/browser/` skip locally if Playwright or Chromium is unavailable and fail instead when `REQUIRE_BROWSER_TESTS=1`. CI installs Chromium with `python -m playwright install --with-deps chromium`; local setup uses `python -m playwright install chromium`. On Linux, if browser launch reports missing system libraries, use the CI installation command where supported. Run the suite from the repository root in its virtual environment:
+Follow the [README setup](../README.md#setup) and [first-time setup](FIRST_TIME_SETUP.md#6-verify-the-test-suite). CI installs `requirements.txt` and `requirements-dev.txt` plus Playwright's Chromium on Python 3.12 and runs `python -m compileall app` and `python -m pytest` with `REQUIRE_BROWSER_TESTS=1`. Its data guard checks for tracked changes and new files under `data/`, including ignored files, even when pytest fails. Browser tests in `tests/browser/` skip locally if Playwright or Chromium is unavailable and fail instead when `REQUIRE_BROWSER_TESTS=1`. CI installs Chromium with `python -m playwright install --with-deps chromium`; local setup uses `python -m playwright install chromium`. On Linux, if browser launch reports missing system libraries, use the CI installation command where supported. Run the suite from the repository root in its virtual environment:
 
 ```sh
 python -m pytest
@@ -40,7 +40,7 @@ python -m pytest -k <actual-behaviour-name>
 
 Replace placeholders; do not run them literally. Use the project's interpreter so pytest and application dependencies resolve from the same environment. No tests collected is not successful feature verification.
 
-`tests/conftest.py` applies two automatic fixtures to every test: `isolated_restaurants_path` copies `data/restaurants.json` into the test's `tmp_path` and points `RESTAURANTS_DATA_PATH` at the copy, and a session check fails the run if any committed file under `data/` changed. Request `isolated_restaurants_path` as a test argument when a test needs the temporary file's location. Group further tests by the responsibilities they exercise. Do not create empty test subdirectories just to match an example.
+`tests/conftest.py` automatically creates a restaurant copy and empty customer, cart, order, staff and session stores for each test. A session check compares file contents and paths under `data/` before and after the run. Request `isolated_restaurants_path` to access the restaurant copy, `m2_store_paths` to access the complete path mapping, or `auth_accounts` to seed accounts and sessions for a test.
 
 The create-restaurant browser tests in `tests/browser/test_create_restaurant_browser.py` use the shared live-server and isolated-data fixtures. They cover navigation, real API creation and repository reload, required fields and backend validation, field-error correction before resubmission, recoverable storage errors, stalled-request timeout and lost responses without automatic retries, unexpected responses, duplicate-submit protection, safe text rendering, and keyboard use at a phone viewport. The timeout case advances Playwright's browser clock while holding the POST pending, then verifies restored controls, preserved values, no automatic retry, and a successful later manual submission. Run them with `python -m pytest -q tests/browser/test_create_restaurant_browser.py` after installing the browser dependencies described above. Set `REQUIRE_BROWSER_TESTS=1` to fail rather than skip if Chromium is unavailable.
 
@@ -54,16 +54,14 @@ The Edit restaurant browser tests in `tests/browser/test_edit_restaurant_browser
 [example bundle](examples/m2.json). Run `python -m pytest -q tests/contracts`.
 Its models and in-memory customer/catalog/cart/order doubles support independent
 feature development. They do not implement production checkout or authorization
-and must not be imported by application code. The package's `m2_store_paths`
-fixture selects explicit disposable paths for every proposed customer/cart/order
-store and reuses the root fixture's restaurant copy; it does not initialize
-committed data or add working runtime configuration.
+and must not be imported by application code. The shared `m2_store_paths`
+fixture sets the proposed `*_DATA_PATH` variables for the disposable files.
+Feature tests should verify that the real repositories honor those paths once
+the runtime stores are implemented.
 
-The session guard already snapshots every file under `data/`; new stores do not
-need duplicate hash guards. Feature owners still need real path-override,
-save/reload, failure, authorization and service/API tests, and isolated auth
-storage if #78 adds it. Final #95/#101 integration tests must use the real
-implementations, not these doubles.
+The session guard already snapshots files under `data/`. Feature owners still
+need real save/reload, failure, authorization and service/API tests. Final
+#95/#101 integration tests use the real implementations.
 
 ### Test-first cycle
 

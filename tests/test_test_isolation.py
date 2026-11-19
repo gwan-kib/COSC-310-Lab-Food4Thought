@@ -1,10 +1,12 @@
-# Verify that Food4Thought's shared fixtures select a fresh temporary copy of
-# representative data. Check the configured location and perform a write to that
-# copy to show that committed data remains untouched.
+# Verify that Food4Thought's shared fixtures route every store to temporary data.
+# Check that implicit configuration and writes to the restaurant copy leave
+# committed data untouched.
 
 import json
 import os
 from pathlib import Path
+
+import pytest
 
 COMMITTED_DATA = Path(__file__).resolve().parents[1] / "data" / "restaurants.json"
 
@@ -28,3 +30,12 @@ def test_writes_to_isolated_copy_do_not_reach_committed_data(isolated_restaurant
     isolated_restaurants_path.write_text("[]", encoding="utf-8")
 
     assert COMMITTED_DATA.read_bytes() == original
+
+
+@pytest.mark.parametrize("store", ["customers", "carts", "orders", "staff", "sessions"])
+def test_m2_store_is_isolated_without_requesting_a_fixture(tmp_path, store):
+    path = tmp_path / f"{store}.json"
+    configured = os.environ.get(f"{store.upper()}_DATA_PATH")
+
+    assert configured == str(path)
+    assert json.loads(path.read_text(encoding="utf-8")) == []

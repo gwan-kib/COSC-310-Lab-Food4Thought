@@ -53,8 +53,7 @@ def _submitted_secrets(value: Any) -> set[str]:
 
 
 def _scrub(value: Any, secrets: set[str]) -> Any:
-    # A model-level validator can quote a password in its message or context even
-    # though its error is not located on the password field.
+    # Cross-field and model validators can quote passwords in their diagnostics.
     if isinstance(value, dict):
         return {key: _scrub(item, secrets) for key, item in value.items()}
     if isinstance(value, list):
@@ -67,9 +66,9 @@ def _scrub(value: Any, secrets: set[str]) -> Any:
     return value
 
 
-def _redact_error(error: dict[str, Any]) -> dict[str, Any]:
+def _redact_error(error: dict[str, Any], body_secrets: set[str]) -> dict[str, Any]:
     error = dict(error)
-    secrets = _submitted_secrets(error.get("input"))
+    secrets = body_secrets | _submitted_secrets(error.get("input"))
     if any(_is_sensitive(part) for part in error.get("loc", ())):
         if isinstance(error.get("input"), str) and error["input"]:
             secrets.add(error["input"])
@@ -91,10 +90,12 @@ async def request_validation_error(
     _request: Request, exc: RequestValidationError
 ) -> Response:
     """Return validation details even when rejected input cannot be rendered as JSON."""
+    # An individual error's input may contain only the field being validated.
+    body_secrets = _submitted_secrets(exc.body)
     # Rejected input may contain overflowing numbers, lone surrogates, or raw
     # non-UTF-8 bytes. Error rendering must not turn those failures into a 500.
     errors = jsonable_encoder(
-        [_redact_error(error) for error in exc.errors()],
+        [_redact_error(error, body_secrets) for error in exc.errors()],
         custom_encoder={
             float: lambda value: value if math.isfinite(value) else str(value),
             bytes: lambda value: value.decode("utf-8", errors="backslashreplace"),
