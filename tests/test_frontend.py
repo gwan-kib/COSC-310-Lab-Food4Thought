@@ -28,10 +28,13 @@ def test_frontend_assets_are_served():
     client = TestClient(app)
 
     script = client.get("/app/app.js")
+    api_client = client.get("/app/api-client.js")
     styles = client.get("/app/styles.css")
 
     assert script.status_code == 200
     assert "javascript" in script.headers["content-type"]
+    assert api_client.status_code == 200
+    assert "javascript" in api_client.headers["content-type"]
     assert styles.status_code == 200
     assert styles.headers["content-type"].startswith("text/css")
 
@@ -57,11 +60,13 @@ def test_frontend_directory_does_not_depend_on_working_directory():
 
 def test_frontend_reads_data_through_the_rest_api():
     script = (FRONTEND_DIR / "app.js").read_text(encoding="utf-8")
+    api_client = (FRONTEND_DIR / "api-client.js").read_text(encoding="utf-8")
 
-    assert "fetch(" in script
+    assert 'from "./api-client.js"' in script
+    assert "fetch(" in api_client
     assert "/restaurants" in script
     assert "/menu" in script
-    assert "restaurants.json" not in script
+    assert "restaurants.json" not in script + api_client
 
 
 def test_frontend_has_no_hard_coded_restaurant_data():

@@ -692,3 +692,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The new redaction tests failed 2 of 7 before the change and passed after it. The shared-fixture test failed with "fixture 'm2_store_paths' not found" before the move and passed after it. The login-response test failed with an import error before `LoginResponse` existed and passed after it. A probe app on the pinned FastAPI showed an inactive customer's invalid quantity returned 422 with identity-only authentication and 403 with the pre-check dependency, while malformed JSON still returned 422 first. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 425 tests with the committed-data guard; `python -m compileall -q app`, `git diff --check` and a local Markdown link/anchor check passed; `data/` was unchanged. Only the Figma sign-in screen was checked.
 - PR or commit: [PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106); branch `docs/78-auth-design`, review follow-up commit.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain these changes; Thomas's and Gwantana's re-review is required.
+
+### Entry 56: Shared frontend JSON transport for issue #98
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee and requester. Student design and implementation review is pending.
+- Artifact: `frontend/api-client.js`, the discovery and restaurant management frontend scripts and HTML entry points, `tests/browser/test_frontend_browser.py`, `tests/test_frontend.py`, the M2.3 evidence in `docs/milestones/M2.md`, and the PR description.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Identify and improve a concrete frontend integration boundary for M2 §5.
+- Influence: Codex compared page-local, transport-only, and endpoint-specific client designs. It extracted shared JSON request handling while keeping status feedback, field validation and retry decisions with the pages. Codex wrote the characterization checks, adapted the static asset checks, and drafted the decision and verification evidence.
+- Validation: With Python 3.12, `REQUIRE_BROWSER_TESTS=1` and Chromium headless shell 153, 42 focused tests passed against the original frontend with the characterization cases. The refactored suite passed 428 tests with no skips. Application compilation, JavaScript syntax checks, the committed-data guard and whitespace checks passed. An additional Node probe checked propagation of an abort during response-body reading without a retry.
+- PR or commit: [Issue #98](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/98) and branch `refactor/98-shared-frontend-api`.
+- Student review status: Pending. Local checks establish implementation results. Student understanding, teammate review and merge evidence require separate confirmation.
