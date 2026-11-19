@@ -4,6 +4,7 @@
 
 import json
 import math
+import re
 from typing import Any
 
 from fastapi import Request, Response
@@ -25,16 +26,18 @@ def _is_sensitive(name: object) -> bool:
     return isinstance(name, str) and name.casefold() in SENSITIVE_FIELDS
 
 
-def _redact(value: Any) -> Any:
+def _redact(value: Any, secrets: set[str]) -> Any:
     # Missing-field errors report the whole request body as their input, so a
     # valid password can appear inside an error about a different field.
     if isinstance(value, dict):
         return {
-            key: REDACTED if _is_sensitive(key) else _redact(item)
+            key: REDACTED if _is_sensitive(key) else _redact(item, secrets)
             for key, item in value.items()
         }
     if isinstance(value, list):
-        return [_redact(item) for item in value]
+        return [_redact(item, secrets) for item in value]
+    if isinstance(value, str) and value in secrets:
+        return REDACTED
     return value
 
 
@@ -52,17 +55,14 @@ def _submitted_secrets(value: Any) -> set[str]:
     return set()
 
 
-def _scrub(value: Any, secrets: set[str]) -> Any:
+def _scrub(value: Any, pattern: re.Pattern[str]) -> Any:
     # Cross-field and model validators can quote passwords in their diagnostics.
     if isinstance(value, dict):
-        return {key: _scrub(item, secrets) for key, item in value.items()}
+        return {key: _scrub(item, pattern) for key, item in value.items()}
     if isinstance(value, list):
-        return [_scrub(item, secrets) for item in value]
+        return [_scrub(item, pattern) for item in value]
     if isinstance(value, (str, Exception)):
-        text = str(value)
-        for secret in sorted(secrets, key=len, reverse=True):
-            text = text.replace(secret, REDACTED)
-        return text
+        return pattern.sub(REDACTED, str(value))
     return value
 
 
@@ -78,11 +78,14 @@ def _redact_error(error: dict[str, Any], body_secrets: set[str]) -> dict[str, An
             error["msg"] = SENSITIVE_ERROR_MESSAGE
             error.pop("ctx", None)
     elif "input" in error:
-        error["input"] = _redact(error["input"])
+        error["input"] = _redact(error["input"], secrets)
     if secrets:
+        # Include !r output without its surrounding quotes and redact in one pass.
+        forms = secrets | {repr(secret)[1:-1] for secret in secrets}
+        pattern = re.compile("|".join(re.escape(form) for form in sorted(forms, key=len, reverse=True)))
         for field in ("msg", "ctx"):
             if field in error:
-                error[field] = _scrub(error[field], secrets)
+                error[field] = _scrub(error[field], pattern)
     return error
 
 

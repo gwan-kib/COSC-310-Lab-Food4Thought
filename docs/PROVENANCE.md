@@ -704,3 +704,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The cross-field regression failed on the original handler and passed after the fix. Five isolation checks failed with the original fixtures and passed with automatic M2 paths. The final local backend suite passed 400 tests, and a scratch combination with PR #109 passed 413 backend tests. Compilation and local data-guard checks passed. Browser launch in the local environment failed because Chromium could not open a Unix socket. GitHub CI results are tracked in the task PR.
 - PR or commit: [Issue #102](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/102), [PR #106 review finding](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106#pullrequestreview-5984850396), and branch `chore/102-regression-coverage`.
 - Student review status: Pending. Gwantana's review and a teammate's approval are still required.
+
+### Entry 56: PR #110 credential redaction review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue coordinator and requester. Thomas Chen (`Tc2006415`) identified the two cases in review.
+- Artifact: `app/api/errors.py`, `tests/test_credential_redaction.py`, `docs/AUTH_DESIGN.md`, `docs/milestones/M2.md` and this entry.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address Thomas's findings about passwords in rejected input and in escaped validator diagnostics.
+- Influence: Codex wrote both regression tests and updated the shared 422 handler to redact equal input values and scrub literal and `repr`-escaped password text from diagnostics.
+- Validation: `python -m pytest -q tests/test_credential_redaction.py` showed two failures and eight passes before the fix. The focused credential and validation-error suite passed 35 tests after the fix, and `python -m pytest -q --ignore=tests/browser` passed 402 tests. Compilation, the local data guard and `git diff --check` passed.
+- PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110) and [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985133060).
+- Student review status: Pending for the follow-up.

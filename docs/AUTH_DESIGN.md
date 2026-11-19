@@ -278,6 +278,10 @@ Facts checked against the pinned FastAPI with a probe app (results in PR #106):
   The [review finding](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106#pullrequestreview-5984850396)
   has a [regression test](../tests/test_credential_redaction.py) that preserves the
   email diagnostic and removes the password from both fields.
+- **PR #110 follow-up** redacts a reported input value if it equals a submitted
+  password, even when the error points to another field. Messages and context
+  also redact Python's escaped `repr` form of the password while retaining the
+  rest of the diagnostic. [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985133060)
 - Committed data has no hashes or tokens: `data/` gets no seeded accounts. Demo staff
   accounts are provisioned locally. Example and fixture passwords are labelled dummies.
 - Passwords are never sent in URLs or query strings.

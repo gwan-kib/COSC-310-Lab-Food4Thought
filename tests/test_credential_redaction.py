@@ -168,3 +168,30 @@ def test_password_in_another_fields_message_and_context_is_redacted():
     assert error["input"] == email
     assert error["msg"] == f"Email {email} matches the end of password {REDACTED}"
     assert error["ctx"] == {"email": email, "submitted": REDACTED}
+
+
+def test_rejected_input_equal_to_the_password_is_redacted():
+    password = "same-value@example.invalid"
+
+    response = _client().post("/leaky", json={"email": password, "password": password})
+
+    assert response.status_code == 422
+    [error] = response.json()["detail"]
+    assert error["loc"] == ["body", "email"]
+    assert error["input"] == REDACTED
+    assert password not in response.text
+
+
+def test_repr_formatted_password_is_redacted_in_message_and_context():
+    email = "a@example.invalid"
+    password = email + "\\path\nwith'quotes\""
+
+    response = _client().post("/leaky", json={"email": email, "password": password})
+
+    assert response.status_code == 422
+    [error] = response.json()["detail"]
+    assert error["loc"] == ["body"]
+    assert error["input"] == {"email": email, "password": REDACTED}
+    diagnostic = f"password '{REDACTED}' must not start with the email"
+    assert error["msg"] == f"Value error, {diagnostic}"
+    assert error["ctx"] == {"error": diagnostic}
