@@ -85,7 +85,7 @@ With the virtual environment active:
 python -m pip install -r requirements.txt
 ```
 
-The current dependency file installs FastAPI, Uvicorn, Pydantic, pytest, and httpx2.
+The current dependency file installs FastAPI, Uvicorn, Pydantic, pwdlib with Argon2 (password hashing; currently used by the authentication test fixtures), pytest, and httpx2.
 
 ## 6. Verify the test suite
 
