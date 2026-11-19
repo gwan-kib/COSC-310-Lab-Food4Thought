@@ -28,7 +28,7 @@ def menu_data(isolated_restaurants_path):
             "cuisine": "Fusion",
             "description": "Test kitchen",
             "legacy_note": "Keep this field",
-            "menu_items": [{"id": "existing", **BODY}],
+            "menu_items": [{"id": "existing", **BODY, "available": True}],
         }
         for identifier in ("other", "target")
     ]
@@ -48,7 +48,7 @@ def test_add_item_persists_under_correct_parent_and_can_be_browsed(
 
     assert response.status_code == 201
     created = response.json()
-    assert created == {**BODY, "id": created["id"], "price": expected_price}
+    assert created == {**BODY, "available": True, "id": created["id"], "price": expected_price}
     identifier = UUID(created["id"])
     assert identifier.version == 4
     assert str(identifier) == created["id"]
@@ -215,7 +215,7 @@ def test_service_add_item_returns_persisted_model(isolated_restaurants_path, men
     assert isinstance(item, MenuItem)
     reloaded = RestaurantRepository(isolated_restaurants_path).get_record("target")
     assert reloaded.menu_items[-1] == item
-    assert item.model_dump(exclude={"id"}) == BODY
+    assert item.model_dump(exclude={"id"}) == {**BODY, "available": True}
 
 
 @pytest.mark.parametrize("collision", [False, True])
@@ -249,7 +249,7 @@ def test_service_returns_created_item_by_id_when_saved_order_changes(
     reloaded = RestaurantRepository(isolated_restaurants_path).get_record("target")
     assert [saved.id for saved in reloaded.menu_items] == [created_id, existing_id]
     assert item == next(saved for saved in reloaded.menu_items if saved.id == created_id)
-    assert item.model_dump(exclude={"id"}) == BODY
+    assert item.model_dump(exclude={"id"}) == {**BODY, "available": True}
 
 
 def test_service_add_item_raises_for_unknown_parent(isolated_restaurants_path, menu_data):
@@ -282,11 +282,13 @@ def test_add_item_openapi_describes_request_parent_and_responses():
     assert request["$ref"] == "#/components/schemas/MenuItemCreate"
     model = schema["components"]["schemas"]["MenuItemCreate"]
     assert set(model["required"]) == {"name", "description", "price"}
-    assert set(model["properties"]) == {"name", "description", "price"}
+    assert set(model["properties"]) == {"name", "description", "price", "available"}
+    assert model["properties"]["available"]["type"] == "boolean"
+    assert model["properties"]["available"]["default"] is True
     assert model["additionalProperties"] is False
     assert model["properties"]["price"]["type"] == "string"
     responses = operation["responses"]
-    assert set(responses) == {"201", "404", "422", "500"}
+    assert set(responses) == {"201", "401", "403", "404", "422", "500"}
     for status, model_name in (("201", "MenuItem"), ("404", "ErrorResponse"),
                                ("500", "ErrorResponse"), ("422", "HTTPValidationError")):
         assert responses[status]["content"]["application/json"]["schema"]["$ref"] == (

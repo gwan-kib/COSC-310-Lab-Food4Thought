@@ -32,6 +32,7 @@ def test_create_restaurant_persists_and_preserves_existing_menu(isolated_restaur
             "name": "Vegetable bowl",
             "description": "Rice and vegetables",
             "price": "12.50",
+            "available": False,
         }
     ]
     isolated_restaurants_path.write_text(json.dumps([existing]), encoding="utf-8")

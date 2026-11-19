@@ -192,12 +192,16 @@ bodies forbid unknown fields. IDs are opaque nonempty strings, not UUID-only.
 
 Preserve all eight M1 restaurant/menu operations, response projections, paths,
 decimal-string prices, filtering, partial-update and 404/422/500 semantics.
-The planned #94 extension adds `available` to menu item create/read/update models;
+The #94 catalog implementation adds `available` to menu item create/read/update models;
 old valid create/PATCH requests remain valid and omitted PATCH fields retain their
-value. Legacy items read as available, with no read-time rewrite. Current M1
-`MenuItem` forbids extra fields, so it **cannot yet accept persisted `available`**:
-#94 must update the models and compatibility tests before adding the field to
-data. Do not claim this proposal already changed OpenAPI or runtime behavior.
+value. Legacy items read as available, with no read-time rewrite. Successful whole-file saves include the default on legacy items. A supplied
+`available` must be a JSON boolean. Both item write operations check manager
+permission for an explicitly supplied flag. Valid explicit writes on the default
+server return 401 until #78/#84 supply authenticated staff access. Scope denial
+returns 403 when a permission provider is supplied. Body validation currently
+runs first. Omitted-field M1 writes retain their existing behavior.
+Real cart-add and checkout enforcement and shared workflow locking depend on
+#86/#91. Availability by itself does not implement those operations.
 
 ### Concrete examples
 

@@ -30,6 +30,9 @@ def test_update_persists_only_supplied_fields_and_preserves_menus(
     isolated_restaurants_path, changes, expected_changes
 ):
     before = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
+    for restaurant in before:
+        for item in restaurant["menu_items"]:
+            item.setdefault("available", True)
     target = before[1]  # Selecting the second record catches updating the wrong one.
     expected = {**target, **expected_changes}
 
@@ -50,6 +53,9 @@ def test_update_persists_only_supplied_fields_and_preserves_menus(
 
 def test_update_accepts_unchanged_value(isolated_restaurants_path):
     original = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
+    for restaurant in original:
+        for item in restaurant["menu_items"]:
+            item.setdefault("available", True)
     target = original[0]
 
     response = TestClient(app).patch(

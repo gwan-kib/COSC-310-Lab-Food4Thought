@@ -57,7 +57,7 @@ def test_menu_returns_representative_items(isolated_restaurants_path):
     assert response.status_code == 200
     assert response.json() == {
         "restaurant_id": record["id"],
-        "items": record["menu_items"],
+        "items": [{"available": True, **item} for item in record["menu_items"]],
     }
 
 

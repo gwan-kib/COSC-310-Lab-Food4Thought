@@ -60,7 +60,7 @@ def test_update_changes_only_supplied_fields_in_selected_parent(
     before = [record.model_dump() for record in records]
     expected_item = {
         "id": "shared", "name": "Soup", "description": "Hot", "price": "4.50",
-        **expected_changes,
+        "available": True, **expected_changes,
     }
 
     result = RestaurantService(repository).update_menu_item(

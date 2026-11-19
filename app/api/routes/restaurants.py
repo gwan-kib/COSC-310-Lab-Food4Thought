@@ -20,12 +20,19 @@ from app.schemas.restaurant import (
     RestaurantUpdate,
 )
 from app.services.restaurant import (
+    MenuAuthenticationRequired,
+    MenuPermissionDenied,
     MenuItemNotFoundError,
     RestaurantNotFoundError,
     RestaurantService,
 )
 
 router = APIRouter()
+
+MENU_PERMISSION_RESPONSES = {
+    401: {"model": ErrorResponse, "description": "Availability requires authentication"},
+    403: {"model": ErrorResponse, "description": "Caller cannot manage this restaurant"},
+}
 
 # A supplied filter must contain more than whitespace; blank values are a 422.
 CuisineFilter = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
@@ -194,11 +201,13 @@ def get_menu(
         "Add and persist an item under an existing restaurant with a server-generated "
         "stable ID. Supply name, description, and a nonnegative decimal-string price "
         "no greater than 999.00, with at most two fractional digits. "
+        "Availability defaults to true. Explicit availability requires manager permission. "
         "The saved price has two fractional digits."
     ),
     response_model=MenuItem,
     status_code=201,
     responses={
+        **MENU_PERMISSION_RESPONSES,
         404: {"model": ErrorResponse, "description": "Restaurant not found"},
         500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
     },
@@ -213,6 +222,11 @@ def add_menu_item(
 ) -> MenuItem:
     try:
         return service.add_menu_item(restaurant_id, request)
+    except MenuAuthenticationRequired as exc:
+        raise HTTPException(status_code=401, detail="Authentication required",
+                            headers={"WWW-Authenticate": "Bearer"}) from exc
+    except MenuPermissionDenied as exc:
+        raise HTTPException(status_code=403, detail="Operation not permitted") from exc
     except RestaurantNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Restaurant not found") from exc
     except RestaurantDataError as exc:
@@ -225,8 +239,9 @@ def add_menu_item(
     "/restaurants/{restaurant_id}/menu/items/{item_id}",
     summary="Update a menu item",
     description=(
-        "Persist a partial update to name, description, or price under the specified "
-        "restaurant. Supply at least one non-null field. Text must be nonblank; "
+        "Persist a partial update to name, description, price, or availability under the specified "
+        "restaurant. Explicit availability requires manager permission. Supply at least "
+        "one non-null field. Text must be nonblank; "
         "price must be a nonnegative decimal string no greater than 999.00, with "
         "at most two fractional digits. Omitted fields, IDs, parent relationships, "
         "and unrelated items "
@@ -235,6 +250,7 @@ def add_menu_item(
     ),
     response_model=MenuItem,
     responses={
+        **MENU_PERMISSION_RESPONSES,
         404: {
             "model": ErrorResponse,
             "description": "Restaurant not found, or menu item not found under that restaurant",
@@ -256,6 +272,11 @@ def update_menu_item(
 ) -> MenuItem:
     try:
         return service.update_menu_item(restaurant_id, item_id, request)
+    except MenuAuthenticationRequired as exc:
+        raise HTTPException(status_code=401, detail="Authentication required",
+                            headers={"WWW-Authenticate": "Bearer"}) from exc
+    except MenuPermissionDenied as exc:
+        raise HTTPException(status_code=403, detail="Operation not permitted") from exc
     except RestaurantNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Restaurant not found") from exc
     except MenuItemNotFoundError as exc:

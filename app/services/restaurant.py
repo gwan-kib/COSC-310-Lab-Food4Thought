@@ -3,6 +3,7 @@
 # repository mutation callbacks, keeping generated IDs and menu-item lookups scoped
 # to the appropriate resource.
 
+from collections.abc import Callable
 from uuid import uuid4
 
 from app.repositories.restaurant import RestaurantRepository
@@ -26,11 +27,29 @@ class MenuItemNotFoundError(Exception):
     """No item exists with the requested identifier under this restaurant."""
 
 
+class MenuAuthenticationRequired(Exception):
+    """No authenticated manager permission check was provided."""
+
+
+class MenuPermissionDenied(Exception):
+    """The caller cannot manage this restaurant's menu."""
+
+
 class RestaurantService:
     """Provide restaurant discovery and management through the repository boundary."""
 
-    def __init__(self, repository: RestaurantRepository) -> None:
+    def __init__(
+        self, repository: RestaurantRepository, *,
+        can_manage_menu: Callable[[str], bool] | None = None,
+    ) -> None:
         self.repository = repository
+        self.can_manage_menu = can_manage_menu
+
+    def _require_menu_permission(self, restaurant_id: str) -> None:
+        if self.can_manage_menu is None:
+            raise MenuAuthenticationRequired()
+        if not self.can_manage_menu(restaurant_id):
+            raise MenuPermissionDenied()
 
     def list_restaurants(self, cuisine: str | None = None) -> list[Restaurant]:
         """Return restaurants in stored order, optionally only one cuisine.
@@ -91,6 +110,8 @@ class RestaurantService:
 
     def add_menu_item(self, restaurant_id: str, request: MenuItemCreate) -> MenuItem:
         """Append an item to an existing restaurant and return its persisted form."""
+        if "available" in request.model_fields_set:
+            self._require_menu_permission(restaurant_id)
         created_id: str | None = None
 
         def add(records: list[RestaurantRecord]) -> None:
@@ -114,6 +135,8 @@ class RestaurantService:
     def update_menu_item(
         self, restaurant_id: str, item_id: str, request: MenuItemUpdate
     ) -> MenuItem:
+        if "available" in request.model_fields_set:
+            self._require_menu_permission(restaurant_id)
         changes = request.model_dump(exclude_unset=True)
 
         def update(records: list[RestaurantRecord]) -> None:

@@ -91,7 +91,7 @@ validates the complete result before saving. Atomic same-directory replacement
 and a process-shared repository mutation lock retain M1's failure guarantees.
 Unknown complete restaurant fields remain preserved; do not write public read
 models back over full stored records. Legacy omitted `menu_items` still means an
-empty menu; the proposed omitted menu `available` means true only once #94 lands.
+empty menu; an omitted menu `available` now reads as true. A successful full-file save materializes that default on legacy items, including unrelated items. An explicit false is preserved.
 Explicit null/invalid values are corruption. Reads never migrate data implicitly.
 
 Multiple files are not a transaction. The contract's workflow lock serializes

@@ -15,7 +15,7 @@ from app.repositories.restaurant import RestaurantRepository
 
 
 PATH = "/restaurants/target/menu/items/shared"
-ITEM = {"id": "shared", "name": "Soup", "description": "Hot soup", "price": "4.50"}
+ITEM = {"available": True, "id": "shared", "name": "Soup", "description": "Hot soup", "price": "4.50"}
 
 
 @pytest.fixture
@@ -241,9 +241,9 @@ def test_update_openapi_describes_partial_input_and_scoped_errors():
     assert not update.get("required")
     assert update["minProperties"] == 1
     assert update["additionalProperties"] is False
-    assert set(update["properties"]) == {"name", "description", "price"}
-    for field in update["properties"].values():
-        assert field["type"] == "string"
+    assert set(update["properties"]) == {"name", "description", "price", "available"}
+    for name, field in update["properties"].items():
+        assert field["type"] == ("boolean" if name == "available" else "string")
         assert "default" not in field
     assert update["properties"]["name"]["minLength"] == 1
     assert update["properties"]["description"]["minLength"] == 1

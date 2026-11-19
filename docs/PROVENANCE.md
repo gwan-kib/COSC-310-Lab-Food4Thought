@@ -668,3 +668,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: Checked checkout sequencing and lock scope, separation of the two checklists, the source distinctions, and Markdown links and anchors against the PR tree. Application tests are outside this documentation change's scope. Real checkout concurrency, persistence and restart verification remain integration work.
 - PR or commit: [PR #105](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105) and [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105#pullrequestreview-5791463356).
 - Student review status: Pending for this revision.
+
+### Entry 53: Menu availability and legacy compatibility (#94)
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu schemas, restaurant service and routes, availability and regression tests, API/data contract and setup guides on the #94 branch.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Implement the catalog portion of #94. Thomas chose to materialize omitted legacy flags on a successful full-store save.
+- Influence: Codex wrote the implementation, tests and documentation. Explicit flag changes use an injected restaurant permission check pending the shared staff identity implementation.
+- Validation: In the isolated worktree, 407 baseline tests passed. The initial new test run had 6 expected failures and 7 passes. After implementation all 13 focused tests passed. Compilation passed and the full browser-required suite passed 420 tests with committed data intact. Real staff login, cart and checkout integration and cross-workflow locking are pending.
+- PR or commit: Local work for [#94](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/94).
+- Student review status: Implementation review and peer feedback pending.
