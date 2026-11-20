@@ -4,9 +4,9 @@
 
 The [M1 contract](M1_API_CONTRACT.md#persistence-and-layer-boundaries) describes
 implemented restaurant/menu storage. The [M2 contract](M2_API_CONTRACT.md) proposes
-the additions below for #77. **There are no customer, cart or order repositories
-in the application yet.** These are design targets, not setup instructions or a
-claim that the application accepts these files. Course traceability and unresolved
+the additions below for #77. The [order repository](../app/repositories/order.py)
+implements order storage for #91–#93. Customer and cart storage are still design targets.
+Course traceability and unresolved
 source/role questions are recorded in that contract and [M2 evidence](milestones/M2.md).
 
 ## Store ownership and configuration
@@ -15,8 +15,8 @@ source/role questions are recorded in that contract and [M2 evidence](milestones
 | --- | --- | --- |
 | Restaurant/menu | Implemented `data/restaurants.json`, `RESTAURANTS_DATA_PATH` | Existing repository; Thomas owns #94 availability extension; JSON array of complete restaurant records |
 | Customer | Proposed `data/customers.json`, `CUSTOMERS_DATA_PATH` | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
-| Cart | `data/carts.json`, `CARTS_DATA_PATH` (implemented: `app/repositories/cart.py`, #85/#86) | Sreeram; JSON array of `CartRecord` objects |
-| Order | Proposed `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; JSON array of immutable `Order` snapshots |
+| Cart | Implemented `data/carts.json`, `CARTS_DATA_PATH` (`app/repositories/cart.py`, #85/#86) | Sreeram; JSON array of `CartRecord` objects |
+| Order | Implemented `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; append-only JSON array of order snapshots |
 | Staff account | Proposed `data/staff.json`, `STAFF_DATA_PATH` | Sreeram (#78); provisioned restaurant users and administrators: `id`, `name`, `email`, `role`, `restaurant_ids`, Argon2id `password_hash` |
 | Session | Proposed `data/sessions.json`, `SESSIONS_DATA_PATH` | Sreeram (#78); `token_sha256`, `account_id`, `account_type`, `issued_at`, `expires_at`; never the token itself |
 
@@ -106,9 +106,9 @@ The full [retry policy](M2_API_CONTRACT.md#checkout-ordering-failures-and-retry-
 also prevents clearing a later cart revision. No claim of multiworker/external
 writer coordination, power-loss durability, or complete M3 recovery is made.
 
-No existing runtime configuration or M1 schema changes in this PR. The two setup
-guides therefore stay unchanged; implementing owners must update both when their
-configuration/data files become operational.
+Checkout acquires [the workflow lock](../app/core/workflow.py). The other
+writers must acquire that same lock for cross-store serialization to hold in the
+integrated app. Customer/cart/auth adapters and the HTTP route are pending.
 
 ## Verification responsibilities
 

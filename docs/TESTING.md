@@ -40,7 +40,7 @@ python -m pytest -k <actual-behaviour-name>
 
 Replace placeholders; do not run them literally. Use the project's interpreter so pytest and application dependencies resolve from the same environment. No tests collected is not successful feature verification.
 
-`tests/conftest.py` applies two automatic fixtures to every test: `isolated_restaurants_path` copies `data/restaurants.json` into the test's `tmp_path` and points `RESTAURANTS_DATA_PATH` at the copy, and a session check fails the run if any committed file under `data/` changed. Request `isolated_restaurants_path` as a test argument when a test needs the temporary file's location. Group further tests by the responsibilities they exercise. Do not create empty test subdirectories just to match an example.
+`tests/conftest.py` points `RESTAURANTS_DATA_PATH` at a temporary copy of the sample restaurants and `ORDERS_DATA_PATH` at a disposable path for every test. The `m2_store_paths` fixture initializes the empty order file for tests that need it. A session check fails if any committed file under `data/` changed. Group further tests by the responsibilities they exercise.
 
 The create-restaurant browser tests in `tests/browser/test_create_restaurant_browser.py` use the shared live-server and isolated-data fixtures. They cover navigation, real API creation and repository reload, required fields and backend validation, field-error correction before resubmission, recoverable storage errors, stalled-request timeout and lost responses without automatic retries, unexpected responses, duplicate-submit protection, safe text rendering, and keyboard use at a phone viewport. The timeout case advances Playwright's browser clock while holding the POST pending, then verifies restored controls, preserved values, no automatic retry, and a successful later manual submission. Run them with `python -m pytest -q tests/browser/test_create_restaurant_browser.py` after installing the browser dependencies described above. Set `REQUIRE_BROWSER_TESTS=1` to fail rather than skip if Chromium is unavailable.
 
@@ -54,7 +54,7 @@ The Edit restaurant browser tests in `tests/browser/test_edit_restaurant_browser
 [example bundle](examples/m2.json). Run `python -m pytest -q tests/contracts`.
 Its models and in-memory customer/catalog/cart/order doubles support independent
 feature development. They do not implement production checkout or authorization
-and must not be imported by application code. The package's `m2_store_paths`
+and must not be imported by application code. The shared `m2_store_paths`
 fixture selects explicit disposable paths for every proposed customer/cart/order
 store and reuses the root fixture's restaurant copy; it does not initialize
 committed data or add working runtime configuration.
@@ -64,6 +64,12 @@ need duplicate hash guards. Feature owners still need real path-override,
 save/reload, failure, authorization and service/API tests, and isolated auth
 storage if #78 adds it. Final #95/#101 integration tests must use the real
 implementations, not these doubles.
+
+Run `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
+for #91. These tests use a temporary order file, reopen the repository for retry,
+and check current pricing, authorization timing and conditional reset failures.
+Customer, cart and menu inputs are doubles. The real sign-in, cart, checkout and
+persisted order history/detail workflow remains an integration test to deliver.
 
 ### Test-first cycle
 
