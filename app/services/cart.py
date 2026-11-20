@@ -1,6 +1,7 @@
 """Apply Food4Thought's cart rules: create or read a customer's active cart (#85) and
 add menu items (#86). Edits run under the shared workflow lock, re-read the customer's
-current status, and price lines from current menu data rather than client input.
+current status, price lines from current menu data rather than client input, and
+build the response before saving so a failed read never leaves a half-finished change.
 """
 
 from typing import Protocol
@@ -8,6 +9,7 @@ from typing import Protocol
 from app.core.workflow import workflow_lock
 from app.repositories.cart import CartDataError, CartRepository
 from app.schemas.cart import AddCartItemRequest, CartItem, CartRecord, CartView, CartViewItem
+from app.schemas.order import cents, money
 from app.services.catalog import CatalogItem
 from app.services.restaurant import MenuItemNotFoundError, RestaurantNotFoundError
 
@@ -56,16 +58,6 @@ class CheckoutRecoveryRequiredError(Exception):
     """An order was saved for this cart revision but the cart was not reset yet."""
 
 
-def _cents(price: str) -> int:
-    # Prices are validated "12.50" strings; integer cents avoid float rounding.
-    whole, _, fraction = price.partition(".")
-    return int(whole) * 100 + int(fraction.ljust(2, "0")[:2])
-
-
-def _money(cents: int) -> str:
-    return f"{cents // 100}.{cents % 100:02d}"
-
-
 class CartService:
     def __init__(self, carts: CartRepository, customers: CustomerAccess,
                  catalog: CatalogAccess, receipts: OrderReceipts) -> None:
@@ -78,8 +70,10 @@ class CartService:
         """Return the active cart, creating an empty one on first use (PUT .../cart)."""
         with workflow_lock:
             self._require_active(customer_id)
-            cart, created = self.carts.create_cart(customer_id)
-            return self._view(cart), created
+            new_views: list[CartView] = []
+            cart, created = self.carts.create_cart(
+                customer_id, before_save=lambda new: new_views.append(self._view(new)))
+            return (new_views[0] if created else self._view(cart)), created
 
     def get_cart(self, customer_id: str) -> CartView:
         """Read the cart without creating it; inactive customers may still read."""
@@ -96,8 +90,11 @@ class CartService:
             cart = self.carts.get_cart(customer_id)
             if cart is None:
                 raise CartNotFoundError(customer_id)
+            # Contract order: receipt, mixed restaurant, restaurant, item, availability.
             if self.receipts.find_for_cart(cart.id, cart.revision) is not None:
                 raise CheckoutRecoveryRequiredError(cart.id)
+            if cart.restaurant_id not in (None, request.restaurant_id):
+                raise CartRestaurantConflictError(cart.restaurant_id)
             if self.catalog.get_restaurant(request.restaurant_id) is None:
                 raise RestaurantNotFoundError(request.restaurant_id)
             item = self.catalog.get_item(request.restaurant_id, request.item_id)
@@ -105,8 +102,6 @@ class CartService:
                 raise MenuItemNotFoundError(request.item_id)
             if not item.available:
                 raise MenuItemUnavailableError(request.item_id)
-            if cart.restaurant_id not in (None, request.restaurant_id):
-                raise CartRestaurantConflictError(cart.restaurant_id)
 
             items = [line.model_copy() for line in cart.items]
             existing = next((line for line in items if line.item_id == request.item_id), None)
@@ -116,8 +111,9 @@ class CartService:
                 existing.quantity += request.quantity
             updated = CartRecord(id=cart.id, customer_id=customer_id, revision=cart.revision + 1,
                                  restaurant_id=request.restaurant_id, items=items)
+            view = self._view(updated)  # every fallible read happens before the write
             self.carts.save_cart(updated)
-            return self._view(updated)
+            return view
 
     def _require_active(self, customer_id: str) -> None:
         customer = self.customers.get_customer(customer_id)
@@ -133,11 +129,12 @@ class CartService:
             if item is None:
                 # A stored reference to a missing item is corrupt data, not a free item.
                 raise CartDataError(f"Cart {cart.id} references missing item {line.item_id}")
-            line_cents = _cents(item.price) * line.quantity
+            # Checkout's exact conversion handles totals longer than int's text limit.
             lines.append(CartViewItem(item_id=item.id, name=item.name, quantity=line.quantity,
-                                      unit_price=_money(_cents(item.price)),
-                                      line_total=_money(line_cents), available=item.available))
-        subtotal = _money(sum(_cents(line.line_total) for line in lines))
+                                      unit_price=item.price,
+                                      line_total=money(cents(item.price) * line.quantity),
+                                      available=item.available))
+        subtotal = money(sum(cents(line.line_total) for line in lines))
         receipt = self.receipts.find_for_cart(cart.id, cart.revision)
         return CartView(id=cart.id, customer_id=cart.customer_id, revision=cart.revision,
                         restaurant_id=cart.restaurant_id, items=lines, subtotal=subtotal,

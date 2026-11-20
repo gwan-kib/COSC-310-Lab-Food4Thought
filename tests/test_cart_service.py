@@ -4,13 +4,16 @@ restaurant repository on an isolated copy, so prices and parents are the backend
 """
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 
 import pytest
 from pydantic import ValidationError
 
+from app.core.storage import StorageFailure
 from app.repositories.cart import CartDataError, CartRepository
-from app.schemas.cart import AddCartItemRequest
+from app.schemas.cart import AddCartItemRequest, CartItem, CartRecord
+from app.schemas.order import cents, money
 from app.services.cart import (
     CartNotFoundError, CartRestaurantConflictError, CartService,
     CheckoutRecoveryRequiredError, CustomerInactiveError, CustomerNotFoundError,
@@ -210,3 +213,71 @@ def test_client_cannot_supply_price_total_or_owner():
         with pytest.raises(ValidationError):
             AddCartItemRequest.model_validate(
                 {"restaurant_id": "restaurant-001", "item_id": "item-001", "quantity": 1, **extra})
+
+
+# --- PR #113 review regressions ---------------------------------------------------
+
+def test_failed_view_read_after_add_leaves_the_cart_file_unchanged(m2_store_paths):
+    # A stored line whose menu item has disappeared makes the priced view fail.
+    cart, _ = CartRepository().create_cart("customer-001")
+    CartRepository().save_cart(CartRecord(id=cart.id, customer_id="customer-001", revision=3,
+                                          restaurant_id="restaurant-001",
+                                          items=[CartItem(item_id="item-gone", quantity=1)]))
+    before = m2_store_paths["carts"].read_bytes()
+
+    with pytest.raises(CartDataError):
+        _service().add_item("customer-001", _add(quantity=1))
+
+    assert m2_store_paths["carts"].read_bytes() == before
+
+
+class FailingReceipts:
+    def find_for_cart(self, cart_id, revision):
+        raise StorageFailure("order store unavailable")
+
+
+def test_failed_receipt_read_on_create_saves_no_cart(m2_store_paths):
+    before = m2_store_paths["carts"].read_bytes()
+
+    with pytest.raises(StorageFailure):
+        _service(receipts=FailingReceipts()).create_or_get_cart("customer-001")
+
+    assert m2_store_paths["carts"].read_bytes() == before
+
+
+@pytest.mark.parametrize(("restaurant_id", "item_id"), [
+    ("restaurant-002", "item-404"),   # other restaurant, missing item
+    ("restaurant-404", "item-001"),   # missing restaurant
+])
+def test_mixed_restaurant_is_reported_before_missing_restaurant_or_item(m2_store_paths, restaurant_id, item_id):
+    service = _service()
+    service.create_or_get_cart("customer-001")
+    service.add_item("customer-001", _add())
+    before = m2_store_paths["carts"].read_bytes()
+
+    with pytest.raises(CartRestaurantConflictError):
+        service.add_item("customer-001", _add(restaurant_id=restaurant_id, item_id=item_id))
+
+    assert m2_store_paths["carts"].read_bytes() == before
+
+
+def test_totals_beyond_the_int_text_limit_match_checkout_money(m2_store_paths):
+    # Same quantity as checkout's regression: the total has more than 4300 digits.
+    quantity = 10**4299 + 1
+    service = _service()
+    service.create_or_get_cart("customer-001")
+
+    view = service.add_item("customer-001", _add(quantity=quantity))
+
+    expected = money(cents("12.50") * quantity)
+    assert view.items[0].line_total == view.subtotal == view.total == expected
+    assert _service().get_cart("customer-001") == view
+
+
+def test_concurrent_creates_produce_one_cart(m2_store_paths):
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(lambda _: _service().create_or_get_cart("customer-001"), range(8)))
+
+    assert len({view.id for view, _ in results}) == 1
+    assert sum(created for _, created in results) == 1
+    assert len(json.loads(m2_store_paths["carts"].read_text())) == 1

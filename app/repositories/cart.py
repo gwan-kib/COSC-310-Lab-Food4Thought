@@ -42,8 +42,13 @@ class CartRepository:
     def get_cart(self, customer_id: str) -> CartRecord | None:
         return next((cart for cart in self.load_carts() if cart.customer_id == customer_id), None)
 
-    def create_cart(self, customer_id: str) -> tuple[CartRecord, bool]:
-        """Return the customer's cart, creating an empty one if none exists yet."""
+    def create_cart(
+        self, customer_id: str, before_save: Callable[[CartRecord], None] | None = None
+    ) -> tuple[CartRecord, bool]:
+        """Return the customer's cart, creating an empty one if none exists yet.
+
+        `before_save` runs on a new cart before it is written; if it raises, nothing is saved.
+        """
         created: list[CartRecord] = []
 
         def add_if_missing(carts: list[CartRecord]) -> None:
@@ -55,6 +60,8 @@ class CartRepository:
                 cart_id = str(uuid4())
             created.append(CartRecord(id=cart_id, customer_id=customer_id, revision=0,
                                       restaurant_id=None, items=[]))
+            if before_save is not None:
+                before_save(created[0])
             carts.append(created[0])
 
         carts = self._mutate(add_if_missing, save=lambda: bool(created))
