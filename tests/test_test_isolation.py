@@ -38,4 +38,13 @@ def test_m2_store_is_isolated_without_requesting_a_fixture(tmp_path, store):
     configured = os.environ.get(f"{store.upper()}_DATA_PATH")
 
     assert configured == str(path)
-    assert json.loads(path.read_text(encoding="utf-8")) == []
+    if store == "orders":
+        # The repository must report a missing store without creating one.
+        assert not path.exists()
+    else:
+        assert json.loads(path.read_text(encoding="utf-8")) == []
+
+
+def test_requesting_initialized_m2_stores_creates_order_file(m2_store_paths):
+    order_path = m2_store_paths["orders"]
+    assert json.loads(order_path.read_text(encoding="utf-8")) == []

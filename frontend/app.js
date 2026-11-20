@@ -3,6 +3,8 @@
 // with textContent and ignore superseded requests so late responses cannot replace
 // the current filter or selection.
 
+import { requestJson } from "./api-client.js";
+
 class ApiError extends Error {
   constructor(status, message) {
     super(message);
@@ -13,18 +15,12 @@ class ApiError extends Error {
 async function getJson(path) {
   let response;
   try {
-    response = await fetch(path, { headers: { Accept: "application/json" } });
+    response = await requestJson(path, { timeoutMs: null });
   } catch {
     throw new ApiError(0, "Could not reach the server.");
   }
 
-  let body = null;
-  try {
-    body = await response.json();
-  } catch {
-    // A non-JSON body still produces a readable error below.
-  }
-
+  const { body } = response;
   if (!response.ok) {
     const detail = body && typeof body.detail === "string" ? body.detail : null;
     throw new ApiError(response.status, detail || `Request failed (HTTP ${response.status}).`);

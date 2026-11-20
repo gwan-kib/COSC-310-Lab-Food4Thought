@@ -1,6 +1,7 @@
-"""Give each Food4Thought test disposable restaurant and M2 store paths.
-A session-level snapshot detects changes under data/, and tests needing seeded
-accounts can request the shared authentication fixture.
+"""Isolate restaurant and all M2 store paths for every test.
+Customer, cart, staff and session stores start empty; order storage stays absent
+until a test explicitly requests initialized M2 stores. The session guard
+detects unexpected writes to committed application data.
 """
 
 import hashlib
@@ -40,19 +41,35 @@ def isolated_restaurants_path(tmp_path, monkeypatch) -> Path:
     return path
 
 
-# Stores proposed by the M2 contract (#77) and the authentication design (#78).
-M2_STORES = ("customers", "carts", "orders", "staff", "sessions")
+# Select a disposable path even in tests that do not initialize order storage.
+@pytest.fixture(autouse=True)
+def isolated_orders_path(tmp_path, monkeypatch) -> Path:
+    path = tmp_path / "orders.json"
+    monkeypatch.setenv("ORDERS_DATA_PATH", str(path))
+    return path
+
+
+# Additional stores proposed by the M2 and authentication contracts.
+ADDITIONAL_M2_STORES = ("customers", "carts", "staff", "sessions")
 
 
 @pytest.fixture(autouse=True)
-def m2_store_paths(tmp_path, monkeypatch, isolated_restaurants_path) -> dict[str, Path]:
-    """Empty, isolated JSON stores, each selected through its *_DATA_PATH variable."""
-    paths = {"restaurants": isolated_restaurants_path}
-    for store in M2_STORES:
+def isolated_additional_m2_stores(tmp_path, monkeypatch, isolated_orders_path) -> dict[str, Path]:
+    """Set up the other M2 stores for every test, but leave orders.json absent."""
+    paths = {"orders": isolated_orders_path}
+    for store in ADDITIONAL_M2_STORES:
         path = tmp_path / f"{store}.json"
         path.write_text("[]\n", encoding="utf-8")
         monkeypatch.setenv(f"{store.upper()}_DATA_PATH", str(path))
         paths[store] = path
+    return paths
+
+
+@pytest.fixture
+def m2_store_paths(isolated_restaurants_path, isolated_additional_m2_stores) -> dict[str, Path]:
+    """Return all temporary paths and initialize orders only when requested."""
+    paths = {"restaurants": isolated_restaurants_path, **isolated_additional_m2_stores}
+    paths["orders"].write_text("[]\n", encoding="utf-8")
     return paths
 
 

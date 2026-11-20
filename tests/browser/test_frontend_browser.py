@@ -1,6 +1,7 @@
-"""Exercise Food4Thought's customer discovery page in Chromium against the real API
-and isolated storage. Cover legacy menu prices, asynchronous selection and error
-recovery, and regressions from the PR #58 review.
+"""Exercise Food4Thought's customer discovery page in Chromium against the real API and
+isolated storage. Regression scenarios from PR #58 review protect selection races,
+malformed links, retries, independent menu errors, and long-text layout at phone
+widths.
 """
 
 import json
@@ -183,4 +184,26 @@ def test_details_still_show_when_only_the_menu_fails(page, live_server):
     cedar_bowl.click()
     expect(page.locator("#menu-list li")).to_have_count(2)
     expect(page.locator("#menu-status")).to_be_hidden()
+    assert page.page_errors == []
+
+
+@pytest.mark.parametrize("failure,expected", [
+    ("network", "Could not reach the server."),
+    ("non-json", "Request failed (HTTP 503)."),
+    ("empty-detail", "Request failed (HTTP 503)."),
+])
+def test_discovery_reports_list_request_failures(page, live_server, failure, expected):
+    def fail_list(route):
+        if failure == "network":
+            route.abort()
+        elif failure == "non-json":
+            route.fulfill(status=503, content_type="text/html", body="<h1>Unavailable</h1>")
+        else:
+            route.fulfill(status=503, json={"detail": ""})
+
+    page.route("**/restaurants", fail_list)
+    page.goto(f"{live_server}/app/")
+
+    expect(page.locator("#list-status")).to_have_text(f"Could not load restaurants: {expected}")
+    expect(_restaurant_buttons(page)).to_have_count(0)
     assert page.page_errors == []
