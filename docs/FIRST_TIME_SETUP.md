@@ -175,6 +175,12 @@ storage error. The focused checkout tests select their own disposable files:
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`.
 Checkout is currently available at the service layer only.
 
+Customer accounts and sign-in sessions use `data/customers.json` (`CUSTOMERS_DATA_PATH`) and
+`data/sessions.json` (`SESSIONS_DATA_PATH`), both committed as `[]`. Registering or signing in
+writes to them, so for manual experiments copy both to a temporary directory and point the two
+variables at the copies before starting the server. To try it in `/docs`: `POST /customers`, then
+`POST /auth/login`, click **Authorize**, paste the `access_token`, and call `GET /customers/me`.
+
 **Restaurant HTTP experiments**
 
 Stop any existing server first. From the repository root, with the virtual environment active, make a uniquely named temporary directory and copy the sample into it. These commands create a new copy each time; to verify persistence after restarting, reuse the printed path instead of repeating the copy step.

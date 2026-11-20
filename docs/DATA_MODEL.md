@@ -14,11 +14,11 @@ source/role questions are recorded in that contract and [M2 evidence](milestones
 | Store | Existing / proposed file and override | Owner / format |
 | --- | --- | --- |
 | Restaurant/menu | Implemented `data/restaurants.json`, `RESTAURANTS_DATA_PATH` | Existing repository; Thomas owns #94 availability extension; JSON array of complete restaurant records |
-| Customer | Proposed `data/customers.json`, `CUSTOMERS_DATA_PATH` | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
+| Customer | Implemented `data/customers.json`, `CUSTOMERS_DATA_PATH` (`app/repositories/customer.py`, #79–#82) | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
 | Cart | Proposed `data/carts.json`, `CARTS_DATA_PATH` | Sreeram; JSON array of `CartRecord` objects |
 | Order | Implemented `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; append-only JSON array of order snapshots |
 | Staff account | Proposed `data/staff.json`, `STAFF_DATA_PATH` | Sreeram (#78); provisioned restaurant users and administrators: `id`, `name`, `email`, `role`, `restaurant_ids`, Argon2id `password_hash` |
-| Session | Proposed `data/sessions.json`, `SESSIONS_DATA_PATH` | Sreeram (#78); `token_sha256`, `account_id`, `account_type`, `issued_at`, `expires_at`; never the token itself |
+| Session | Implemented `data/sessions.json`, `SESSIONS_DATA_PATH` (#80) | Sreeram (#78); `token_sha256`, `account_id`, `account_type`, `issued_at`, `expires_at`; never the token itself |
 
 New repositories should match M1's explicit `path: Path | str | None` injection,
 resolve overrides at construction rather than import time, and keep file I/O out
