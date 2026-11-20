@@ -773,7 +773,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110); [Thomas's latest review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985546961).
 - Student review status: Pending. Owner should review the integration and re-request peer approval.
 
-### Entry 55: Cart storage, create/retrieve cart and add item to cart
+### Entry 60: Cart storage, create/retrieve cart and add item to cart
 
 - Student(s): Sreeram Nara (`SreeramNara`), assignee of #85 and #86.
 - Artifact: `app/schemas/cart.py`, `app/repositories/cart.py`, `app/services/cart.py`, `app/services/catalog.py`, `app/core/config.py` (`get_carts_data_path`), `data/carts.json`, `tests/test_cart_repository.py`, `tests/test_cart_service.py`, and cart lines in `docs/FIRST_TIME_SETUP.md` and `docs/DATA_MODEL.md`. `app/core/storage.py` and `app/core/workflow.py` are byte-identical copies of the files in Thomas Chen's PR #111 so both PRs share one workflow lock and storage-failure type.
