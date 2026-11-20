@@ -182,6 +182,27 @@ def test_rejected_input_equal_to_the_password_is_redacted():
     assert password not in response.text
 
 
+def test_rejected_input_containing_the_password_is_redacted():
+    password = "pasted-password-with-trailing-space"
+    response = _client().post("/leaky", json={"email": password + " ", "password": password})
+
+    assert response.status_code == 422
+    [error] = response.json()["detail"]
+    assert error["loc"] == ["body", "email"]
+    assert error["input"] == REDACTED
+    assert password not in response.text
+
+
+def test_short_password_does_not_change_builtin_diagnostics():
+    response = _client().post("/credentials", json={"email": 7, "password": "a"})
+
+    assert response.status_code == 422
+    errors = {tuple(error["loc"]): error for error in response.json()["detail"]}
+    assert errors[("body", "email")]["msg"] == "Input should be a valid string"
+    assert errors[("body", "password")]["msg"] == "String should have at least 12 characters"
+    assert errors[("body", "password")]["input"] == REDACTED
+
+
 def test_repr_formatted_password_is_redacted_in_message_and_context():
     email = "a@example.invalid"
     password = email + "\\path\nwith'quotes\""

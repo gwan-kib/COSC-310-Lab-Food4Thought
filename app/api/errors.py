@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
+from pydantic_core import PydanticKnownError
 
 # Compared case-insensitively against field names and error locations.
 SENSITIVE_FIELDS = frozenset({"password"})
@@ -19,6 +20,7 @@ SAFE_SENSITIVE_ERROR_TYPES = frozenset(
     {"missing", "string_type", "string_too_short", "string_too_long", "extra_forbidden"}
 )
 SENSITIVE_ERROR_MESSAGE = "Invalid password"
+STRING_LENGTH_ERROR_TYPES = frozenset({"string_too_short", "string_too_long"})
 
 
 def _is_sensitive(name: object) -> bool:
@@ -35,7 +37,7 @@ def _redact(value: Any, secrets: set[str]) -> Any:
         }
     if isinstance(value, list):
         return [_redact(item, secrets) for item in value]
-    if isinstance(value, str) and value in secrets:
+    if isinstance(value, str) and any(secret in value for secret in secrets):
         return REDACTED
     return value
 
@@ -69,6 +71,18 @@ def _scrub(value: Any, forms: list[str]) -> Any:
     return value
 
 
+def _uses_fixed_message(error: dict[str, Any]) -> bool:
+    # Match the canonical text because custom validators can reuse a built-in code.
+    # String length messages may use schema bounds. Other formatted errors may
+    # include submitted values, so require a context-free message for those.
+    kind = error.get("type")
+    context = error.get("ctx") if kind in STRING_LENGTH_ERROR_TYPES else None
+    try:
+        return error.get("msg") == PydanticKnownError(kind, context).message()
+    except (KeyError, TypeError, OverflowError):
+        return False
+
+
 def _redact_error(error: dict[str, Any], body_secrets: set[str]) -> dict[str, Any]:
     error = dict(error)
     secrets = body_secrets | _submitted_secrets(error.get("input"))
@@ -80,15 +94,17 @@ def _redact_error(error: dict[str, Any], body_secrets: set[str]) -> dict[str, An
         if error.get("type") not in SAFE_SENSITIVE_ERROR_TYPES:
             error["msg"] = SENSITIVE_ERROR_MESSAGE
             error.pop("ctx", None)
+            return error
     elif "input" in error:
         error["input"] = _redact(error["input"], secrets)
     if secrets:
         # Include !r output without its surrounding quotes.
         forms = secrets | {repr(secret)[1:-1] for secret in secrets}
         longest_first = sorted(forms, key=len, reverse=True)
-        for field in ("msg", "ctx"):
-            if field in error:
-                error[field] = _scrub(error[field], longest_first)
+        if "msg" in error and not _uses_fixed_message(error):
+            error["msg"] = _scrub(error["msg"], longest_first)
+        if "ctx" in error:
+            error["ctx"] = _scrub(error["ctx"], longest_first)
     return error
 
 

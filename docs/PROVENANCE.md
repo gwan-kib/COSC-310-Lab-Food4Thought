@@ -716,3 +716,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: `python -m pytest -q tests/test_credential_redaction.py` showed two failures and eight passes before the fix. The focused credential and validation-error suite passed 35 tests after the fix, and `python -m pytest -q --ignore=tests/browser` passed 402 tests. Compilation, the local data guard and `git diff --check` passed.
 - PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110) and [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985133060).
 - Student review status: Pending for the follow-up.
+
+### Entry 57: PR #110 second credential redaction review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue coordinator. Thomas Chen (`Tc2006415`) identified both cases in review.
+- Artifact: `app/api/errors.py`, `tests/test_credential_redaction.py`, `docs/AUTH_DESIGN.md`, `docs/milestones/M2.md` and this entry.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address Thomas's follow-up findings about passwords embedded in rejected values and short passwords changing standard error wording.
+- Influence: Codex wrote the two regression tests and changed the shared handler to mask input strings containing a submitted password and preserve canonical fixed diagnostics. Custom messages and error context still undergo redaction.
+- Validation: `python -m pytest -q tests/test_credential_redaction.py` showed two failures and 10 passes before the fix. The focused credential and validation-error suite passed 37 tests after the fix, and `python -m pytest -q --ignore=tests/browser` passed 404 tests. Compilation, the local data guard and `git diff --check` passed.
+- PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110) and [Thomas's second review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985366789).
+- Student review status: Pending for the follow-up.
