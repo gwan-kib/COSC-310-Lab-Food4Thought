@@ -216,6 +216,30 @@ revision 2, return `cart_reset_pending: true` so the client can retry that
 revision. If the read confirms the purchased revision is gone, return
 `cart_reset_pending: false`. If the cart cannot be read, return `true`.
 
+## Order history service implementation (#92)
+
+[`OrderHistoryService.list_orders(principal)`](../app/services/order_history.py)
+uses the existing order repository from #91. It acquires the shared workflow
+lock, resolves the authorized customer through an injected helper, then calls
+`list_for_customer(customer.id)`. At composition time, bind #84's
+`require_customer(principal, customers, active=False)` so inactive customers
+retain read access. The callback pattern matches the checkout service; it is
+not an alternative authentication implementation.
+
+Results are saved `Order` snapshots in persisted insertion order, with `[]` for
+a customer with no orders. Reads do not recalculate historical values, consult
+the current cart/catalog, or write files. Access/customer-store failures propagate
+from the shared helper; missing, unreadable or corrupt order storage raises
+`OrderDataError("Order data is unavailable")` rather than returning an empty list.
+
+The [history tests](../tests/test_order_history_service.py) use independent
+A1/B1/A2 persisted fixtures and real order storage. They also exercise checkout
+service → saved receipt → history reload with customer/cart/catalog/auth doubles.
+`GET /customers/me/orders` is **not registered yet**: real identity and access
+dependencies (#79/#80/#84), 200/401/403/500 HTTP tests, OpenAPI, and the complete
+real purchase-to-history workflow remain integration work. No HTTP availability
+is implied by the service tests.
+
 ## Checkout ordering, failures, and retry contract
 
 The [checkout service](../app/services/checkout.py) and [JSON order store](../app/repositories/order.py)

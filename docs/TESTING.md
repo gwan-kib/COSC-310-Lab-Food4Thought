@@ -71,6 +71,17 @@ and check current pricing, authorization timing and conditional reset failures.
 Customer, cart and menu inputs are doubles. The real sign-in, cart, checkout and
 persisted order history/detail workflow remains an integration test to deliver.
 
+Run `python -m pytest -q tests/test_order_history_service.py` for the #92 service.
+Independent A1/B1/A2 JSON fixtures verify customer scoping, persisted insertion
+order, empty history, unchanged files, stable snapshots after reload, and errors
+for missing/unreadable/corrupt stores even when a customer has no orders. The
+authorization-boundary tests verify delegation under the workflow lock and
+denial before private order reads; they do not implement or prove real auth.
+One test connects the real checkout service and order repository to history,
+including a second read through a fresh repository. Customer/cart/catalog/auth
+remain doubles, so authenticated HTTP and full workflow tests are still pending.
+The default full-suite command above includes these tests.
+
 ### Test-first cycle
 
 **Team convention:** use a test-first cycle for new or changed behaviour and bug fixes. Tests come before the implementation code they verify.
