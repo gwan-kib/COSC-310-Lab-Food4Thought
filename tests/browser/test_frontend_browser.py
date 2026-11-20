@@ -54,6 +54,39 @@ def test_list_details_and_menu_load(page, live_server):
     assert page.page_errors == []
 
 
+def test_filtered_legacy_menu_shows_decimal_prices_without_writing(
+    page, live_server, isolated_restaurants_path
+):
+    # Use an M1 menu with valid, noncanonical prices and no availability fields.
+    records = json.loads(isolated_restaurants_path.read_bytes())
+    records[0]["menu_items"][0]["price"] = "12.5"
+    records[0]["menu_items"][1]["price"] = "999"
+    original = json.dumps(records).encode("utf-8")
+    isolated_restaurants_path.write_bytes(original)
+
+    page.goto(f"{live_server}/app/")
+    expect(_restaurant_buttons(page)).to_have_count(2)
+    page.get_by_label("Cuisine").fill("japanese")
+    page.get_by_role("button", name="Filter").click()
+    expect(_restaurant_buttons(page)).to_have_count(1)
+    with page.expect_response(CEDAR_BOWL_MENU) as menu_response:
+        _restaurant_buttons(page).filter(has_text="Cedar Bowl").click()
+
+    response = menu_response.value
+    assert response.status == 200
+    assert {item["id"]: item["price"] for item in response.json()["items"]} == {
+        "item-001": "12.50",
+        "item-002": "999.00",
+    }
+    expect(page.locator("#details-name")).to_have_text("Cedar Bowl")
+    menu = page.locator("#menu-list li")
+    expect(menu.filter(has_text="Vegetable bowl").locator(".price")).to_have_text("$12.50")
+    expect(menu.filter(has_text="Chicken udon").locator(".price")).to_have_text("$999.00")
+    expect(menu).to_have_count(2)
+    assert isolated_restaurants_path.read_bytes() == original
+    assert page.page_errors == []
+
+
 def test_clearing_selection_ignores_late_detail_responses(page, live_server):
     # Hold the detail and menu responses until after the selection is cleared.
     held = []

@@ -713,6 +713,42 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The new checkout test first failed during money formatting, then exposed the same digit limit in the contract model's parser. After both fixes it verified the exact total, receipt reload, and replay. `python -m pytest -q tests/test_checkout_service.py tests/test_order_repository.py tests/contracts` passed 67 tests. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed 462 tests. `python -m compileall app` and `git diff --exit-code -- data/` succeeded.
 - PR: [#111](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/111). Student review of the revision and peer re-review are pending.
 
+### Entry 55: Regression coverage for issue #102
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue coordinator.
+- Artifact: `app/api/errors.py`, credential/restaurant/isolation tests under `tests/`, `.github/workflows/ci.yml`, `docs/AUTH_DESIGN.md`, `docs/FIRST_TIME_SETUP.md`, `docs/TESTING.md`, `docs/milestones/M2.md`, this entry and the task PR.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address the documented cross-field disclosure and keep M1 catalog coverage and isolated storage ready for M2 integration.
+- Influence: Codex continued the task branch's existing edits, wrote the regression and targeted handler fix, adapted write-failure assertions for the shared store fixtures, and documented observed and pending verification.
+- Validation: The cross-field regression failed on the original handler and passed after the fix. Five isolation checks failed with the original fixtures and passed with automatic M2 paths. The final local backend suite passed 400 tests, and a scratch combination with PR #109 passed 413 backend tests. Compilation and local data-guard checks passed. Browser launch in the local environment failed because Chromium could not open a Unix socket. GitHub CI results are tracked in the task PR.
+- PR or commit: [Issue #102](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/102), [PR #106 review finding](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106#pullrequestreview-5984850396), and branch `chore/102-regression-coverage`.
+- Student review status: Pending. Gwantana's review and a teammate's approval are still required.
+
+### Entry 56: PR #110 credential redaction review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue coordinator and requester. Thomas Chen (`Tc2006415`) identified the two cases in review.
+- Artifact: `app/api/errors.py`, `tests/test_credential_redaction.py`, `docs/AUTH_DESIGN.md`, `docs/milestones/M2.md` and this entry.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address Thomas's findings about passwords in rejected input and in escaped validator diagnostics.
+- Influence: Codex wrote both regression tests and updated the shared 422 handler to redact equal input values and scrub literal and `repr`-escaped password text from diagnostics.
+- Validation: `python -m pytest -q tests/test_credential_redaction.py` showed two failures and eight passes before the fix. The focused credential and validation-error suite passed 35 tests after the fix, and `python -m pytest -q --ignore=tests/browser` passed 402 tests. Compilation, the local data guard and `git diff --check` passed.
+- PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110) and [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985133060).
+- Student review status: Pending for the follow-up.
+
+### Entry 57: PR #110 second credential redaction review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue coordinator. Thomas Chen (`Tc2006415`) identified both cases in review.
+- Artifact: `app/api/errors.py`, `tests/test_credential_redaction.py`, `docs/AUTH_DESIGN.md`, `docs/milestones/M2.md` and this entry.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address Thomas's follow-up findings about passwords embedded in rejected values and short passwords changing standard error wording.
+- Influence: Codex wrote the two regression tests and changed the shared handler to mask input strings containing a submitted password and preserve canonical fixed diagnostics. Custom messages and error context still undergo redaction.
+- Validation: `python -m pytest -q tests/test_credential_redaction.py` showed two failures and 10 passes before the fix. The focused credential and validation-error suite passed 37 tests after the fix, and `python -m pytest -q --ignore=tests/browser` passed 404 tests. Compilation, the local data guard and `git diff --check` passed.
+- PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110) and [Thomas's second review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985366789).
+- Student review status: Pending for the follow-up.
+
 ### Entry 58: Shared frontend JSON transport for issue #98
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee and requester. Student design and implementation review is pending.
@@ -724,3 +760,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: With Python 3.12, `REQUIRE_BROWSER_TESTS=1` and Chromium headless shell 153, 42 focused tests passed against the original frontend with the characterization cases. The original refactor passed 428 tests with no skips. A Node probe checked propagation of an abort during response-body reading without a retry. The review follow-up test failed because Chromium sent no `Authorization` header before the fix and passed after it. The updated branch passed all 466 tests, application compilation, a JavaScript syntax check, the committed-data guard and whitespace checks.
 - PR or commit: [PR #112](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/112) for [issue #98](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/98).
 - Student review status: Gwantana's confirmation is pending. Thomas's initial review is linked above. Re-review and merge evidence are pending.
+
+### Entry 59: PR #110 merge-conflict and isolation review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), PR #110 author and requester; Thomas Chen (`Tc2006415`) supplied the review findings.
+- Artifact: `tests/conftest.py`, `tests/test_test_isolation.py`, `docs/TESTING.md`, `docs/FIRST_TIME_SETUP.md`, `docs/milestones/M2.md`, `tests/browser/test_frontend_browser.py`, this file and integration of PR #110 with current `main`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Resolve Thomas's PR #110 review conflicts with #111 and preserve the later merged frontend integration changes.
+- Influence: Combined the branches without discarding either set of changes. Isolated all M2 paths automatically while retaining the order repository's missing-file semantics: only the opt-in `m2_store_paths` fixture creates `orders.json`. Preserved the checkout tests/commands, provenance from both branches, and browser and milestone additions.
+- Validation: Inspected current PR #110 and main sources and the review requirements. Automated tests and GitHub Actions must be checked on this combined revision; no passing test result is claimed here.
+- PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110); [Thomas's latest review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985546961).
+- Student review status: Pending. Owner should review the integration and re-request peer approval.
