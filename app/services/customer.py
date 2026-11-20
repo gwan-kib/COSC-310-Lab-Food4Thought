@@ -1,5 +1,5 @@
-"""Apply Food4Thought's customer account rules: register (#79), read (#81) and update
-(#82) a profile. Emails are unique ignoring case, passwords are hashed before storage,
+"""Apply Food4Thought's customer account rules: register (#79), read (#81), update
+(#82) and deactivate (#83) a profile. Emails are unique ignoring case, passwords are hashed before storage,
 and profile changes re-check that the customer is still active under the workflow lock.
 """
 
@@ -57,5 +57,18 @@ class CustomerService:
             # Only fields the client actually sent change; ID, email, role and hash are kept.
             updated = customer.model_copy(update=request.model_dump(exclude_unset=True))
             updated = StoredCustomer.model_validate(updated.model_dump())
+            self.repository.save_customer(updated)
+            return updated.public()
+
+    def deactivate(self, customer_id: str) -> Customer:
+        """Mark the account inactive, keeping its ID, cart and orders; repeating is a no-op."""
+        # Same lock as cart edits and checkout, so a racing checkout sees the result.
+        with workflow_lock:
+            customer = self.repository.get_customer(customer_id)
+            if customer is None:
+                raise CustomerNotFoundError(customer_id)
+            if customer.status == "inactive":
+                return customer.public()
+            updated = customer.model_copy(update={"status": "inactive"})
             self.repository.save_customer(updated)
             return updated.public()

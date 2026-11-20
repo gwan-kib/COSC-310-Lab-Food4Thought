@@ -748,3 +748,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: `tests/test_customer_accounts_api.py` was written first and failed collection (`No module named 'app.api.auth'`); after implementation all 42 API tests passed. `tests/test_customer_repository.py` (6 tests) was added after implementation as repository-level evidence, so it did not fail first. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed with the committed-data guard; committed `data/` files other than the two new empty stores were unchanged.
 - PR or commit: Branch `feature/79-82-customer-accounts`; PR not yet opened.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 57: Deactivate account and protected cart routes
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #83, #84, #85, #86 and #90.
+- Artifact: `app/api/routes/carts.py`, the deactivate route in `app/api/routes/customers.py`, `CustomerService.deactivate` in `app/services/customer.py`, router registration in `app/main.py`, `tests/test_cart_api.py`, and cart/deactivate lines in `README.md` and `docs/FIRST_TIME_SETUP.md`. The branch combines PRs #113 and #114, which it builds on.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Connect the cart service (#113) to customer sign-in (#114) so the cart works through the API, and add account deactivation, for the M2 customer-to-cart workflow.
+- Influence: Claude wrote the API tests first, then: `POST /customers/me/deactivate` (sets inactive under the workflow lock, keeps ID/cart/orders, repeat is 200); `PUT /customers/me/cart` (201 new / 200 existing), `GET /customers/me/cart` (never creates; inactive customers may read) and `POST /customers/me/cart/items`, wired to the real customer, cart, restaurant-catalog and order-receipt stores; customer-role checks on all of them and active-customer pre-checks on writes, so an old token cannot change the cart after deactivation, even with an invalid body; and one mapping from cart-service outcomes to the contract's 401/403/404/409/500 messages.
+- Validation: The 25 tests in `tests/test_cart_api.py` failed before the routes existed and passed after. The unavailable-item case overrides the catalog dependency because menu availability (#94) is not on `main` yet. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 581 tests with the committed-data guard.
+- PR or commit: Branch `feature/83-84-cart-routes`; PR not yet opened.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
