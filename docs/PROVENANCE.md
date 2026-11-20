@@ -785,3 +785,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114); branch `feature/79-82-customer-accounts`.
 - Review follow-up: Thomas Chen (`Tc2006415`) reviewed PR #114. Claude wrote 11 failing regression tests, then: reserved staff emails at registration, checked under the account-email lock that staff provisioning (#107) must also hold (`data/staff.json` added as `[]`); dropped raw request input from 422 responses on `/customers` and `/auth/login`, so text or form bodies cannot echo a password; made `POST /auth/login` sign in restaurant users and administrators from the staff store with a `staff` session; required timezone-aware session times with expiry after issue; turned unusable stored password hashes into the documented JSON 500; restricted staff roles to `restaurant_user` and `administrator`; and pointed both setup guides' manual-test commands at disposable copies of every store. The shell loop was run; the PowerShell loop was checked by reading only. All account, redaction and validation-error tests passed after the changes.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 63: Staff account provisioning command
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #107.
+- Artifact: `app/scripts/create_staff_account.py`, `app/scripts/__init__.py`, `app/services/staff.py`, the write methods in `app/repositories/staff.py`, `tests/test_staff_provisioning.py`, and staff-account instructions in `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md` and `README.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Let the team create restaurant users and administrators, which have no public sign-up, so staff can sign in for the M2 demo and menu-availability work (#94).
+- Influence: Claude wrote the tests first, then a provisioning service and an argparse command (`create`, `assign`) that reads the password twice with a hidden prompt, applies the customer password and email rules, stores only an Argon2id hash, rejects unknown restaurants and administrators with restaurants, keeps emails unique across customers and staff under the shared account-email lock, and never prints the password.
+- Validation: `tests/test_staff_provisioning.py` first failed with `No module named 'app.scripts'`; after implementation its 13 tests passed. The real command was also run through `python -m` on disposable copies of the data files: it created a manager for `restaurant-001`, `POST /auth/login` returned 200 with role `restaurant_user`, and `data/` was unchanged. The PowerShell form of the commands was not run.
+- PR or commit: Branch `feature/107-staff-provisioning`; PR not yet opened.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.

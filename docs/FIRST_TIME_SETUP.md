@@ -230,6 +230,36 @@ unset RESTAURANTS_DATA_PATH CUSTOMERS_DATA_PATH SESSIONS_DATA_PATH STAFF_DATA_PA
 
 The temporary directory remains available for inspection; these instructions do not delete data. New terminals need the same data-path setting to reuse an experiment.
 
+### Staff accounts for manual experiments
+
+There is no public sign-up for restaurant users or administrators. Create them with the
+provisioning command. It asks for the password twice with a hidden prompt and stores only
+its hash. Run it **after** the disposable-copy commands above, in the same terminal, so it
+writes to the copies and not to `data/staff.json`.
+
+Create a demo manager for `restaurant-001`:
+
+```sh
+python -m app.scripts.create_staff_account create --name "Cedar Bowl Manager" --email manager@cedarbowl.invalid --role restaurant_user --restaurant restaurant-001
+```
+
+Create an administrator (administrators manage no restaurants):
+
+```sh
+python -m app.scripts.create_staff_account create --name "Platform Admin" --email admin@food4thought.invalid --role administrator
+```
+
+Give an existing manager another restaurant, for example one an administrator created:
+
+```sh
+python -m app.scripts.create_staff_account assign --email manager@cedarbowl.invalid --restaurant restaurant-002
+```
+
+Then sign in through `POST /auth/login` with that email and password; the response's
+`role` is `restaurant_user` or `administrator`. Emails must be unused by any customer or
+staff account, and unknown restaurant IDs are rejected without writing anything. The
+same commands work in Windows PowerShell.
+
 ## Setup complete
 
 A first-time setup is complete when:

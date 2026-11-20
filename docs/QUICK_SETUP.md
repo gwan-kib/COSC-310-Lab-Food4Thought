@@ -85,6 +85,8 @@ of the empty `data/orders.json` before constructing the repository. Run
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
 to exercise checkout with isolated storage. The checkout HTTP route is pending.
 
+To sign in as a restaurant user or administrator, create the account in the same terminal after setting the disposable data paths: `python -m app.scripts.create_staff_account create --name "Cedar Bowl Manager" --email manager@cedarbowl.invalid --role restaurant_user --restaurant restaurant-001`. See [staff accounts](FIRST_TIME_SETUP.md#staff-accounts-for-manual-experiments) for administrators and assigning restaurants.
+
 ## Short version
 
 For a normal returning session, the sequence is:
