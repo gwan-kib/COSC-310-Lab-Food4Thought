@@ -6,18 +6,28 @@ atomically, so a failed save leaves the previous carts intact.
 import json
 import os
 import tempfile
+from decimal import Decimal
 from collections.abc import Callable
 from pathlib import Path
 from threading import Lock
 from uuid import uuid4
 
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
+from pydantic_core import PydanticSerializationError
 
 from app.core.config import get_carts_data_path
 from app.core.storage import StorageFailure
 from app.schemas.cart import CartRecord
 
 _mutation_lock = Lock()
+# Quantities have no upper limit, but Python refuses to convert integers longer than
+# 4300 digits to or from text. Pydantic writes them; reading parses each integer via
+# Decimal, which has no such limit (the same approach as checkout's cents()).
+_carts = TypeAdapter(list[CartRecord])
+
+
+def _exact_int(text: str) -> int:
+    return int(Decimal(text))
 
 
 class CartDataError(StorageFailure):
@@ -32,8 +42,8 @@ class CartRepository:
 
     def load_carts(self) -> list[CartRecord]:
         try:
-            records = json.loads(self.path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            records = json.loads(self.path.read_bytes(), parse_int=_exact_int)
+        except (OSError, UnicodeError, ValueError) as exc:
             raise CartDataError(f"Could not read cart data from {self.path}: {exc}") from exc
         if not isinstance(records, list):
             raise CartDataError(f"Cart data in {self.path} must be a JSON array")
@@ -109,6 +119,9 @@ class CartRepository:
             carts = [CartRecord.model_validate(record) for record in records]
         except ValidationError as exc:
             raise CartDataError(f"Invalid cart record in {self.path}: {exc}") from exc
+        return self._check_unique(carts)
+
+    def _check_unique(self, carts: list[CartRecord]) -> list[CartRecord]:
         if len({cart.id for cart in carts}) != len(carts):
             raise CartDataError(f"Duplicate cart ID in {self.path}")
         if len({cart.customer_id for cart in carts}) != len(carts):
@@ -123,11 +136,11 @@ class CartRepository:
                 prefix=f".{self.path.name}.", suffix=".tmp", delete=False,
             ) as temporary_file:
                 temporary_path = Path(temporary_file.name)
-                json.dump([cart.model_dump(mode="json") for cart in carts],
-                          temporary_file, ensure_ascii=False, indent=2)
+                temporary_file.write(_carts.dump_json(carts, indent=2).decode("utf-8"))
                 temporary_file.write("\n")
             os.replace(temporary_path, self.path)
-        except (OSError, UnicodeError, TypeError) as exc:
+        except (OSError, UnicodeError, TypeError, ValueError, PydanticSerializationError) as exc:
+            # Every failed save removes its temporary file and keeps the previous carts.
             if temporary_path is not None:
                 temporary_path.unlink(missing_ok=True)
             raise CartDataError(f"Could not save cart data to {self.path}: {exc}") from exc

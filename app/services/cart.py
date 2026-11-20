@@ -91,7 +91,7 @@ class CartService:
             if cart is None:
                 raise CartNotFoundError(customer_id)
             # Contract order: receipt, mixed restaurant, restaurant, item, availability.
-            if self.receipts.find_for_cart(cart.id, cart.revision) is not None:
+            if self._receipt_for(cart) is not None:
                 raise CheckoutRecoveryRequiredError(cart.id)
             if cart.restaurant_id not in (None, request.restaurant_id):
                 raise CartRestaurantConflictError(cart.restaurant_id)
@@ -122,6 +122,14 @@ class CartService:
         if customer.status != "active":
             raise CustomerInactiveError(customer_id)
 
+    def _receipt_for(self, cart: CartRecord) -> object | None:
+        """The saved order for this cart revision, checked to belong to the cart's customer."""
+        receipt = self.receipts.find_for_cart(cart.id, cart.revision)
+        if receipt is not None and getattr(receipt, "customer_id", None) != cart.customer_id:
+            # Never reveal another customer's order or let it block this customer's cart.
+            raise CartDataError(f"Order receipt for cart {cart.id} belongs to another customer")
+        return receipt
+
     def _view(self, cart: CartRecord) -> CartView:
         lines = []
         for line in cart.items:
@@ -135,7 +143,7 @@ class CartService:
                                       line_total=money(cents(item.price) * line.quantity),
                                       available=item.available))
         subtotal = money(sum(cents(line.line_total) for line in lines))
-        receipt = self.receipts.find_for_cart(cart.id, cart.revision)
+        receipt = self._receipt_for(cart)
         return CartView(id=cart.id, customer_id=cart.customer_id, revision=cart.revision,
                         restaurant_id=cart.restaurant_id, items=lines, subtotal=subtotal,
                         total=subtotal, checkout_order_id=None if receipt is None else receipt.id)

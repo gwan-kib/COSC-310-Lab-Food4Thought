@@ -102,3 +102,20 @@ def test_reset_after_order_clears_only_the_matching_revision(m2_store_paths):
     reset = repository.get_cart("customer-001")
     assert (reset.id, reset.revision, reset.restaurant_id, reset.items) == (cart.id, 4, None, [])
     assert repository.reset_after_order("customer-001", cart.id, 3) is False
+
+
+def test_serialization_failure_is_a_cart_data_error_with_no_temporary_file(m2_store_paths, monkeypatch):
+    repository = CartRepository()
+    cart, _ = repository.create_cart("customer-001")
+    before = m2_store_paths["carts"].read_bytes()
+
+    def broken_dump(*_args, **_kwargs):
+        raise ValueError("cannot serialize")
+
+    monkeypatch.setattr("app.repositories.cart._carts.dump_json", broken_dump)
+    with pytest.raises(CartDataError):
+        repository.save_cart(cart.model_copy(update={"revision": 1, "restaurant_id": "restaurant-001",
+                                                     "items": [CartItem(item_id="item-001", quantity=1)]}))
+
+    assert m2_store_paths["carts"].read_bytes() == before
+    assert not list(m2_store_paths["carts"].parent.glob(".carts.json.*.tmp"))

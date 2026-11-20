@@ -31,12 +31,13 @@ INACTIVE = ADA.model_copy(update={"id": "customer-009", "status": "inactive"})
 class Receipts:
     """Order-receipt lookup double: optionally reports a saved order for one revision."""
 
-    def __init__(self, pending=None):
+    def __init__(self, pending=None, owner="customer-001"):
         self.pending = pending
+        self.owner = owner
 
     def find_for_cart(self, cart_id, revision):
         if self.pending == (cart_id, revision):
-            return SimpleNamespace(id="order-123")
+            return SimpleNamespace(id="order-123", customer_id=self.owner)
         return None
 
 
@@ -281,3 +282,34 @@ def test_concurrent_creates_produce_one_cart(m2_store_paths):
     assert len({view.id for view, _ in results}) == 1
     assert sum(created for _, created in results) == 1
     assert len(json.loads(m2_store_paths["carts"].read_text())) == 1
+
+
+def test_receipt_owned_by_another_customer_exposes_no_order_id(m2_store_paths):
+    cart, _ = CartRepository().create_cart("customer-001")
+    service = _service(receipts=Receipts(pending=(cart.id, 0), owner="customer-002"))
+
+    with pytest.raises(CartDataError):
+        service.get_cart("customer-001")
+
+
+def test_receipt_owned_by_another_customer_does_not_block_or_change_an_add(m2_store_paths):
+    cart, _ = CartRepository().create_cart("customer-001")
+    service = _service(receipts=Receipts(pending=(cart.id, 0), owner="customer-002"))
+    before = m2_store_paths["carts"].read_bytes()
+
+    with pytest.raises(CartDataError):
+        service.add_item("customer-001", _add())
+
+    assert m2_store_paths["carts"].read_bytes() == before
+
+
+def test_repeated_add_across_the_int_text_limit_saves_and_reloads_exactly(m2_store_paths):
+    service = _service()
+    service.create_or_get_cart("customer-001")
+    service.add_item("customer-001", _add(quantity=10**4300 - 1))  # 4300 digits
+
+    view = service.add_item("customer-001", _add(quantity=1))      # now 4301 digits
+
+    assert view.items[0].quantity == 10**4300
+    assert CartRepository().get_cart("customer-001").items[0].quantity == 10**4300
+    assert _service().get_cart("customer-001") == view
