@@ -773,7 +773,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110); [Thomas's latest review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985546961).
 - Student review status: Pending. Owner should review the integration and re-request peer approval.
 
-### Entry 56: Customer registration, sign-in, profile read and update
+### Entry 61: Customer registration, sign-in, profile read and update
 
 - Student(s): Sreeram Nara (`SreeramNara`), assignee of #79, #80, #81 and #82.
 - Artifact: `app/schemas/customer.py`, `app/repositories/customer.py`, `app/services/customer.py`, `app/services/auth.py`, `app/api/auth.py`, `app/api/routes/customers.py`, `app/core/security.py`, `app/core/json_file.py`, data-path accessors in `app/core/config.py`, the router registration in `app/main.py`, `data/customers.json`, `data/sessions.json`, `tests/test_customer_accounts_api.py`, `tests/test_customer_repository.py`, and account lines in `README.md`, `docs/FIRST_TIME_SETUP.md` and `docs/DATA_MODEL.md`.
