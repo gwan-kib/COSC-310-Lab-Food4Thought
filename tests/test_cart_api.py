@@ -15,7 +15,9 @@ from app.main import app
 from app.repositories.cart import CartRepository
 from app.repositories.customer import CustomerRepository
 from app.repositories.order import OrderRepository
+from app.schemas.order import CheckoutRequest
 from app.services.cart import CartService
+from app.services.checkout import CheckoutService
 from app.services.catalog import RestaurantCatalog
 from contracts.auth import FIXED_NOW
 from contracts.m2 import CatalogItem, FakeCatalog
@@ -201,3 +203,48 @@ def test_deactivated_customer_can_still_sign_in_and_read(client, auth_accounts, 
     headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
     assert login.status_code == 200
     assert client.get("/customers/me", headers=headers).json()["status"] == "inactive"
+
+
+# --- PR #115 review regressions -------------------------------------------------------------
+
+def test_put_cart_documents_the_cart_body_for_both_200_and_201(client):
+    responses = client.get("/openapi.json").json()["paths"]["/customers/me/cart"]["put"]["responses"]
+    for code in ("200", "201"):
+        schema = responses[code]["content"]["application/json"]["schema"]
+        assert schema == {"$ref": "#/components/schemas/CartView"}, code
+
+
+def test_profile_update_after_checkout_keeps_ids_carts_and_the_order_snapshot(client, m2_store_paths, auth_accounts, ada):
+    ben = auth_accounts.headers("customer_b")
+    cart = client.put("/customers/me/cart", headers=ada).json()
+    client.put("/customers/me/cart", headers=ben)
+    cart = client.post("/customers/me/cart/items", headers=ada, json=ADD).json()
+    assert client.get("/customers/me/cart", headers=ben).json()["items"] == []
+
+    customers = CustomerRepository()
+    checkout = CheckoutService(lambda _p: customers.get_customer("customer-001"), carts=CartRepository(),
+                               catalog=RestaurantCatalog(), orders=OrderRepository())
+    order = checkout.checkout("principal", CheckoutRequest(cart_id=cart["id"],
+                                                           cart_revision=cart["revision"])).response.order
+    orders_before = m2_store_paths["orders"].read_bytes()
+
+    updated = client.patch("/customers/me", headers=ada,
+                           json={"name": "Ada Renamed", "delivery_address": "9 Moved Street"})
+
+    assert updated.status_code == 200 and updated.json()["id"] == "customer-001"
+    assert client.get("/customers/me/cart", headers=ada).json()["id"] == cart["id"]
+    assert m2_store_paths["orders"].read_bytes() == orders_before
+    assert OrderRepository().get_order(order.id).delivery_address == "101 Example Street, Kelowna, BC"
+
+
+def test_staff_record_claiming_the_customer_role_cannot_reach_the_cart(client, m2_store_paths, auth_accounts):
+    staff = json.loads(m2_store_paths["staff"].read_text(encoding="utf-8"))
+    staff[0]["role"] = "customer"
+    m2_store_paths["staff"].write_text(json.dumps(staff), encoding="utf-8")
+    before = {name: m2_store_paths[name].read_bytes()
+              for name in ("customers", "carts", "staff", "sessions")}
+
+    response = client.put("/customers/me/cart", headers=auth_accounts.headers("restaurant_user"))
+
+    assert (response.status_code, response.json()) == (500, {"detail": "Authentication data is unavailable"})
+    assert {name: m2_store_paths[name].read_bytes() for name in before} == before

@@ -29,13 +29,22 @@ class RestaurantCatalog:
         return None if record is None else record.as_restaurant()
 
     def get_item(self, restaurant_id: str, item_id: str) -> CatalogItem | None:
+        menu = self.get_menu(restaurant_id)
+        return None if menu is None else menu.get(item_id)
+
+    def get_menu(self, restaurant_id: str) -> dict[str, CatalogItem] | None:
+        """Every item of one restaurant from a single validated read, or None if it is missing.
+
+        Carts price all lines from this one snapshot, so a concurrent menu update can
+        never leave one response mixing old and new prices.
+        """
         record = self.repository.get_record(restaurant_id)
         if record is None:
             return None
-        for item in record.menu_items:
-            if item.id == item_id:
-                return CatalogItem(id=item.id, name=item.name, description=item.description,
-                                   price=item.price,
-                                   # Menu availability (#94) adds this field; legacy items are orderable.
-                                   available=getattr(item, "available", True))
-        return None
+        return {
+            item.id: CatalogItem(id=item.id, name=item.name, description=item.description,
+                                 price=item.price,
+                                 # Menu availability (#94) adds this field; legacy items are orderable.
+                                 available=getattr(item, "available", True))
+            for item in record.menu_items
+        }

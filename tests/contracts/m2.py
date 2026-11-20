@@ -194,6 +194,13 @@ class FakeCatalog:
     def get_item(self, restaurant_id: str, item_id: str) -> CatalogItem | None:
         return deepcopy(self.items.get((restaurant_id, item_id)))
 
+    def get_menu(self, restaurant_id: str) -> dict[str, CatalogItem] | None:
+        """All of one restaurant's items from a single read (carts price from one snapshot)."""
+        if restaurant_id not in self.restaurants:
+            return None
+        return {item_id: deepcopy(item) for (owner, item_id), item in self.items.items()
+                if owner == restaurant_id}
+
 
 class FakeCartAccess:
     def __init__(self, carts: list[CartRecord], *, fail_reset: bool = False):

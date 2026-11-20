@@ -73,7 +73,8 @@ HANDLED = (CartNotFoundError, RestaurantNotFoundError, MenuItemNotFoundError,
 
 
 @router.put("", response_model=CartView, summary="Create or get my cart",
-            responses={200: {"description": "Existing cart"}, 201: {"description": "New empty cart"}, **ERRORS})
+            responses={200: {"model": CartView, "description": "Existing cart"},
+                       201: {"model": CartView, "description": "New empty cart"}, **ERRORS})
 def create_or_get_cart(principal: ActiveCustomer, service: Service, response: Response) -> CartView:
     """Return the active cart, creating an empty one the first time (201)."""
     try:
