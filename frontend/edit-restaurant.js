@@ -3,6 +3,8 @@
 // edits on failures, and require user verification after an uncertain save instead
 // of automatically retrying.
 
+import { requestJson } from "./api-client.js";
+
 const editForm = document.getElementById("edit-form");
 const editFields = document.getElementById("edit-fields");
 const editStatus = document.getElementById("edit-status");
@@ -15,7 +17,6 @@ const editableFields = Object.fromEntries(
   Object.keys(fieldLabels).map(name => [name, editForm.elements.namedItem(name)])
 );
 const requestedId = new URLSearchParams(window.location.search).get("id");
-const requestTimeoutMs = 15_000;
 const uncertainUpdate = "Could not confirm whether changes were saved. Check the restaurant details before trying again.";
 let original = null;
 let loading = false;
@@ -61,28 +62,6 @@ for (const [name, field] of Object.entries(editableFields)) {
   });
 }
 
-async function fetchWithTimeout(path, options = {}) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), requestTimeoutMs);
-  try {
-    const response = await fetch(path, {
-      ...options,
-      signal: controller.signal,
-      headers: { Accept: "application/json", ...options.headers },
-    });
-    let body = null;
-    try {
-      body = await response.json();
-    } catch (error) {
-      // An interrupted body read must be handled as a timeout, not a success.
-      if (controller.signal.aborted) throw error;
-    }
-    return { response, body };
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 function validRestaurant(body) {
   return body && body.id === requestedId &&
     ["id", "name", "cuisine", "description"].every(
@@ -112,16 +91,16 @@ async function loadRestaurant() {
   editStatus.textContent = "Loading restaurant…";
 
   try {
-    const { response, body } = await fetchWithTimeout(
+    const { ok, status, body } = await requestJson(
       `/restaurants/${encodeURIComponent(requestedId)}`
     );
-    if (!response.ok) {
-      if (response.status === 404) throw new Error("That restaurant doesn't exist.");
+    if (!ok) {
+      if (status === 404) throw new Error("That restaurant doesn't exist.");
       const detail = typeof body?.detail === "string" ? body.detail :
-        `Request failed (HTTP ${response.status}).`;
+        `Request failed (HTTP ${status}).`;
       throw new Error(detail);
     }
-    if (response.status !== 200 || !validRestaurant(body)) {
+    if (status !== 200 || !validRestaurant(body)) {
       throw new Error("The server returned unexpected restaurant data.");
     }
 
@@ -164,28 +143,27 @@ editForm.addEventListener("submit", async event => {
   let focusAfter = null;
 
   try {
-    const { response, body } = await fetchWithTimeout(
+    const { ok, status, body } = await requestJson(
       `/restaurants/${encodeURIComponent(requestedId)}`,
       {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(changes),
+        payload: changes,
       }
     );
     editStatus.textContent = "";
-    if (!response.ok) {
-      if (response.status === 422 && Array.isArray(body?.detail) && body.detail.length) {
+    if (!ok) {
+      if (status === 422 && Array.isArray(body?.detail) && body.detail.length) {
         focusAfter = showFieldErrors(body.detail);
       } else {
         const detail = typeof body?.detail === "string" ? body.detail :
-          `Request failed (HTTP ${response.status}).`;
+          `Request failed (HTTP ${status}).`;
         editErrors.textContent = `Could not save restaurant: ${detail}`;
       }
       return;
     }
     // The API owns whitespace normalization; JavaScript trim() differs from
     // Pydantic (including for U+0085). Trust the validated 200 response.
-    if (response.status !== 200 || !validRestaurant(body)) {
+    if (status !== 200 || !validRestaurant(body)) {
       editErrors.textContent = uncertainUpdate;
       return;
     }

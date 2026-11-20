@@ -3,6 +3,8 @@
 // input on failures; an unconfirmed POST is never retried automatically because the
 // server may already have saved it.
 
+import { requestJson } from "./api-client.js";
+
 const form = document.getElementById("create-form");
 const fieldset = document.getElementById("create-fields");
 const status = document.getElementById("create-status");
@@ -16,7 +18,6 @@ let submitting = false;
 
 // A lost POST response does not tell us whether the server saved the record.
 const uncertainOutcome = "Could not confirm creation. Check the restaurant list before trying again to avoid creating a duplicate.";
-const requestTimeoutMs = 15_000;
 
 function showValidation(details) {
   const summary = document.createElement("p");
@@ -71,35 +72,22 @@ form.addEventListener("submit", async event => {
   form.setAttribute("aria-busy", "true");
   status.textContent = "Creating restaurant…";
   let focusAfter = null;
-  const controller = new AbortController();
-  // Bound both the request and response-body read; cancellation cannot undo a save.
-  const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
 
   try {
-    const response = await fetch("/restaurants", {
-      signal: controller.signal,
-      method: "POST",
-      headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+    const { ok, status: statusCode, body } = await requestJson("/restaurants", {
+      method: "POST", payload,
     });
-    let body = null;
-    try {
-      body = await response.json();
-    } catch (error) {
-      if (controller.signal.aborted) throw error;
-      // Non-JSON failures still need useful feedback, without erasing input.
-    }
     status.textContent = "";
-    if (!response.ok) {
-      if (response.status === 422 && Array.isArray(body?.detail) && body.detail.length) {
+    if (!ok) {
+      if (statusCode === 422 && Array.isArray(body?.detail) && body.detail.length) {
         focusAfter = showValidation(body.detail);
       } else {
-        const detail = typeof body?.detail === "string" ? body.detail : `Request failed (HTTP ${response.status}).`;
+        const detail = typeof body?.detail === "string" ? body.detail : `Request failed (HTTP ${statusCode}).`;
         errors.textContent = `Could not create restaurant: ${detail}`;
       }
       return;
     }
-    if (response.status !== 201 || !body || !["id", "name", "cuisine", "description"].every(
+    if (statusCode !== 201 || !body || !["id", "name", "cuisine", "description"].every(
       name => typeof body[name] === "string" && body[name].length > 0
     )) {
       errors.textContent = uncertainOutcome;
@@ -114,7 +102,6 @@ form.addEventListener("submit", async event => {
     status.textContent = "";
     errors.textContent = uncertainOutcome;
   } finally {
-    clearTimeout(timeout);
     submitting = false;
     fieldset.disabled = false;
     form.removeAttribute("aria-busy");
