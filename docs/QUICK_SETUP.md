@@ -80,6 +80,11 @@ Before trying the form or any POST/PATCH operation, stop the server and follow t
 
 Stop the server with `Ctrl+C`.
 
+For order repository experiments, set `ORDERS_DATA_PATH` to a disposable copy
+of the empty `data/orders.json` before constructing the repository. Run
+`python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
+to exercise checkout with isolated storage. The checkout HTTP route is pending.
+
 ## Short version
 
 For a normal returning session, the sequence is:

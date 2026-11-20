@@ -692,3 +692,23 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The new redaction tests failed 2 of 7 before the change and passed after it. The shared-fixture test failed with "fixture 'm2_store_paths' not found" before the move and passed after it. The login-response test failed with an import error before `LoginResponse` existed and passed after it. A probe app on the pinned FastAPI showed an inactive customer's invalid quantity returned 422 with identity-only authentication and 403 with the pre-check dependency, while malformed JSON still returned 422 first. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 425 tests with the committed-data guard; `python -m compileall -q app`, `git diff --check` and a local Markdown link/anchor check passed; `data/` was unchanged. Only the Figma sign-in screen was checked.
 - PR or commit: [PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106); branch `docs/78-auth-design`, review follow-up commit.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain these changes; Thomas's and Gwantana's re-review is required.
+
+### Issue 91: checkout service and durable order receipts
+
+- Student: Thomas Chen (`Tc2006415`), implementation assignee for [#91](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/91).
+- Artifacts: order models, JSON repository, checkout service, workflow lock and storage error, empty order seed and path configuration, checkout/repository tests and test fixtures, README, setup guides, M2 API/data/testing documentation and milestone evidence.
+- Label: `AI-GENERATED`.
+- AI tool: OpenAI Codex.
+- Purpose and influence: Thomas confirmed the first PR scope, the shared workflow lock and equal treatment of foreign carts and receipts. Codex wrote the implementation, tests and documentation. Agent review identified a mutable collection inside returned snapshots, a reset exception mismatch and a foreign-receipt error difference during a cart-store outage. Regression tests reproduced these cases before correction.
+- Validation: On Python 3.12 the baseline suite had 425 passing tests. The initial repository and checkout test runs each failed on missing implementation modules. The first full run after implementing the feature found four existing restaurant tests affected by eager order fixture creation. After limiting file initialization to tests that request it, `python -m compileall app` succeeded and `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed all 461 tests, including the committed-data guard. Of these, 36 exercise the new repository and service. They use real temporary order storage with customer, cart, authorization and catalog doubles. Full HTTP integration and human review are pending.
+- Issue/branch: #91, `feature/91-checkout-order` (first implementation change).
+- Student review status: Thomas confirmed the design. Student review of the implementation and individual understanding remain pending.
+
+### PR #111 review follow-up: quantity range and cart reset documentation
+
+- Student: Thomas Chen (`Tc2006415`), #91 assignee. Gwantana Kiboigo requested the changes in [the PR review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/111#pullrequestreview-5985221321).
+- Artifacts: `app/schemas/order.py`, `tests/contracts/m2.py`, `tests/test_checkout_service.py`, and the reset example and step 5 in `docs/M2_API_CONTRACT.md`.
+- Label: `AI-GENERATED`. AI tool: OpenAI Codex.
+- Purpose and influence: Thomas chose to preserve the cart's accepted quantity range. Codex wrote the exact money conversion and regression test and revised the reset documentation to match the service's fresh-read behavior.
+- Validation: The new checkout test first failed during money formatting, then exposed the same digit limit in the contract model's parser. After both fixes it verified the exact total, receipt reload, and replay. `python -m pytest -q tests/test_checkout_service.py tests/test_order_repository.py tests/contracts` passed 67 tests. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed 462 tests. `python -m compileall app` and `git diff --exit-code -- data/` succeeded.
+- PR: [#111](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/111). Student review of the revision and peer re-review are pending.

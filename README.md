@@ -103,12 +103,13 @@ See [Testing](docs/TESTING.md) for required-browser mode, focused commands, isol
 ```text
 app/main.py             FastAPI entry point, routers, frontend serving
 app/api/                Routes, error responses, OpenAPI handling
-app/services/           Restaurant/menu rules and orchestration
+app/services/           Restaurant/menu rules and checkout orchestration
 app/repositories/       JSON loading, validation, and persistence
 app/schemas/            Pydantic request, response, and persistence models
-app/core/config.py      Configurable restaurant-data path
+app/core/config.py      Configurable restaurant and order data paths
 frontend/               Customer, Create restaurant, and Edit restaurant pages and shared styles
 data/restaurants.json   Representative restaurant/menu data
+data/orders.json        Empty order store for the checkout service
 tests/                  Backend/API tests; tests/browser/ for customer and management pages
 scrum/                  Signed team agreement and M1 sprint planning
 docs/                   Setup, testing, API contract, milestones, provenance
@@ -123,7 +124,7 @@ requirements-dev.txt    Pinned browser-test dependencies
 - [Testing conventions](docs/TESTING.md)
 - [M0 checkpoint](docs/milestones/M0.md) and [M1 checkpoint](docs/milestones/M1.md)
 - [M1 API/data contract](docs/M1_API_CONTRACT.md)
-- [Proposed M2 API/persistence contract](docs/M2_API_CONTRACT.md), [data model](docs/DATA_MODEL.md), and [M2 evidence/status](docs/milestones/M2.md) — design handoff only; new workflows are not implemented yet.
+- [M2 API/persistence contract](docs/M2_API_CONTRACT.md), [data model](docs/DATA_MODEL.md), and [M2 evidence/status](docs/milestones/M2.md). The checkout service and order store are implemented. The HTTP checkout workflow awaits integration.
 - [M1 Engineering Decision Receipt — menu-item price validation](docs/DECISION_RECEIPT.md)
 - [Shared AI provenance record](docs/PROVENANCE.md)
 - [M1 sprint plan](scrum/SPRINT-Planning-M1.md) and [signed team agreement](scrum/team-agreement.md)
