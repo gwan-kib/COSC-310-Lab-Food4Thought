@@ -3,10 +3,11 @@ the public profile, the stored record with its password hash, and sign-in sessio
 Only `Customer` may leave the backend; the stored record never reaches a response.
 """
 
-from datetime import datetime
 from typing import Annotated, Literal, Self
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import (
+    AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, StringConstraints, model_validator,
+)
 from pydantic.json_schema import SkipJsonSchema
 
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
@@ -110,5 +111,12 @@ class SessionRecord(CustomerModel):
     token_sha256: Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
     account_id: Text
     account_type: Literal["customer", "staff"]
-    issued_at: datetime
-    expires_at: datetime
+    # Timezone-aware, so comparing with the clock can never raise mid-request.
+    issued_at: AwareDatetime
+    expires_at: AwareDatetime
+
+    @model_validator(mode="after")
+    def expires_after_issue(self) -> Self:
+        if self.expires_at <= self.issued_at:
+            raise ValueError("A session must expire after it is issued")
+        return self

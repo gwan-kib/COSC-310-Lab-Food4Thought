@@ -238,3 +238,89 @@ def test_update_save_failure_is_500_without_partial_changes(client, m2_store_pat
 
     assert (response.status_code, response.json()) == (500, {"detail": "Customer data is unavailable"})
     assert _bytes(m2_store_paths) == before
+
+
+# --- PR #114 review regressions ------------------------------------------------------------
+
+def _all_bytes(paths):
+    return {store: paths[store].read_bytes() for store in ("customers", "sessions", "staff")}
+
+
+def test_registration_rejects_a_staff_email_in_any_case(client, m2_store_paths, auth_accounts):
+    before = _all_bytes(m2_store_paths)
+    response = client.post("/customers", json={**NEW, "email": "OWNER@Example.invalid"})
+
+    assert (response.status_code, response.json()) == (409, {"detail": "Email is already registered"})
+    assert _all_bytes(m2_store_paths) == before
+
+
+@pytest.mark.parametrize(("path", "credentials"), [
+    ("/customers", NEW),
+    ("/auth/login", {"email": "ada@example.invalid", "password": "ada-fixture-password-1"}),
+])
+@pytest.mark.parametrize("encoding", ["text", "form"])
+def test_credentials_in_a_raw_or_form_body_are_never_echoed(client, auth_accounts, path, credentials, encoding):
+    if encoding == "text":
+        response = client.post(path, content=json.dumps(credentials),
+                               headers={"Content-Type": "text/plain"})
+    else:
+        response = client.post(path, data=credentials)
+
+    assert response.status_code == 422
+    assert credentials["password"] not in response.text
+
+
+@pytest.mark.parametrize(("key", "role"), [("restaurant_user", "restaurant_user"),
+                                           ("administrator", "administrator")])
+def test_staff_sign_in_through_the_same_login(client, m2_store_paths, auth_accounts, key, role):
+    account = auth_accounts.accounts[key]
+    response = client.post("/auth/login", json={"email": account.record.email.upper(),
+                                                 "password": account.password})
+
+    assert response.status_code == 200
+    assert response.json()["role"] == role
+    headers = {"Authorization": f"Bearer {response.json()['access_token']}"}
+    assert client.get("/customers/me", headers=headers).status_code == 403
+    newest = json.loads(m2_store_paths["sessions"].read_text())[-1]
+    assert (newest["account_id"], newest["account_type"]) == (account.record.id, "staff")
+
+
+def test_wrong_staff_password_is_the_same_401(client, auth_accounts):
+    response = client.post("/auth/login", json={"email": "owner@example.invalid", "password": "wrong-pass-1"})
+    assert (response.status_code, response.json()) == (401, {"detail": "Invalid email or password"})
+
+
+@pytest.mark.parametrize("change", [
+    {"expires_at": "2026-11-21T11:00:00"},                     # no timezone
+    {"issued_at": "2026-11-21T11:00:00+00:00",
+     "expires_at": "2026-11-21T11:00:00+00:00"},              # expires when issued
+])
+def test_damaged_session_timestamps_are_a_json_500(client, m2_store_paths, auth_accounts, change):
+    sessions = json.loads(m2_store_paths["sessions"].read_text())
+    sessions[0].update(change)
+    m2_store_paths["sessions"].write_text(json.dumps(sessions), encoding="utf-8")
+
+    response = client.get("/customers/me", headers=auth_accounts.headers("customer_a"))
+    assert (response.status_code, response.json()) == (500, {"detail": "Authentication data is unavailable"})
+
+
+def test_unusable_stored_password_hash_is_a_json_500(client, m2_store_paths, auth_accounts):
+    customers = json.loads(m2_store_paths["customers"].read_text())
+    customers[0]["password_hash"] = "not-a-real-hash"
+    m2_store_paths["customers"].write_text(json.dumps(customers), encoding="utf-8")
+
+    response = client.post("/auth/login", json={"email": "ada@example.invalid",
+                                                 "password": "ada-fixture-password-1"})
+    assert (response.status_code, response.json()) == (500, {"detail": "Customer data is unavailable"})
+
+
+def test_staff_record_with_a_customer_role_is_a_storage_error(client, m2_store_paths, auth_accounts):
+    staff = json.loads(m2_store_paths["staff"].read_text())
+    staff[0]["role"] = "customer"
+    m2_store_paths["staff"].write_text(json.dumps(staff), encoding="utf-8")
+    before = _all_bytes(m2_store_paths)
+
+    response = client.get("/customers/me", headers=auth_accounts.headers("restaurant_user"))
+
+    assert (response.status_code, response.json()) == (500, {"detail": "Authentication data is unavailable"})
+    assert _all_bytes(m2_store_paths) == before

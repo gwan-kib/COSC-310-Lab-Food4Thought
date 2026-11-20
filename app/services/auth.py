@@ -1,17 +1,17 @@
 """Sign Food4Thought users in and resolve their bearer tokens (#80, AUTH_DESIGN.md).
-Login checks the password hash and stores only the new token's digest; resolving a
-token answers "who is calling?" and leaves role and status decisions to callers.
+One login serves customers and provisioned staff; it checks the password hash and
+stores only the new token's digest. Resolving a token answers "who is calling?" and
+leaves role and status decisions to callers.
 """
 
 from datetime import datetime, timedelta
 
-from pydantic import BaseModel, ValidationError
-
-from app.core.config import get_staff_data_path
-from app.core.json_file import read_json_array
-from app.core.security import new_token, token_digest, verify_against_dummy, verify_password
-from app.repositories.customer import CustomerRepository, SessionDataError, SessionRepository
-from app.schemas.customer import LoginRequest, LoginResponse, Principal, Role, SessionRecord
+from app.core.security import (
+    UnusablePasswordHashError, new_token, token_digest, verify_against_dummy, verify_password,
+)
+from app.repositories.customer import CustomerDataError, CustomerRepository, SessionRepository
+from app.repositories.staff import StaffDataError, StaffRepository
+from app.schemas.customer import LoginRequest, LoginResponse, Principal, SessionRecord
 
 SESSION_LIFETIME = timedelta(hours=24)
 
@@ -24,30 +24,39 @@ class AuthenticationRequiredError(Exception):
     """The token is missing, unknown or expired, or its account no longer exists."""
 
 
-class _StaffAccount(BaseModel):
-    id: str
-    role: Role
-
-
 class AuthService:
-    def __init__(self, customers: CustomerRepository, sessions: SessionRepository) -> None:
+    def __init__(self, customers: CustomerRepository, sessions: SessionRepository,
+                 staff: StaffRepository | None = None) -> None:
         self.customers = customers
         self.sessions = sessions
+        self.staff = staff or StaffRepository()
 
     def login(self, request: LoginRequest, now: datetime) -> LoginResponse:
+        # Emails are unique across both stores, so at most one account matches.
         customer = self.customers.find_by_email(request.email)
-        if customer is None:
-            verify_against_dummy(request.password)
-            raise InvalidCredentialsError()
-        if not verify_password(request.password, customer.password_hash):
+        if customer is not None:
+            account_id, account_type, role = customer.id, "customer", customer.role
+            password_hash, data_error = customer.password_hash, CustomerDataError
+        else:
+            staff = self.staff.find_by_email(request.email)
+            if staff is None:
+                verify_against_dummy(request.password)
+                raise InvalidCredentialsError()
+            account_id, account_type, role = staff.id, "staff", staff.role
+            password_hash, data_error = staff.password_hash, StaffDataError
+        try:
+            matches = verify_password(request.password, password_hash)
+        except UnusablePasswordHashError as exc:
+            raise data_error(f"Stored password hash for {account_id} is unusable") from exc
+        if not matches:
             raise InvalidCredentialsError()
         # Inactive customers may sign in for read-only access (agreed policy).
         token = new_token()
         self.sessions.add_session(SessionRecord(
-            token_sha256=token_digest(token), account_id=customer.id, account_type="customer",
+            token_sha256=token_digest(token), account_id=account_id, account_type=account_type,
             issued_at=now, expires_at=now + SESSION_LIFETIME,
         ))
-        return LoginResponse(access_token=token, token_type="bearer", role="customer")
+        return LoginResponse(access_token=token, token_type="bearer", role=role)
 
     def resolve(self, token: str, now: datetime) -> Principal:
         session = self.sessions.find(token_digest(token))
@@ -58,16 +67,7 @@ class AuthService:
             if customer is None:
                 raise AuthenticationRequiredError()
             return Principal(account_id=customer.id, role=customer.role)
-        return Principal(account_id=session.account_id, role=self._staff_role(session.account_id))
-
-    def _staff_role(self, staff_id: str) -> Role:
-        # Staff accounts are provisioned by #107; only their role is needed here.
-        try:
-            staff = [_StaffAccount.model_validate(record)
-                     for record in read_json_array(get_staff_data_path(), SessionDataError)]
-        except ValidationError as exc:
-            raise SessionDataError(f"Invalid staff record: {exc}") from exc
-        account = next((s for s in staff if s.id == staff_id), None)
-        if account is None:
+        staff = self.staff.get_staff(session.account_id)
+        if staff is None:
             raise AuthenticationRequiredError()
-        return account.role
+        return Principal(account_id=staff.id, role=staff.role)

@@ -93,7 +93,7 @@ The current dependency file installs FastAPI, Uvicorn, Pydantic, pwdlib with Arg
 python -m pytest
 ```
 
-The tests use temporary restaurant-data copies and are designed not to modify committed files under `data/`.
+The tests use a temporary restaurant-data copy and disposable M2 store paths. Customers, carts, staff and sessions are initialized per test; orders are initialized only when a test requests `m2_store_paths`. See [test isolation](TESTING.md#one-default-for-file-isolation).
 
 The real-browser frontend tests in `tests/browser/` skip if Playwright or Chromium is unavailable locally. CI always runs them. To run them locally as well:
 
@@ -177,25 +177,28 @@ storage error. The focused checkout tests select their own disposable files:
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`.
 Checkout is currently available at the service layer only.
 
-Customer accounts and sign-in sessions use `data/customers.json` (`CUSTOMERS_DATA_PATH`) and
-`data/sessions.json` (`SESSIONS_DATA_PATH`), both committed as `[]`. Registering or signing in
-writes to them, so for manual experiments copy both to a temporary directory and point the two
-variables at the copies before starting the server. To try it in `/docs`: `POST /customers`, then
+Customer accounts, sign-in sessions and provisioned staff accounts use `data/customers.json`
+(`CUSTOMERS_DATA_PATH`), `data/sessions.json` (`SESSIONS_DATA_PATH`) and `data/staff.json`
+(`STAFF_DATA_PATH`), all committed as `[]`. Registering or signing in writes to them, so use the
+[disposable copies](#disposable-data-for-manual-experiments) for manual experiments. To try it in `/docs`: `POST /customers`, then
 `POST /auth/login`, click **Authorize**, paste the `access_token`, and call `GET /customers/me`.
 
-**Restaurant HTTP experiments**
+**HTTP experiments (restaurants, accounts, carts, orders)**
 
-Stop any existing server first. From the repository root, with the virtual environment active, make a uniquely named temporary directory and copy the sample into it. These commands create a new copy each time; to verify persistence after restarting, reuse the printed path instead of repeating the copy step.
+Stop any existing server first. Registering, signing in, editing a cart and changing restaurants all write to `data/`, so point every store at a disposable copy. From the repository root, with the virtual environment active, these commands copy each store that exists into a new temporary directory and set its `*_DATA_PATH` variable (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, `CARTS_DATA_PATH`, `ORDERS_DATA_PATH`). They create a new copy each time; to verify persistence after restarting, keep the same terminal instead of repeating the copy step.
 
 Windows PowerShell:
 
 ```powershell
 $manualDataDir = Join-Path ([System.IO.Path]::GetTempPath()) ('food4thought-manual-' + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $manualDataDir | Out-Null
-$manualDataPath = Join-Path $manualDataDir 'restaurants.json'
-Copy-Item -LiteralPath 'data/restaurants.json' -Destination $manualDataPath
-$env:RESTAURANTS_DATA_PATH = $manualDataPath
-Write-Output $env:RESTAURANTS_DATA_PATH
+foreach ($store in 'restaurants', 'customers', 'sessions', 'staff', 'carts', 'orders') {
+    if (Test-Path "data/$store.json") {
+        Copy-Item -LiteralPath "data/$store.json" -Destination (Join-Path $manualDataDir "$store.json")
+        Set-Item -Path "Env:$($store.ToUpper())_DATA_PATH" -Value (Join-Path $manualDataDir "$store.json")
+    }
+}
+Write-Output $manualDataDir
 python -m uvicorn app.main:app --reload
 ```
 
@@ -203,22 +206,28 @@ macOS/Linux:
 
 ```sh
 manual_data_dir=$(mktemp -d)
-cp data/restaurants.json "$manual_data_dir/restaurants.json"
-export RESTAURANTS_DATA_PATH="$manual_data_dir/restaurants.json"
-printf '%s\n' "$RESTAURANTS_DATA_PATH"
+for store in restaurants customers sessions staff carts orders; do
+  if [ -f "data/$store.json" ]; then
+    cp "data/$store.json" "$manual_data_dir/$store.json"
+    export "$(printf '%s' "$store" | tr '[:lower:]' '[:upper:]')_DATA_PATH=$manual_data_dir/$store.json"
+  fi
+done
+printf '%s\n' "$manual_data_dir"
 python -m uvicorn app.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000/app/create-restaurant.html` or `/docs` and use the POST/PATCH examples above. Confirm saved values with GET, stop with `Ctrl+C`, then run the same Uvicorn command in the same terminal to verify persistence. All experiments in that server use the copy.
+Open `http://127.0.0.1:8000/app/create-restaurant.html` or `/docs` and use the POST/PATCH examples above, or register with `POST /customers`, sign in with `POST /auth/login`, and click **Authorize** with the returned token. Confirm saved values with GET, stop with `Ctrl+C`, then run the same Uvicorn command in the same terminal to verify persistence. All experiments in that server use the copies.
 
-After stopping the experiment server, clear the override before returning to normal sample-data use:
+After stopping the experiment server, clear the overrides before returning to normal sample-data use:
 
 ```powershell
-Remove-Item Env:RESTAURANTS_DATA_PATH
+foreach ($store in 'restaurants', 'customers', 'sessions', 'staff', 'carts', 'orders') {
+    Remove-Item -Path "Env:$($store.ToUpper())_DATA_PATH" -ErrorAction SilentlyContinue
+}
 ```
 
 ```sh
-unset RESTAURANTS_DATA_PATH
+unset RESTAURANTS_DATA_PATH CUSTOMERS_DATA_PATH SESSIONS_DATA_PATH STAFF_DATA_PATH CARTS_DATA_PATH ORDERS_DATA_PATH
 ```
 
 The temporary directory remains available for inspection; these instructions do not delete data. New terminals need the same data-path setting to reuse an experiment.
