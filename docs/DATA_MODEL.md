@@ -15,7 +15,7 @@ source/role questions are recorded in that contract and [M2 evidence](milestones
 | --- | --- | --- |
 | Restaurant/menu | Implemented `data/restaurants.json`, `RESTAURANTS_DATA_PATH` | Existing repository; Thomas owns #94 availability extension; JSON array of complete restaurant records |
 | Customer | Implemented `data/customers.json`, `CUSTOMERS_DATA_PATH` (`app/repositories/customer.py`, #79–#82) | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
-| Cart | Proposed `data/carts.json`, `CARTS_DATA_PATH` | Sreeram; JSON array of `CartRecord` objects |
+| Cart | Implemented `data/carts.json`, `CARTS_DATA_PATH` (`app/repositories/cart.py`, #85/#86) | Sreeram; JSON array of `CartRecord` objects |
 | Order | Implemented `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; append-only JSON array of order snapshots |
 | Staff account | Proposed `data/staff.json`, `STAFF_DATA_PATH` | Sreeram (#78); provisioned restaurant users and administrators: `id`, `name`, `email`, `role`, `restaurant_ids`, Argon2id `password_hash` |
 | Session | Implemented `data/sessions.json`, `SESSIONS_DATA_PATH` (#80) | Sreeram (#78); `token_sha256`, `account_id`, `account_type`, `issued_at`, `expires_at`; never the token itself |
