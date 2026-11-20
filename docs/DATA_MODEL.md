@@ -23,9 +23,8 @@ source/role questions are recorded in that contract and [M2 evidence](milestones
 New repositories should match M1's explicit `path: Path | str | None` injection,
 resolve overrides at construction rather than import time, and keep file I/O out
 of routes/services. The staff and session stores, Argon2id password hashing and the token design
-are proposed in [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78). They are not configured
-at runtime yet; the [shared fixtures](../tests/conftest.py) already
-isolate both stores in tests.
+follow [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78) and are implemented (#79–#82, #107); the
+[shared fixtures](../tests/conftest.py) isolate both stores in tests. New JSON-array stores read and save through `app/core/json_file.py` (#96), which gives exact integers of any length, the store's own error for missing or corrupt files, and atomic replacement that leaves no temporary file on failure; the customer, session, staff and cart repositories use it, and the order and restaurant repositories can adopt it.
 
 Feature PRs must initialize deliberately empty new stores and explain first-run
 configuration in both setup guides when implemented. Once configured, a missing,
