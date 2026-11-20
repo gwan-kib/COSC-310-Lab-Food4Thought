@@ -1,5 +1,5 @@
-"""Isolate Food4Thought tests with a fresh temporary data copy selected through
-RESTAURANTS_DATA_PATH for each test. A session-level hash comparison also detects
+"""Isolate restaurant and order storage with disposable paths for every test.
+A session-level hash comparison also detects
 changes to committed data, and the shared M2 store and authentication-account
 fixtures are available to every test directory.
 """
@@ -41,15 +41,24 @@ def isolated_restaurants_path(tmp_path, monkeypatch) -> Path:
     return path
 
 
-# Stores proposed by the M2 contract (#77) and the authentication design (#78).
-M2_STORES = ("customers", "carts", "orders", "staff", "sessions")
+# Select a disposable path even in tests that do not initialize order storage.
+@pytest.fixture(autouse=True)
+def isolated_orders_path(tmp_path, monkeypatch) -> Path:
+    path = tmp_path / "orders.json"
+    monkeypatch.setenv("ORDERS_DATA_PATH", str(path))
+    return path
+
+
+# Additional stores proposed by the M2 and authentication contracts.
+ADDITIONAL_M2_STORES = ("customers", "carts", "staff", "sessions")
 
 
 @pytest.fixture
-def m2_store_paths(tmp_path, monkeypatch, isolated_restaurants_path) -> dict[str, Path]:
+def m2_store_paths(tmp_path, monkeypatch, isolated_restaurants_path, isolated_orders_path) -> dict[str, Path]:
     """Empty, isolated JSON stores, each selected through its *_DATA_PATH variable."""
-    paths = {"restaurants": isolated_restaurants_path}
-    for store in M2_STORES:
+    paths = {"restaurants": isolated_restaurants_path, "orders": isolated_orders_path}
+    isolated_orders_path.write_text("[]\n", encoding="utf-8")
+    for store in ADDITIONAL_M2_STORES:
         path = tmp_path / f"{store}.json"
         path.write_text("[]\n", encoding="utf-8")
         monkeypatch.setenv(f"{store.upper()}_DATA_PATH", str(path))

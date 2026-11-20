@@ -1,11 +1,16 @@
 // Send Food4Thought's JSON REST requests through one transport. Return the
 // HTTP outcome to the page so it can decide what to display and whether to retry.
 
-export async function requestJson(path, { method = "GET", payload, timeoutMs = 15_000 } = {}) {
-  const headers = { Accept: "application/json" };
-  const options = { method, headers };
+export async function requestJson(
+  path, { method = "GET", payload, timeoutMs = 15_000, headers } = {}
+) {
+  const requestHeaders = new Headers(headers);
+  if (!requestHeaders.has("Accept")) requestHeaders.set("Accept", "application/json");
+  const options = { method, headers: requestHeaders };
   if (payload !== undefined) {
-    headers["Content-Type"] = "application/json";
+    if (!requestHeaders.has("Content-Type")) {
+      requestHeaders.set("Content-Type", "application/json");
+    }
     options.body = JSON.stringify(payload);
   }
 

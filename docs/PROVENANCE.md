@@ -693,14 +693,34 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106); branch `docs/78-auth-design`, review follow-up commit.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain these changes; Thomas's and Gwantana's re-review is required.
 
-### Entry 56: Shared frontend JSON transport for issue #98
+### Issue 91: checkout service and durable order receipts
+
+- Student: Thomas Chen (`Tc2006415`), implementation assignee for [#91](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/91).
+- Artifacts: order models, JSON repository, checkout service, workflow lock and storage error, empty order seed and path configuration, checkout/repository tests and test fixtures, README, setup guides, M2 API/data/testing documentation and milestone evidence.
+- Label: `AI-GENERATED`.
+- AI tool: OpenAI Codex.
+- Purpose and influence: Thomas confirmed the first PR scope, the shared workflow lock and equal treatment of foreign carts and receipts. Codex wrote the implementation, tests and documentation. Agent review identified a mutable collection inside returned snapshots, a reset exception mismatch and a foreign-receipt error difference during a cart-store outage. Regression tests reproduced these cases before correction.
+- Validation: On Python 3.12 the baseline suite had 425 passing tests. The initial repository and checkout test runs each failed on missing implementation modules. The first full run after implementing the feature found four existing restaurant tests affected by eager order fixture creation. After limiting file initialization to tests that request it, `python -m compileall app` succeeded and `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed all 461 tests, including the committed-data guard. Of these, 36 exercise the new repository and service. They use real temporary order storage with customer, cart, authorization and catalog doubles. Full HTTP integration and human review are pending.
+- Issue/branch: #91, `feature/91-checkout-order` (first implementation change).
+- Student review status: Thomas confirmed the design. Student review of the implementation and individual understanding remain pending.
+
+### PR #111 review follow-up: quantity range and cart reset documentation
+
+- Student: Thomas Chen (`Tc2006415`), #91 assignee. Gwantana Kiboigo requested the changes in [the PR review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/111#pullrequestreview-5985221321).
+- Artifacts: `app/schemas/order.py`, `tests/contracts/m2.py`, `tests/test_checkout_service.py`, and the reset example and step 5 in `docs/M2_API_CONTRACT.md`.
+- Label: `AI-GENERATED`. AI tool: OpenAI Codex.
+- Purpose and influence: Thomas chose to preserve the cart's accepted quantity range. Codex wrote the exact money conversion and regression test and revised the reset documentation to match the service's fresh-read behavior.
+- Validation: The new checkout test first failed during money formatting, then exposed the same digit limit in the contract model's parser. After both fixes it verified the exact total, receipt reload, and replay. `python -m pytest -q tests/test_checkout_service.py tests/test_order_repository.py tests/contracts` passed 67 tests. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed 462 tests. `python -m compileall app` and `git diff --exit-code -- data/` succeeded.
+- PR: [#111](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/111). Student review of the revision and peer re-review are pending.
+
+### Entry 58: Shared frontend JSON transport for issue #98
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee and requester. Student design and implementation review is pending.
-- Artifact: `frontend/api-client.js`, the discovery and restaurant management frontend scripts and HTML entry points, `tests/browser/test_frontend_browser.py`, `tests/test_frontend.py`, the M2.3 evidence in `docs/milestones/M2.md`, and the PR description.
+- Artifact: `frontend/api-client.js`, the discovery and restaurant management frontend scripts and HTML entry points, `tests/browser/test_frontend_browser.py`, `tests/browser/test_api_client_browser.py`, `tests/test_frontend.py`, the M2.3 evidence in `docs/milestones/M2.md`, and the PR description.
 - Label: `AI-GENERATED`.
 - AI tool: Codex.
 - Purpose: Identify and improve a concrete frontend integration boundary for M2 §5.
-- Influence: Codex compared page-local, transport-only, and endpoint-specific client designs. It extracted shared JSON request handling while keeping status feedback, field validation and retry decisions with the pages. Codex wrote the characterization checks, adapted the static asset checks, and drafted the decision and verification evidence.
-- Validation: With Python 3.12, `REQUIRE_BROWSER_TESTS=1` and Chromium headless shell 153, 42 focused tests passed against the original frontend with the characterization cases. The refactored suite passed 428 tests with no skips. Application compilation, JavaScript syntax checks, the committed-data guard and whitespace checks passed. An additional Node probe checked propagation of an abort during response-body reading without a retry.
+- Influence: Codex compared page-local, transport-only, and endpoint-specific client designs. It extracted shared JSON request handling while keeping status feedback, field validation and retry decisions with the pages. Codex wrote the characterization checks, adapted the static asset checks, and drafted the decision and verification evidence. Following [Thomas Chen's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/112#pullrequestreview-5985511805), Codex added caller-supplied header forwarding and a browser regression test. It also integrated `main`, preserved the checkout provenance, and renumbered the entry to avoid duplicating PR #110's Entry 56.
+- Validation: With Python 3.12, `REQUIRE_BROWSER_TESTS=1` and Chromium headless shell 153, 42 focused tests passed against the original frontend with the characterization cases. The original refactor passed 428 tests with no skips. A Node probe checked propagation of an abort during response-body reading without a retry. The review follow-up test failed because Chromium sent no `Authorization` header before the fix and passed after it. The updated branch passed all 466 tests, application compilation, a JavaScript syntax check, the committed-data guard and whitespace checks.
 - PR or commit: [PR #112](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/112) for [issue #98](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/98).
-- Student review status: Pending. Local checks establish implementation results. Student understanding, teammate review and merge evidence require separate confirmation.
+- Student review status: Gwantana's confirmation is pending. Thomas's initial review is linked above. Re-review and merge evidence are pending.
