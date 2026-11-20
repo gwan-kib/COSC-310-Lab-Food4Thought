@@ -20,6 +20,9 @@ SAFE_SENSITIVE_ERROR_TYPES = frozenset(
     {"missing", "string_type", "string_too_short", "string_too_long", "extra_forbidden"}
 )
 SENSITIVE_ERROR_MESSAGE = "Invalid password"
+# Endpoints whose bodies carry credentials. A body sent with the wrong content type
+# reaches the handler as raw text, which field-based redaction cannot see inside.
+CREDENTIAL_PATHS = frozenset({"/customers", "/auth/login"})
 STRING_LENGTH_ERROR_TYPES = frozenset({"string_too_short", "string_too_long"})
 
 
@@ -109,15 +112,19 @@ def _redact_error(error: dict[str, Any], body_secrets: set[str]) -> dict[str, An
 
 
 async def request_validation_error(
-    _request: Request, exc: RequestValidationError
+    request: Request, exc: RequestValidationError
 ) -> Response:
     """Return validation details even when rejected input cannot be rendered as JSON."""
     # An individual error's input may contain only the field being validated.
     body_secrets = _submitted_secrets(exc.body)
     # Rejected input may contain overflowing numbers, lone surrogates, or raw
     # non-UTF-8 bytes. Error rendering must not turn those failures into a 500.
+    redacted = [_redact_error(error, body_secrets) for error in exc.errors()]
+    if request.url.path in CREDENTIAL_PATHS and not isinstance(exc.body, dict):
+        redacted = [{key: value for key, value in error.items() if key != "input"}
+                    for error in redacted]
     errors = jsonable_encoder(
-        [_redact_error(error, body_secrets) for error in exc.errors()],
+        redacted,
         custom_encoder={
             float: lambda value: value if math.isfinite(value) else str(value),
             bytes: lambda value: value.decode("utf-8", errors="backslashreplace"),

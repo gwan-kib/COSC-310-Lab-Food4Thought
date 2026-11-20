@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.api.auth import ActiveCustomer, CurrentCustomer, authentication_required, get_now
 from app.core.storage import StorageFailure
 from app.repositories.customer import CustomerRepository, SessionDataError, SessionRepository
+from app.repositories.staff import StaffDataError
 from app.schemas.customer import Customer, CustomerProfileUpdate, CustomerRegistration, LoginRequest, LoginResponse
 from app.schemas.restaurant import ErrorResponse
 from app.services.auth import AuthService, InvalidCredentialsError
@@ -59,7 +60,7 @@ def login(request: LoginRequest, now: Annotated[datetime, Depends(get_now)]) -> 
     except InvalidCredentialsError:
         raise HTTPException(401, "Invalid email or password",
                             headers={"WWW-Authenticate": "Bearer"}) from None
-    except SessionDataError:
+    except (SessionDataError, StaffDataError):
         raise HTTPException(500, "Authentication data is unavailable") from None
     except StorageFailure:
         raise HTTPException(500, CUSTOMER_DATA_ERROR) from None

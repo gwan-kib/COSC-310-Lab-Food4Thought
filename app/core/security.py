@@ -16,8 +16,15 @@ def hash_password(password: str) -> str:
     return _hasher.hash(password)
 
 
+class UnusablePasswordHashError(Exception):
+    """A stored hash is damaged or in an unknown format (a storage problem, not a wrong password)."""
+
+
 def verify_password(password: str, password_hash: str) -> bool:
-    return _hasher.verify(password, password_hash)
+    try:
+        return _hasher.verify(password, password_hash)
+    except Exception as exc:  # pwdlib raises several types for malformed hashes
+        raise UnusablePasswordHashError(str(exc)) from exc
 
 
 @lru_cache(maxsize=1)

@@ -8,6 +8,7 @@ from uuid import uuid4
 from app.core.security import hash_password
 from app.core.workflow import workflow_lock
 from app.repositories.customer import CustomerRepository, DuplicateEmailError
+from app.repositories.staff import StaffRepository
 from app.schemas.customer import Customer, CustomerProfileUpdate, CustomerRegistration, StoredCustomer
 
 
@@ -23,11 +24,14 @@ __all__ = ["CustomerService", "CustomerNotFoundError", "CustomerInactiveError", 
 
 
 class CustomerService:
-    def __init__(self, repository: CustomerRepository) -> None:
+    def __init__(self, repository: CustomerRepository, staff: StaffRepository | None = None) -> None:
         self.repository = repository
+        self.staff = staff or StaffRepository()
 
     def register(self, request: CustomerRegistration) -> Customer:
-        if self.repository.find_by_email(request.email) is not None:
+        # One email rule for every account: customers and staff share the namespace.
+        if (self.repository.find_by_email(request.email) is not None
+                or self.staff.find_by_email(request.email) is not None):
             raise DuplicateEmailError(request.email)
         existing_ids = {customer.id for customer in self.repository.load_customers()}
         customer_id = str(uuid4())
@@ -38,7 +42,8 @@ class CustomerService:
             delivery_address=request.delivery_address, status="active",
             role="customer", password_hash=hash_password(request.password),
         )
-        self.repository.add_customer(customer)  # returns only after the save succeeds
+        # Returns only after the save succeeds; staff emails are re-read under the lock.
+        self.repository.add_customer(customer, reserved_emails=self.staff.emails)
         return customer.public()
 
     def get_profile(self, customer_id: str) -> Customer:

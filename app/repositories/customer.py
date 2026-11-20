@@ -14,7 +14,9 @@ from app.core.json_file import read_json_array, write_json_array
 from app.core.storage import StorageFailure
 from app.schemas.customer import SessionRecord, StoredCustomer
 
-_customer_lock = Lock()
+# Held for every write that can add an account email. Staff provisioning (#107) must
+# hold it too, so a customer and a staff account cannot claim the same email at once.
+ACCOUNT_EMAIL_LOCK = Lock()
 _session_lock = Lock()
 
 
@@ -44,10 +46,13 @@ class CustomerRepository:
         wanted = email.strip().casefold()
         return next((c for c in self.load_customers() if c.email.casefold() == wanted), None)
 
-    def add_customer(self, customer: StoredCustomer) -> None:
+    def add_customer(self, customer: StoredCustomer,
+                     reserved_emails: Callable[[], set[str]] = set) -> None:
+        """Add a customer; `reserved_emails` returns other accounts' casefolded emails."""
         def add(customers: list[StoredCustomer]) -> None:
             # Checked again under the lock so two registrations cannot share an email.
-            if any(c.email.casefold() == customer.email.casefold() for c in customers):
+            wanted = customer.email.casefold()
+            if wanted in reserved_emails() or any(c.email.casefold() == wanted for c in customers):
                 raise DuplicateEmailError(customer.email)
             customers.append(customer)
 
@@ -64,7 +69,7 @@ class CustomerRepository:
         self._mutate(replace)
 
     def _mutate(self, change: Callable[[list[StoredCustomer]], None]) -> None:
-        with _customer_lock:
+        with ACCOUNT_EMAIL_LOCK:
             customers = self.load_customers()
             change(customers)
             validated = self._validate([c.model_dump() for c in customers])
