@@ -1,7 +1,7 @@
-"""Isolate restaurant and order storage with disposable paths for every test.
-A session-level hash comparison also detects
-changes to committed data, and the shared M2 store and authentication-account
-fixtures are available to every test directory.
+"""Isolate restaurant and all M2 store paths for every test.
+Customer, cart, staff and session stores start empty; order storage stays absent
+until a test explicitly requests initialized M2 stores. The session guard
+detects unexpected writes to committed application data.
 """
 
 import hashlib
@@ -29,7 +29,7 @@ def committed_data_is_unchanged():
     before = _snapshot_data_files()
     yield
     after = _snapshot_data_files()
-    assert after == before, "Tests modified committed files under data/"
+    assert after == before, "Tests changed files under data/"
 
 
 @pytest.fixture(autouse=True)
@@ -53,16 +53,23 @@ def isolated_orders_path(tmp_path, monkeypatch) -> Path:
 ADDITIONAL_M2_STORES = ("customers", "carts", "staff", "sessions")
 
 
-@pytest.fixture
-def m2_store_paths(tmp_path, monkeypatch, isolated_restaurants_path, isolated_orders_path) -> dict[str, Path]:
-    """Empty, isolated JSON stores, each selected through its *_DATA_PATH variable."""
-    paths = {"restaurants": isolated_restaurants_path, "orders": isolated_orders_path}
-    isolated_orders_path.write_text("[]\n", encoding="utf-8")
+@pytest.fixture(autouse=True)
+def isolated_additional_m2_stores(tmp_path, monkeypatch, isolated_orders_path) -> dict[str, Path]:
+    """Set up the other M2 stores for every test, but leave orders.json absent."""
+    paths = {"orders": isolated_orders_path}
     for store in ADDITIONAL_M2_STORES:
         path = tmp_path / f"{store}.json"
         path.write_text("[]\n", encoding="utf-8")
         monkeypatch.setenv(f"{store.upper()}_DATA_PATH", str(path))
         paths[store] = path
+    return paths
+
+
+@pytest.fixture
+def m2_store_paths(isolated_restaurants_path, isolated_additional_m2_stores) -> dict[str, Path]:
+    """Return all temporary paths and initialize orders only when requested."""
+    paths = {"restaurants": isolated_restaurants_path, **isolated_additional_m2_stores}
+    paths["orders"].write_text("[]\n", encoding="utf-8")
     return paths
 
 
