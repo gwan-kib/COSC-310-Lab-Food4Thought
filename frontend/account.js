@@ -17,6 +17,10 @@ const pendingForms = new Set();
 let token = sessionStorage.getItem(TOKEN_KEY);
 let customer = null;
 let accountWriting = false;
+// Compare edits to the actual values shown in the controls (some inputs normalize text).
+let profileBaseline = null;
+// Each write, logout, and newer read invalidates older in-flight profile reads.
+let profileReadVersion = 0;
 
 function feedback(prefix) {
   return {
@@ -113,6 +117,7 @@ async function submitOnce(form, elements, progress, operation) {
 
 function setAccountEditingEnabled() {
   const active = customer?.status === "active";
+  document.getElementById("profile-details").hidden = !customer;
   profileForm.hidden = !active;
   deactivateForm.hidden = !active;
   document.getElementById("account-state").textContent =
@@ -124,32 +129,61 @@ function setAccountEditingEnabled() {
 function showSession() {
   signedOut.hidden = Boolean(token);
   signedIn.hidden = !token;
-  if (token) setAccountEditingEnabled();
+  setAccountEditingEnabled();
+}
+
+function clearAccountView() {
+  ++profileReadVersion;
+  customer = null;
+  profileBaseline = null;
+  for (const form of [signInForm, registerForm, profileForm, deactivateForm]) {
+    form.reset();
+  }
+  for (const [form, elements] of [
+    [signInForm, signin], [registerForm, register],
+    [profileForm, profile], [deactivateForm, deactivate],
+    [null, feedback("refresh")],
+  ]) {
+    elements.status.textContent = "";
+    resetErrors(form, elements.errors);
+  }
+  for (const id of ["profile-email", "saved-name", "saved-address"]) {
+    document.getElementById(id).textContent = "";
+  }
+  setAccountEditingEnabled();
 }
 
 function forgetSession(message) {
   token = null;
-  customer = null;
   sessionStorage.removeItem(TOKEN_KEY);
+  clearAccountView();
   showSession();
   sessionStatus.textContent = message;
 }
 
-function displayCustomer(value, fillForm) {
+function displayCustomer(value, replaceFields = false) {
+  // An untouched field follows fresh server data; a locally edited field keeps
+  // the draft. Capture the browser-normalized value after assigning it.
+  const baseline = profileBaseline ?? {};
+  for (const name of ["name", "delivery_address"]) {
+    const field = profileForm.elements.namedItem(name);
+    if (replaceFields || profileBaseline === null || field.value === baseline[name]) {
+      field.value = value[name];
+      baseline[name] = field.value;
+    }
+  }
+  profileBaseline = baseline;
   customer = value;
   document.getElementById("profile-email").textContent = value.email;
   document.getElementById("saved-name").textContent = value.name;
   document.getElementById("saved-address").textContent = value.delivery_address;
-  if (fillForm) {
-    profileForm.elements.namedItem("name").value = value.name;
-    profileForm.elements.namedItem("delivery_address").value = value.delivery_address;
-  }
   setAccountEditingEnabled();
 }
 
 async function loadProfile(fillForm = false) {
   if (!token) return;
   const currentToken = token;
+  const readVersion = ++profileReadVersion;
   const message = feedback("refresh");
   message.status.textContent = "Checking your saved profile…";
   message.errors.textContent = "";
@@ -158,7 +192,7 @@ async function loadProfile(fillForm = false) {
     const result = await requestJson("/customers/me", {
       headers: { Authorization: `Bearer ${currentToken}` },
     });
-    if (token !== currentToken) return;
+    if (token !== currentToken || readVersion !== profileReadVersion) return;
     if (result.status === 401) {
       forgetSession("Your session is missing, invalid or expired. Sign in again.");
       return;
@@ -171,16 +205,19 @@ async function loadProfile(fillForm = false) {
       message.errors.textContent = "The profile response was unexpected. Check again before editing.";
       return;
     }
+    const firstRead = profileBaseline === null;
     displayCustomer(result.body, fillForm);
-    message.status.textContent = fillForm
+    message.status.textContent = fillForm || firstRead
       ? "Profile loaded."
       : "Saved profile checked. Unsaved form entries have not been changed.";
   } catch {
-    if (token === currentToken) {
+    if (token === currentToken && readVersion === profileReadVersion) {
       message.errors.textContent = "Could not reach the server to check your profile. Try checking again.";
     }
   } finally {
-    refreshButton.disabled = false;
+    if (token === currentToken && readVersion === profileReadVersion) {
+      refreshButton.disabled = accountWriting;
+    }
   }
 }
 
@@ -206,6 +243,7 @@ function authFailure(result, errors, action) {
 }
 
 function lockAccountWrites(locked) {
+  if (locked) ++profileReadVersion; // A GET issued before this write is stale.
   accountWriting = locked;
   profileForm.querySelector("fieldset").disabled = locked;
   deactivateForm.querySelector("fieldset").disabled = locked;
@@ -244,10 +282,9 @@ signInForm.addEventListener("submit", async event => {
         signin.errors.textContent = "This page is for customer accounts. Use the staff interface for a staff account.";
         return;
       }
+      clearAccountView(); // Never carry another session's data or consent forward.
       token = body.access_token;
       sessionStorage.setItem(TOKEN_KEY, token);
-      customer = null;
-      signInForm.elements.namedItem("password").value = "";
       sessionStatus.textContent = "Signed in.";
       showSession();
       await loadProfile(true);
@@ -288,10 +325,11 @@ registerForm.addEventListener("submit", async event => {
 
 profileForm.addEventListener("submit", async event => {
   event.preventDefault();
-  if (accountWriting || !customer || customer.status !== "active" || !token || !profileForm.reportValidity()) return;
+  if (accountWriting || !customer || !profileBaseline ||
+      customer.status !== "active" || !token || !profileForm.reportValidity()) return;
   const changes = {};
   for (const [name, value] of Object.entries(formValues(profileForm))) {
-    if (value.trim() !== customer[name]) changes[name] = value;
+    if (value !== profileBaseline[name]) changes[name] = value;
   }
   if (!Object.keys(changes).length) {
     profile.status.textContent = "No changes to save.";
@@ -371,6 +409,10 @@ signOutButton.addEventListener("click", () => {
     profileForm.reset();
   }
 });
+
+// A failed module import leaves sensitive forms disabled and unable to submit.
+signInForm.querySelector("fieldset").disabled = false;
+registerForm.querySelector("fieldset").disabled = false;
 
 showSession();
 if (token) void loadProfile(true);
