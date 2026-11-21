@@ -1131,7 +1131,15 @@ its pending-auth and local-only status.
 - Verification for this merge: 228 focused history, detail and cart tests passed. With Chromium required (`REQUIRE_BROWSER_TESTS=1`), `python -m pytest -q` passed all 862 tests. Compilation, whitespace and provenance numbering checks passed. Git reported no changes under `data/`. Hosted checks and re-review are tracked on the PR.
 - Current-main verification: Main advanced to `6bc8e8c` during validation. Codex retained #127's cart regression and provenance, renumbered the history entries 78–81, and updated the milestone and PR links. The same focused suite passed 229 tests. The full Chromium-required suite passed all 863 tests.
 
-### Entry 82: Team Receipt M2.3 evidence for #96
+### Entry 82: Expose authenticated checkout and receipt replay (#91)
+
+- Student responsible for [issue #91](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/91) is Thomas Chen (`Tc2006415`). Responsible-student review and individual understanding are pending.
+- Label is `AI-GENERATED`. OpenAI Codex authored the checkout router, HTTP tests and this entry. It updated app registration, the README, API contract, data model, setup and testing guides, and M2 milestone evidence.
+- Codex connected the existing checkout service to the bearer-authenticated HTTP application and wrote tests for its public purchase, failure and retry behavior. The tests exercise real JSON stores, including failed order and cart replacements.
+- On Python 3.12, `python -m pytest -q tests/test_checkout_api.py --tb=line` failed all 20 cases before the route existed. After wiring it, `python -m pytest -q tests/test_checkout_api.py --tb=short` passed all 20. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed all 883 tests. `python -m compileall -q app` succeeded and Git reported a clean `data/` directory.
+- Branch `feature/91-checkout-http` starts at `da903cc`. Human peer review and integration are pending.
+
+### Entry 84: Team Receipt M2.3 evidence for #96
 
 - Student(s): Sreeram Nara (`SreeramNara`), assignee of #96.
 - Artifact: The "Team Receipt M2.3 evidence for issue #96" section and the responsibility-map link in `docs/milestones/M2.md`, and this record.
@@ -1140,5 +1148,5 @@ its pending-auth and local-only status.
 - Purpose: Record Sreeram's architectural improvement (#96, PR #116) in the team's M2.3 receipt, following the structure of the existing #98 entry.
 - Influence: Claude drafted the section from the merged code, the pre-change source at `95c7c8e`, the PR #113 and #116 reviews, and the recorded test results. It covers the observed weakness, the alternatives considered, the decision, the result and trade-off, and the verification and review evidence.
 - Validation: Every link points to the pre-change commit, a merged file or a recorded review. The figures (120 characterization tests, 5,001-digit regression, 57 removed and 32 added lines) come from the PR #116 record. This is documentation only, so there are no application tests to add; `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed unchanged.
-- PR or commit: Branch `docs/96-team-receipt`; PR not yet opened.
+- PR or commit: [PR #129](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/129), branch `docs/96-team-receipt`.
 - Student review status: Pending. Sreeram has not yet confirmed that the wording reflects his understanding.

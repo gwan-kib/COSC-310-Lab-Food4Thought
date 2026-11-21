@@ -115,8 +115,8 @@ writer coordination, power-loss durability, or complete M3 recovery is made.
 Checkout acquires [the workflow lock](../app/core/workflow.py). The other
 writers must acquire that same lock for cross-store serialization to hold in the
 integrated app. Customer authentication and repository adapters are implemented,
-and cart create/read/add HTTP routes are provided by #115, with item removal in #88. Checkout HTTP integration
-remains separate work (#84).
+and cart create/read/add HTTP routes are provided by #115, with item removal in #88.
+The [checkout route](../app/api/routes/checkout.py) uses the same cart and order stores for purchases and retries.
 
 ## Verification responsibilities
 

@@ -68,9 +68,11 @@ integration tests must use the real implementations, not these doubles.
 Run `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
 for #91. These tests use a temporary order file, reopen the repository for retry,
 and check current pricing, authorization timing and conditional reset failures.
-Customer, cart and menu inputs in that focused suite are doubles. Real-store
-purchase-to-history and purchase-to-detail coverage is provided by the #92 and
-#93 API tests below; checkout HTTP remains separate work.
+Customer, cart and menu inputs in that focused suite are doubles.
+Run `python -m pytest -q tests/test_checkout_api.py` for HTTP coverage with
+real bearer authentication and all six temporary stores. It checks 201/200,
+price and address snapshots, restart and replay after new cart edits, history
+and detail reads, access denials, validation, OpenAPI and both write-failure paths.
 
 Run `python -m pytest -q tests/test_order_history_service.py` for the #92 service.
 Independent A1/B1/A2 JSON fixtures verify customer scoping, persisted insertion
@@ -102,14 +104,13 @@ denials before private storage, generic storage failures, current-account rechec
 fresh repository reload, exact large quantities, and OpenAPI. Its multisubsystem
 test registers/signs in, creates/fills a cart via HTTP, invokes the real checkout
 service with real stores, changes profile/menu values, and retrieves the original
-snapshot through the detail API. It is not an HTTP checkout test: that route remains
-#91 work, and history integration is #92. All participating files are isolated.
+snapshot through the detail API. All participating files are isolated.
 
 For #89, run `python -m pytest -q tests/test_clear_cart.py`. These tests use real
 authentication, cart/customer/catalog/order services and temporary JSON stores to
 check clear/repeat, restaurant release, restart, active ownership, generic storage
 failures and unchanged state on failed save. The checkout recovery scenario calls
-the real checkout service (its HTTP route is not yet wired), blocks ordinary clear
+the real checkout service directly, blocks ordinary clear
 after an order save/reset failure, then replays the receipt and permits later clear
 without changing historical orders. No frontend clear workflow is claimed.
 
