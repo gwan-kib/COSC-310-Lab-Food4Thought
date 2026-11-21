@@ -43,14 +43,16 @@ def test_browser_registration_to_order_receipt_and_owned_api_detail(
     assert logged_in.value.status == 200
     expect(page.locator("#profile-email")).to_have_text(email)
 
-    page.goto(f"{live_server}/app/#/restaurants/restaurant-001")
+    page.get_by_role("link", name="Browse restaurants").click()
+    expect(page.locator("#restaurant-list button")).to_have_count(2)
+    page.locator("#restaurant-list button[data-restaurant-id='restaurant-001']").click()
     expect(page.locator("#menu-list li")).to_have_count(2)
     with page.expect_response("**/customers/me/cart/items") as added:
         page.get_by_role("button", name="Add Vegetable bowl to cart").click()
     assert added.value.status == 200
     expect(page.locator("#menu-status")).to_contain_text("Added Vegetable bowl")
 
-    page.goto(f"{live_server}/app/cart.html")
+    page.get_by_role("link", name="My cart").click()
     expect(page.locator("#cart-items li")).to_have_count(1)
     expect(page.locator("#cart-total")).to_have_text("$12.50")
     page.get_by_role("spinbutton", name="Quantity for Vegetable bowl").fill("2")
