@@ -9,7 +9,7 @@ from typing import Annotated, Literal, Protocol, Self
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 from app.core.storage import StorageFailure
-from app.schemas.order import cents
+from app.core.pricing import cents
 from app.schemas.restaurant import Restaurant
 
 

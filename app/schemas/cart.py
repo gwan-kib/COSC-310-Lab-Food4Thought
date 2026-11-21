@@ -7,8 +7,9 @@ from typing import Annotated, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
+from app.core.pricing import Money
+
 Identifier = Annotated[str, StringConstraints(min_length=1)]
-Money = Annotated[str, StringConstraints(pattern=r"^(0|[1-9][0-9]*)\.[0-9]{2}$")]
 # Strict, so 1.5, true and "2" are rejected instead of being coerced to an integer.
 Quantity = Annotated[int, Field(strict=True, gt=0)]
 Revision = Annotated[int, Field(strict=True, ge=0)]

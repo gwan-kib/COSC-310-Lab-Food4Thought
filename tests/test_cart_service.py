@@ -13,7 +13,7 @@ from pydantic import ValidationError
 from app.core.storage import StorageFailure
 from app.repositories.cart import CartDataError, CartRepository
 from app.schemas.cart import AddCartItemRequest, CartItem, CartRecord
-from app.schemas.order import cents, money
+from app.core.pricing import cents, money
 from app.services.cart import (
     CartNotFoundError, CartRestaurantConflictError, CartService,
     CheckoutRecoveryRequiredError, CustomerInactiveError, CustomerNotFoundError,

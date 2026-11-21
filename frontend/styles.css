@@ -243,3 +243,20 @@ a {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Account page shares the existing form and panel styles. */
+.account-layout { max-width: 44rem; }
+.account-sections { display: grid; gap: 1rem; }
+.account-sections h3, #signed-in h3 { margin-top: 0; }
+.account-heading { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.account-details { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.4rem 0.8rem; overflow-wrap: anywhere; }
+.account-details dt { font-weight: 600; }
+.account-details dd { margin: 0; }
+#profile-form, .deactivate-form { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.account-note { color: var(--muted); font-size: 0.875rem; }
+.checkbox-row { display: flex; gap: 0.5rem; align-items: flex-start; }
+.checkbox-row input { width: auto; margin: 0.25rem 0 0; }
+#deactivate-form button { color: var(--error); border-color: var(--error); background: var(--surface); }
+.account-layout [hidden] { display: none !important; }
+.site-header nav { display: flex; flex-wrap: wrap; gap: 1rem; }
+@media (max-width: 28rem) { .account-details { grid-template-columns: minmax(0, 1fr); } }
