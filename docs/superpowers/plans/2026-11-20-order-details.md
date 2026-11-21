@@ -10,7 +10,7 @@
 ## Constraints and decisions
 
 - Thomas authorized implementation and a PR after the dependency review; no further interview gate.
-- Base: main `95c7c8e`. Reuse #91 storage; do not modify #92's unpublished service.
+- Original base: main `95c7c8e`; synchronized with main `9474129` after the merge-blocker review. Reuse #91 storage; do not modify #92's separate service.
 - Active and inactive customers may read their own saved orders. Staff get 403; invalid identity gets 401; missing/foreign order gets identical 404.
 - Existing `active_customer_for` cannot serve order reads. The proposed generic access helper does not exist in this main, so the small read-specific service checks role and current customer existence directly.
 - No new fields, storage format, dependencies, frontend or checkout endpoint. Real checkout service integration is in scope; checkout HTTP integration awaits #91.
@@ -38,6 +38,8 @@ The [agent-submitted GitHub review](https://github.com/gwan-kib/COSC-310-Lab-Foo
 ## CI, review and integration status
 
 - [x] Hosted CI on PR #119 revision `8811eea`: [`validate` succeeded](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44858630232/job/136706602018). This is evidence for that revision, not a new test run for the subsequent documentation correction.
+- [x] Synchronize current main `9474129`, retaining both sides' setup, milestone and provenance additions. Adapt the historical-snapshot integration test to sign in as the restaurant manager before protected menu/restaurant edits. The merged tree initially produced 1 failed / 30 passed detail cases (401 on anonymous menu edit); after the test update, all 31 passed. Compilation and the complete required-browser suite passed: 735 tests, no skips or warnings. Existing order-detail application code is unchanged.
+- [ ] Verify hosted CI on the synchronized PR revision before re-review; the previous run does not certify the merged tree. Current check results belong in the PR.
 - [ ] Independent human peer review and approval of the implementation and documentation; responsible-student understanding confirmation. The agent-submitted reviews do not satisfy this gate.
 - [ ] Complete HTTP checkout-to-detail integration in #91/#101. The implemented test uses the real checkout service; no checkout HTTP endpoint is added by this PR.
 - [ ] Merge and final issue-completion checks. PR #119 references #93 without closing it.

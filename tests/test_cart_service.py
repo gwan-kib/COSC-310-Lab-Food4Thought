@@ -13,7 +13,7 @@ from pydantic import ValidationError
 from app.core.storage import StorageFailure
 from app.repositories.cart import CartDataError, CartRepository
 from app.schemas.cart import AddCartItemRequest, CartItem, CartRecord
-from app.schemas.order import cents, money
+from app.core.pricing import cents, money
 from app.services.cart import (
     CartNotFoundError, CartRestaurantConflictError, CartService,
     CheckoutRecoveryRequiredError, CustomerInactiveError, CustomerNotFoundError,
@@ -196,7 +196,7 @@ def test_failed_save_preserves_the_previous_cart(m2_store_paths, monkeypatch):
     def broken_replace(*_args):
         raise OSError("disk full")
 
-    monkeypatch.setattr("app.repositories.cart.os.replace", broken_replace)
+    monkeypatch.setattr("app.core.json_file.os.replace", broken_replace)
     with pytest.raises(CartDataError):
         service.add_item("customer-001", _add(quantity=1))
 

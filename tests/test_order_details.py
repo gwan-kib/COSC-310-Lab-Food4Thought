@@ -242,9 +242,17 @@ def test_real_account_cart_checkout_and_detail_preserve_history_after_reload(cli
     assert purchased.created and CartRepository().get_cart(principal.account_id).items == []
     assert client.patch("/customers/me", headers=headers,
                         json={"delivery_address": "99 New Street"}).status_code == 200
+    manager = auth_accounts.accounts["restaurant_user"]
+    manager_login = client.post("/auth/login", json={
+        "email": manager.record.email, "password": manager.password,
+    })
+    assert manager_login.status_code == 200
+    manager_headers = {"Authorization": "Bearer " + manager_login.json()["access_token"]}
     assert client.patch("/restaurants/restaurant-001/menu/items/item-001",
+                        headers=manager_headers,
                         json={"name": "Changed dish", "price": "99.00"}).status_code == 200
-    assert client.patch("/restaurants/restaurant-001", json={"name": "Renamed restaurant"}).status_code == 200
+    assert client.patch("/restaurants/restaurant-001", headers=manager_headers,
+                        json={"name": "Renamed restaurant"}).status_code == 200
     before = stores(auth_accounts.paths)
     with TestClient(app) as restarted_client:
         response = restarted_client.get(URL + order_id, headers=headers)

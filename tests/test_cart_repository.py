@@ -63,7 +63,7 @@ def test_failed_save_keeps_the_previous_file(m2_store_paths, monkeypatch):
     def broken_replace(*_args):
         raise OSError("disk full")
 
-    monkeypatch.setattr("app.repositories.cart.os.replace", broken_replace)
+    monkeypatch.setattr("app.core.json_file.os.replace", broken_replace)
     with pytest.raises(CartDataError):
         repository.save_cart(cart.model_copy(update={"revision": 1, "restaurant_id": "restaurant-001",
                                                      "items": [CartItem(item_id="item-001", quantity=1)]}))
@@ -112,7 +112,7 @@ def test_serialization_failure_is_a_cart_data_error_with_no_temporary_file(m2_st
     def broken_dump(*_args, **_kwargs):
         raise ValueError("cannot serialize")
 
-    monkeypatch.setattr("app.repositories.cart._carts.dump_json", broken_dump)
+    monkeypatch.setattr("app.core.json_file.to_json", broken_dump)
     with pytest.raises(CartDataError):
         repository.save_cart(cart.model_copy(update={"revision": 1, "restaurant_id": "restaurant-001",
                                                      "items": [CartItem(item_id="item-001", quantity=1)]}))

@@ -55,15 +55,15 @@ def repository(records):
     ],
 )
 def test_update_changes_only_supplied_fields_in_selected_parent(
-    records, repository, changes, expected_changes
+    menu_manager, records, repository, changes, expected_changes
 ):
     before = [record.model_dump() for record in records]
     expected_item = {
         "id": "shared", "name": "Soup", "description": "Hot", "price": "4.50",
-        **expected_changes,
+        "available": True, **expected_changes,
     }
 
-    result = RestaurantService(repository).update_menu_item(
+    result = RestaurantService(repository, principal=menu_manager).update_menu_item(
         "target", "shared", MenuItemUpdate(**changes)
     )
 
@@ -81,23 +81,23 @@ def test_update_changes_only_supplied_fields_in_selected_parent(
     ],
 )
 def test_update_missing_parent_or_scoped_item_raises_without_changes(
-    records, repository, parent_id, item_id, expected_error
+    menu_manager, records, repository, parent_id, item_id, expected_error
 ):
     records[0].menu_items[0].id = "other-only"
     before = [record.model_dump() for record in records]
 
     with pytest.raises(expected_error):
-        RestaurantService(repository).update_menu_item(
+        RestaurantService(repository, principal=menu_manager).update_menu_item(
             parent_id, item_id, MenuItemUpdate(price="7.50")
         )
 
     assert [record.model_dump() for record in records] == before
 
 
-def test_update_propagates_repository_failure(repository):
+def test_update_propagates_repository_failure(menu_manager, repository):
     repository.mutate_records.side_effect = RestaurantDataError("Storage unavailable")
 
     with pytest.raises(RestaurantDataError):
-        RestaurantService(repository).update_menu_item(
+        RestaurantService(repository, principal=menu_manager).update_menu_item(
             "target", "shared", MenuItemUpdate(price="7.50")
         )

@@ -2,25 +2,14 @@
 Money is stored in canonical decimal strings and checked with integer cents.
 """
 
-from decimal import Decimal
 from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints, model_validator
 
+from app.core.pricing import Money, cents, line_total, sum_line_totals
+
 Identifier = Annotated[str, StringConstraints(min_length=1)]
-Money = Annotated[str, StringConstraints(pattern=r"^(0|[1-9][0-9]*)\.[0-9]{2}$")]
 Revision = Annotated[int, Field(ge=0)]
-
-
-def cents(amount: str) -> int:
-    """Read validated money exactly, even when a total exceeds int's text limit."""
-    return int(Decimal(amount.replace(".", "")))
-
-
-def money(amount_in_cents: int) -> str:
-    whole, fraction = divmod(amount_in_cents, 100)
-    # Decimal converts the integer exactly without rounding to context precision.
-    return f"{Decimal(whole):f}.{fraction:02d}"
 
 
 class OrderModel(BaseModel):
@@ -43,7 +32,7 @@ class PurchasedItem(OrderModel):
     def verify_amounts(self) -> Self:
         if cents(self.unit_price) > 99900:
             raise ValueError("Unit price exceeds 999.00")
-        if cents(self.line_total) != cents(self.unit_price) * self.quantity:
+        if self.line_total != line_total(self.unit_price, self.quantity):
             raise ValueError("Line total does not match price and quantity")
         return self
 
@@ -69,7 +58,7 @@ class Order(OrderModel):
     def verify_purchase(self) -> Self:
         if len({item.item_id for item in self.items}) != len(self.items):
             raise ValueError("Purchased item IDs must be unique within the restaurant")
-        if sum(cents(item.line_total) for item in self.items) != cents(self.subtotal):
+        if self.subtotal != sum_line_totals(item.line_total for item in self.items):
             raise ValueError("Subtotal does not match the purchased items")
         if self.total != self.subtotal:
             raise ValueError("Total must equal subtotal")
