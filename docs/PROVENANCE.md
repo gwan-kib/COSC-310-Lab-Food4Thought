@@ -1238,3 +1238,15 @@ its pending-auth and local-only status.
 - Validation: Original stacked PR #136 revision ec2e271 passed hosted required-browser CI ([run 44877877769](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877877769)). On reviewed head `2a6bce4`, Thomas's Codex-assisted technical review reported 12 focused tests passing and 978 tests passing with required Chromium, plus successful compilation and clean `data/` guard. That revision preceded the merge of #102/#104 into main and the navigational test improvement; the resolved head needs new CI verification. No local tests were run by this assistant. Human reviewer sign-off and responsible-student walkthrough remain pending. #95 persistence verification PR #132 has merged.
 - PR or commit: [Issue #101](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/101); feature branch `feature/101-complete-workflow-tests`. [PR #136](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/136).
 - Student review status: Pending. Automated results and agent checks do not establish independent human review or individual understanding.
+
+### Entry 91: M2 Scrum meeting record and handoff (#104)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #104 coordinator and requesting student.
+- Artifact: `scrum/M2-SCRUM-MEETING-2026-11-05.md` and its link in `docs/milestones/M2.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Preserve the documented November 5 Scrum meeting and give the M2 handoff a traceable record.
+- Influence: ChatGPT drafted the Markdown record and added the milestone link. The notes distinguish the same-day update from later pull-request evidence. Attendance, decisions and actions missing from the original record are left for team confirmation.
+- Validation: Compared the notes with the November 5 and November 21 comments on issue #104 and the linked GitHub merge records. Checked the local documentation targets. The change is documentation only.
+- PR or commit: [Issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), branch `docs/104-m2-scrum-notes`.
+- Student review status: Pending.
