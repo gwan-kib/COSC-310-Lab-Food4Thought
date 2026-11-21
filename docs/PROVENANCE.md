@@ -1214,3 +1214,15 @@ its pending-auth and local-only status.
 - Validation: Original [hosted CI run 44877788690](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877788690) on PR head `1339a64` passed compilation, required-browser pytest (930 tests) and the `data/` guard. This preceded the recent main merges. The previous sync to main queued CI; the merge after #132 must pass required-browser CI before merging. Sreeram independently tested 9 focused cases and 953 tests split into backend and Chromium runs on the prior head and approved the intended behavior; this is not a CI result for the new head. This is characterization of intended behavior, not a failing-before production defect. Original defect evidence remains in entries 55–57 for PR #110.
 - PR: [#135](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/135), branch `test/102-cross-subsystem-error-precedence`.
 - Student review status: Sreeram approved the previous head's test behavior with only a merge/sync blocker; the current post-#132 head needs CI and a final review-validity check. Responsible-student walkthrough is pending.
+
+### Entry 89: M2 handoff documentation audit and #104 backlog coordination
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue coordinator and requesting student; responsible-student review is pending.
+- Artifact: [Issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/DATA_MODEL.md`, `docs/milestones/M2.md`, `docs/AUTH_DESIGN.md`, `docs/M2_API_CONTRACT.md`, `docs/TESTING.md`, and this provenance entry.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Translate the M2 integration/release backlog into an evidence-based documentation audit, correct stale setup/status text, including matching `httpx2` to the pinned dependency after Sreeram's review, and build a source-to-issue/test/PR handoff checklist.
+- Influence: AI authored substantial changes to the cited documentation, the M2 handoff matrix and release/demo checks; issue #104 itself records AI-GENERATED backlog planning. No student-authored review or agreement is inferred.
+- Validation: Inspected the repository's `main` tree, relevant documentation, issue #104 and merged/open PR metadata on 2026-11-20 and rechecked against merged PRs #132–#135 and #138 on 2026-11-21; checked that pending integration work was not represented as delivered. The reconciled branch was checked across **27 Markdown files and 347 relative repository-path links**, with no missing repository targets. External URLs and fragment anchors were not verified. Documentation-only changes; no application tests or manual demo were run. Student review and integrated-release checks remain separate gates.
+- PR or commit: [PR #137](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/137), branch `docs/104-m2-handoff-audit`; [issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104).
+- Student review status: Pending. Gwantana must review/validate the final documentation and confirm understanding; Sreeram's requested change was applied; re-review is pending.
