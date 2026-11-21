@@ -68,8 +68,16 @@ integration tests must use the real implementations, not these doubles.
 Run `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
 for #91. These tests use a temporary order file, reopen the repository for retry,
 and check current pricing, authorization timing and conditional reset failures.
-Customer, cart and menu inputs are doubles. The real sign-in, cart, checkout and
-persisted order history/detail workflow remains an integration test to deliver.
+Customer, cart and menu inputs in that focused suite are doubles.
+
+Run `python -m pytest -q tests/test_order_details.py` for #93. Independent fixture
+orders cover owner/inactive access, missing/foreign 404 equivalence, identity/role
+denials before private storage, generic storage failures, current-account rechecks,
+fresh repository reload, exact large quantities, and OpenAPI. Its multisubsystem
+test registers/signs in, creates/fills a cart via HTTP, invokes the real checkout
+service with real stores, changes profile/menu values, and retrieves the original
+snapshot through the detail API. It is not an HTTP checkout test: that route remains
+#91 work, and history integration is #92. All participating files are isolated.
 
 For #89, run `python -m pytest -q tests/test_clear_cart.py`. These tests use real
 authentication, cart/customer/catalog/order services and temporary JSON stores to

@@ -125,3 +125,11 @@ Branch `feature/89-clear-shopping-cart` was pushed and [PR #126](https://github.
 was opened against `main` with the prepared description. Remote check results
 are tracked on the PR; human peer approval, student explanation and merge are
 not implied by publication or agent verification.
+
+During publication, #119 merged into main at `c2d4aa8`. The branch merged that
+revision, retaining both README endpoint rows and all provenance entries. The
+automatic setup/contract/testing/milestone merges were inspected. No feature code
+needed conflict resolution. `python -m compileall -q app` succeeded and
+`python -m pytest -q tests/test_clear_cart.py tests/test_order_details.py` passed
+59 tests in 5.86s; whitespace and committed-data guards passed. The hosted full
+suite for this integrated revision is recorded in [PR #126 checks](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/126/checks).
