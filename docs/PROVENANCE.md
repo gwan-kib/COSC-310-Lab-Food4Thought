@@ -1065,7 +1065,20 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Concurrent merge follow-up: PR #123 merged during publication, advancing main to `c2ec1c5`. Codex merged it too, retaining the complete remove-item and quantity operations alongside clear, both DELETE route shapes, combined setup/API documentation and every provenance entry. `python -m pytest -q tests/test_clear_cart.py tests/test_cart_api.py tests/test_cart_remove.py tests/test_order_details.py` passed 139 tests in 11.54s; compilation, whitespace and committed-data checks passed. Fresh hosted CI and re-review status are tracked in PR #126.
 - Student review status: Thomas authorized the recommended implementation; responsible-student code review and explanation remain pending. Canvas and full live Project fields could not be reverified in this run.
 
-### Entry 77: Customer order history service
+### Entry 77: Real-store unavailable cart lines for #86 and #90
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #86 and #90.
+- Artifact: `tests/test_cart_api.py` (`test_unavailable_line_stays_visible_priced_and_counted_through_the_real_store`) and this record.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Add the real-store evidence that kept #86 and #90 open until menu availability (#94, PR #109) merged, as requested in Thomas Chen's PR #115 review.
+- Influence: Claude wrote one API test through real routes and isolated stores. After a customer adds two items, a restaurant user marks one unavailable *and* changes its price through `PATCH /restaurants/{id}/menu/items/{item_id}`. The cart read then returns 200 with that line visible as `available: false`, priced at the **new** current price and counted in the subtotal and total, as the M2 contract requires, while the cart file stays as saved (it stores only IDs and quantities). A second HTTP read and a separately constructed `CartService` with new repositories on the same files return the same view, and adding the item again is 409 `Menu item is unavailable` with the cart unchanged. No application code changed.
+- Validation: The behaviour already existed on `main` (`8705f16`), so the test passed when first run; it is characterization and integration evidence, not test-first. Run against `main` from before #109 (`95c7c8e`), it failed at the availability PATCH (422), confirming it exercises the merged availability feature. `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 820 tests on this branch.
+- PR or commit: [PR #127](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/127), branch `feature/86-90-unavailable-cart-lines`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #127. Claude changed the menu price together with availability so the test proves current-price behaviour (with a temporary catalog that kept the old price, it failed on `12.50` vs `13.00`), replaced the inaccurate "fresh application" claim with a second HTTP read plus an independently constructed `CartService` on new repositories, asserted every setup response, and linked this PR.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 78: Customer order history service
 
 Historical service-only contribution; the endpoint integration below supersedes
 its pending-auth and local-only status.
@@ -1081,7 +1094,7 @@ its pending-auth and local-only status.
 - Issue/branch: #92, `feature/92-order-history`, based on refreshed main `31e4320d003cdd8a6ae019ce74b155564e97d59a`. Local work only; no PR or commit yet.
 - Student review status: Implementation understanding and human peer review remain pending. Agent checks are not student approval. Real #79/#80/#84 auth, HTTP denial tests and a fully real purchase-to-history workflow remain outstanding; #92 is not complete.
 
-### Entry 78: Authenticated history endpoint and integration
+### Entry 79: Authenticated history endpoint and integration
 
 - Student(s): Thomas Chen (`Tc2006415`), #92 assignee and requester.
 - Artifacts: `app/api/routes/order_history.py`, the resolver in `app/services/order_history.py`, router registration in `app/main.py`, `tests/test_order_history_api.py`, README, both setup guides, M2 API/testing/milestone documentation, the temporary working plan (removed during PR review) and this record.
@@ -1092,7 +1105,7 @@ its pending-auth and local-only status.
 - Integration limits: Registration, login, cart operations and history run through HTTP; the purchase step calls the real checkout service with real customer/cart/catalog/order stores and a principal resolved from the issued token. The clock is fixed. A fresh history application reopens the same temporary stores. This does not claim #91's checkout HTTP route exists or that #84's entire rollout is complete. Human peer review, student understanding and merge remain pending.
 - PR/branch: [PR #120](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120), #92, `feature/92-order-history`; endpoint implementation commit `5fd7962`. [Sreeram's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120#pullrequestreview-6002459546) approved `b5b6460`; review of subsequent changes and merge remain pending. No self-approval or merge is authorized.
 
-### Entry 79: Order history review cleanup and main integration
+### Entry 80: Order history review cleanup and main integration
 
 - Student(s): Thomas Chen (`Tc2006415`), #92 assignee and requester; Sreeram Nara (`SreeramNara`) supplied the PR feedback.
 - Artifact: Removal of the temporary agent working plan, history entry numbering and references in this record and `docs/milestones/M2.md`, PR description, and documentation conflict resolutions while merging main `aaca156` and `572368d` into `feature/92-order-history`.
@@ -1103,7 +1116,7 @@ its pending-auth and local-only status.
 - PR or commit: [PR #120](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120), addressing [review 6002459546](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120#pullrequestreview-6002459546).
 - Student review status: Sreeram approved the previous `b5b6460` revision with non-blocking suggestions. Re-review of this revision, responsible-student understanding and merge remain pending.
 
-### Entry 80: Integrate history with account frontend and order details
+### Entry 81: Integrate history with account frontend and order details
 
 - Student(s): Thomas Chen (`Tc2006415`), #92 owner and integration requester; individual understanding remains unconfirmed.
 - Artifact: Merges of main `c2d4aa8` and `cf172eb` into `feature/92-order-history`, application router registration, README, API/setup/testing/milestone documentation, this record and PR #120's description.
@@ -1116,3 +1129,4 @@ its pending-auth and local-only status.
 
 - Review follow-up for [PR #120](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120#pullrequestreview-6003126115): At Thomas's request, OpenAI Codex merged main `8705f16` to address the integration blocker raised by `gwan-kib`. Codex combined README rows for history and cart removal/clear, preserved main's provenance, moved the four history entries to 77–80, and updated the milestone link and PR verification notes. This work uses the entry's AI-GENERATED label. The history/detail and cart implementations and their regression tests were retained from their respective branches.
 - Verification for this merge: 228 focused history, detail and cart tests passed. With Chromium required (`REQUIRE_BROWSER_TESTS=1`), `python -m pytest -q` passed all 862 tests. Compilation, whitespace and provenance numbering checks passed. Git reported no changes under `data/`. Hosted checks and re-review are tracked on the PR.
+- Current-main verification: Main advanced to `6bc8e8c` during validation. Codex retained #127's cart regression and provenance, renumbered the history entries 78–81, and updated the milestone and PR links. The same focused suite passed 229 tests. The full Chromium-required suite passed all 863 tests.
