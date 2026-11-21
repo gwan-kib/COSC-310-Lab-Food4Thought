@@ -837,3 +837,14 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The file differences and preserved tree paths were inspected prior to integration. Passing CI and merge outcome are verified separately; no student understanding or manual testing is claimed.
 - PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
 - Student review status: Pending confirmation by responsible students.
+
+### Entry 65: Share exact pricing across cart views and checkout (#97)
+
+- Student: Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: `app/core/pricing.py`, cart and order schemas, cart and checkout services, test imports, the pricing characterization in `tests/test_cart_api.py`, and [M2.1 receipt evidence](milestones/M2.md#decision-receipt-m21--shared-cart-and-checkout-pricing-97).
+- Label: `AI-GENERATED`
+- AI tool: Codex (OpenAI).
+- Purpose and influence: Codex inspected the implementation and alternatives. Thomas chose the behavior-preserving arithmetic extraction and the cart repricing and receipt replay scenario. Codex wrote the test, extracted the shared type and calculations, updated consumers, and drafted the decision evidence.
+- Validation: On Python 3.12, `python -m pytest -q tests/test_cart_api.py::test_cart_and_checkout_reprice_but_retry_keeps_the_saved_order tests/test_cart_service.py tests/test_cart_checkout_integration.py tests/test_checkout_service.py tests/test_order_repository.py` passed 73 tests before and after extraction. `python -m compileall app` succeeded. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed all 618 tests. `git status --porcelain --untracked-files=all --ignored -- data/` returned no entries. The sorted generated OpenAPI JSON had the same SHA-256 before and after.
+- PR or commit: Local branch `feature/97-shared-pricing` for [issue #97](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/97). PR and peer review pending.
+- Student review status: Thomas confirmed the design and test scenario. Review of the implementation and student understanding are pending.
