@@ -1191,6 +1191,17 @@ its pending-auth and local-only status.
 - PR: [#133](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/133).
 - Student review status: Pending; neither agent changes nor automated checks establish student understanding or peer review.
 
+### Entry 87: Cross-subsystem persistence verification (#95)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #95 coordinator and requester; personal review and understanding are not inferred from automated checks.
+- Artifact: `tests/test_cross_subsystem_persistence.py`, `docs/CROSS_SUBSYSTEM_VERIFICATION.md`, the issue #95 milestone evidence in `docs/milestones/M2.md`, and this provenance entry.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT (OpenAI GPT-6).
+- Purpose and influence: Generated a consolidated cross-subsystem test suite and a traceability matrix for stable customer/restaurant/menu/cart/order identifiers, owner boundaries, fresh-instance persistence, malformed and unreadable stores, validation-before-write and checkout's saved-order/failed-cart-reset policy. Reused the existing implementation and isolated storage fixtures rather than duplicating subsystem repositories.
+- Validation: Inspected the source, API contracts, owner tests and repository boundaries. In [GitHub Actions diagnostic run 44877528951](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877528951), `python -m pytest -q tests/test_cross_subsystem_persistence.py` passed **22 tests** in 0.63s. With `REQUIRE_BROWSER_TESTS=1`, `timeout --signal=INT 120s python -m pytest -vv --tb=short` passed **943 tests** in 27.85s. `python -m compileall app` and the committed-data guard completed successfully. An earlier focused diagnostic failed one test because the test patched `Path.read_bytes` while the restaurant repository uses `Path.read_text`; the injection was corrected and all 22 tests then passed. The temporary CI diagnostics were restored to the normal workflow on the branch; the final ordinary CI rerun is separately tracked on the PR. No local Python run, student walkthrough or teammate review is claimed.
+- PR or commit: [PR #132](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/132), branch `feature/95-cross-subsystem-verification`. Refs #95 without an auto-close keyword.
+- Student review status: Pending responsible-student walkthrough and teammate review. No review, merge or acceptance is asserted.
+
 ### Issue #101: Complete customer-to-order workflow integration evidence
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), responsible for issue #101; student walkthrough and understanding remain unconfirmed.
@@ -1199,6 +1210,6 @@ its pending-auth and local-only status.
 - AI tool: OpenAI ChatGPT (GPT-6).
 - Purpose: Add integrated verification of the actual customer journey, customer/restaurant/cart/order boundaries, checkout failure recovery and visible browser receipt.
 - Influence: ChatGPT authored the HTTP and Chromium tests, assertions, rule matrix, documentation and this provenance entry. Production business rules and repositories were not changed. The browser tests originally depended on #100's frontend branch; PR #133 has since merged into main.
-- Validation: Original stacked PR #136 revision ec2e271 passed hosted required-browser CI ([run 44877877769](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877877769)). After merging changes now on main, the integrated head requires its own CI result. No local pytest/Chromium execution is claimed; student/peer reviews remain pending.
+- Validation: Original stacked PR #136 revision ec2e271 passed hosted required-browser CI ([run 44877877769](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877877769)). After merging changes now on main, the integrated head requires its own CI result. No local pytest/Chromium execution is claimed; student/peer reviews remain pending; #95 persistence verification PR #132 has since merged into main.
 - PR or commit: [Issue #101](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/101); feature branch `feature/101-complete-workflow-tests`. [Draft PR #136](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/136).
 - Student review status: Pending. Automated results and agent checks do not establish independent human review or individual understanding.
