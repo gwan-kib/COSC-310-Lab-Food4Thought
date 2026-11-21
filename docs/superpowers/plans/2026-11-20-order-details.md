@@ -33,11 +33,11 @@ Commands and results are recorded in [provenance](../../PROVENANCE.md#issue-93-o
 
 Implementation, documentation and local verification are complete: initial 28 expected failures; 31 focused passes; 648 full-suite passes with browser tests required; compileall, diff/data guards and 117 local documentation links checked. Independent agent review found no actionable issues. Commit `5b05a59` was pushed on `feature/93-order-details` and PR #119 is open.
 
-Gwantana's [human review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119#pullrequestreview-6002388506) requested this plan-status correction and reported no functional defect in the new detail path. The checklist now records completed implementation/publication separately from the outstanding gates below.
+The [agent-submitted GitHub review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119#pullrequestreview-6002388506), initiated by repository owner Gwantana and authored/submitted through ChatGPT using `gwan-kib`'s connected account, requested the plan-status correction and reported no functional defect in the new detail path. As clarified in the [follow-up review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119#pullrequestreview-6002430412), this is AI-assisted review evidence, not independent human peer review or confirmation of student understanding.
 
-## Pending review and integration
+## CI, review and integration status
 
-- [ ] Hosted CI success: `validate` on implementation revision `5b05a59` was still running when this correction was prepared. Local passing results do not establish hosted CI success.
-- [ ] Human re-review and approval of the documentation correction; responsible-student understanding confirmation.
+- [x] Hosted CI on PR #119 revision `8811eea`: [`validate` succeeded](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44858630232/job/136706602018). This is evidence for that revision, not a new test run for the subsequent documentation correction.
+- [ ] Independent human peer review and approval of the implementation and documentation; responsible-student understanding confirmation. The agent-submitted reviews do not satisfy this gate.
 - [ ] Complete HTTP checkout-to-detail integration in #91/#101. The implemented test uses the real checkout service; no checkout HTTP endpoint is added by this PR.
 - [ ] Merge and final issue-completion checks. PR #119 references #93 without closing it.

@@ -853,11 +853,22 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### PR #119 review follow-up: implementation plan status
 
-- Student(s): Thomas Chen (`Tc2006415`), requester and #93 owner; Gwantana Kiboigo (`gwan-kib`), reviewer requesting the correction.
+- Student(s): Thomas Chen (`Tc2006415`), requester and #93 owner; Gwantana Kiboigo (`gwan-kib`), repository owner who initiated the ChatGPT-authored/submitted review through his connected GitHub account. This attribution does not establish independent human review.
 - Artifact: `docs/superpowers/plans/2026-11-20-order-details.md` and this provenance entry.
 - Label: `AI-GENERATED`
 - AI tool: OpenAI Codex.
-- Purpose and influence: Codex reconciled Task 4 and the execution status with the published PR, marked implementation/documentation/local verification/publication complete, and separately listed hosted CI, human re-review, student understanding, external #91/#101 HTTP integration and merge as pending. Application code and tests were unchanged.
-- Validation: Compared the plan against commit `5b05a59`, live PR #119, its human review and the current check status. Reviewed the documentation diff and checked whitespace and local Markdown links. No application tests rerun for this prose-only correction; the earlier 648-pass result belongs to the implementation revision, not a new test run.
+- Purpose and influence: Codex reconciled Task 4 and the execution status with the published PR, marked implementation/documentation/local verification/publication complete, and separately listed hosted CI, independent human peer review, student understanding, external #91/#101 HTTP integration and merge as pending at that revision. Application code and tests were unchanged.
+- Validation: Compared the plan against commit `5b05a59`, live PR #119, its agent-submitted GitHub review and the then-current check status. Reviewed the documentation diff and checked whitespace and local Markdown links. No application tests rerun for this prose-only correction; the earlier 648-pass result belongs to the implementation revision, not a new test run.
 - PR or commit: [PR #119](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119), addressing [the inline review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119#discussion_r4650156124).
-- Student review status: Human review of the implementation requested this documentation correction. Re-review/approval of the correction and individual understanding remain pending.
+- Student review status: The ChatGPT-authored/submitted review requested this documentation correction; it was not independent human peer review. Independent human review/approval and individual understanding remain pending.
+
+### PR #119 follow-up: correct review attribution and CI status
+
+- Student(s): Thomas Chen (`Tc2006415`), requester and #93 owner. The review clarification was submitted through repository owner Gwantana Kiboigo's (`gwan-kib`) connected GitHub account.
+- Artifact: `docs/superpowers/plans/2026-11-20-order-details.md`, this provenance record, and the PR descriptions.
+- Label: `AI-GENERATED`
+- AI tool: OpenAI Codex.
+- Purpose and influence: Codex corrected the earlier inference that an authenticated GitHub review established human peer review. The documents now attribute it to ChatGPT acting on the repository owner's behalf, keep independent human review/student understanding pending, and link the verified successful CI run for `8811eea`. Thomas requested a new PR, so this documentation correction is on `feature/93-review-provenance`, targeting #119's `feature/93-order-details` branch.
+- Validation: Read [the clarification](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119#pullrequestreview-6002430412) and both inline comments; checked GitHub's check-run API, which reports `validate` completed successfully for `8811eea`. Reviewed the complete documentation-only diff, whitespace and local links. Application tests are not rerun for prose-only changes; no new application-test result is claimed.
+- PR or commit: Follow-up to [PR #119](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119) on `feature/93-review-provenance`; the new PR links this entry.
+- Student review status: Independent human peer review, approval and student understanding confirmation remain pending. Neither the agent-submitted GitHub reviews nor CI establish them.
