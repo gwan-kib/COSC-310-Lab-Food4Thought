@@ -111,10 +111,7 @@ function renderCart(view) {
   cartItems.replaceChildren();
   el("cart-subtotal").textContent = `$${view.subtotal}`;
   el("cart-total").textContent = `$${view.total}`;
-  if (view.items.length === 0) {
-    // Leave the list empty; the cart status and totals describe this state.
-  } else {
-    for (const line of view.items) {
+  for (const line of view.items) {
       const item = document.createElement("li");
       const details = document.createElement("div");
       const name = document.createElement("strong");
@@ -164,7 +161,6 @@ function renderCart(view) {
           undefined, "Item removed."));
       item.append(details, form);
       cartItems.append(item);
-    }
   }
   updateControls();
 }
@@ -178,6 +174,10 @@ async function refreshCart({ reconcile = true } = {}) {
     return;
   }
   setBusy(true);
+  // A failed read must not leave stale totals or a stale cart revision actionable.
+  cart = null;
+  cartContent.hidden = true;
+  createButton.hidden = true;
   message(cartStatus, "Loading cart…");
   message(cartError, "");
   try {
@@ -197,11 +197,9 @@ async function refreshCart({ reconcile = true } = {}) {
     } else if (!response.ok) {
       message(cartStatus, "");
       message(cartError, customerError(response.status, response.body));
-      if (response.status === 401) {
-        cartContent.hidden = true;
-        createButton.hidden = true;
-      }
-      return;
+      if (response.status === 401) orderPanel.hidden = true;
+      // Do not return: a pending checkout's saved receipt may still be
+      // available through order history when this cart endpoint is broken.
     } else if (validCart(response.body)) {
       if (attempt && attempt.customer_id !== response.body.customer_id) clearAttempt();
       renderCart(response.body);
@@ -213,14 +211,10 @@ async function refreshCart({ reconcile = true } = {}) {
       }
     } else {
       message(cartError, "Unexpected cart response. Refresh before changing anything.");
-      cartContent.hidden = true;
-      return;
     }
   } catch {
     message(cartStatus, "");
     message(cartError, "Could not confirm the current cart. Check your connection and refresh before editing.");
-    cartContent.hidden = true;
-    return;
   } finally {
     setBusy(false);
   }
@@ -231,7 +225,6 @@ async function checkOrderStatus() {
   if (!attempt || busy) return;
   setBusy(true);
   showRecovery("Checking saved orders for the original cart and revision…");
-  message(cartError, "");
   try {
     const response = await customerRequest("/customers/me/orders");
     if (!response.ok) {
@@ -250,12 +243,21 @@ async function checkOrderStatus() {
       if (cart && cart.id === attempt.cart_id && cart.revision === attempt.cart_revision) {
         showRecovery("Found a saved order. The original cart still needs checkout recovery.",
           true, "Complete cart reset");
-      } else {
+      } else if (cart) {
         clearAttempt();
         // A saved receipt is authoritative even when its response was lost.
         message(cartStatus, "Found your saved order. No second order was submitted.");
         showRecovery("Found a saved order. No checkout retry is needed.");
+      } else {
+        // The receipt is durable, but without a cart read we cannot tell if
+        // the purchased revision still needs a conditional reset.
+        showRecovery("Found your saved order, but cannot confirm the cart reset. Refresh cart to verify it before making changes.");
       }
+    } else if (!cart) {
+      showRecovery("No saved order was found, but the cart cannot be verified. Refresh cart before trying the original checkout again.");
+    } else if (cart.id !== attempt.cart_id || cart.revision !== attempt.cart_revision) {
+      clearAttempt();
+      showRecovery("Your cart changed. Review the current items and total before placing an order.");
     } else {
       showRecovery("No saved order was found for this attempt. Recheck the status or explicitly retry the same cart revision; it cannot create a second order for that revision.", true);
     }
@@ -274,7 +276,7 @@ async function mutateCart(method, path, payload, success) {
   try {
     const response = await customerRequest(path, { method, payload });
     if (!response.ok) {
-      message(cartError, customerError(response.status, response.body));
+      message(cartError, customerError(response.status, response.body, method === "PATCH"));
       message(cartStatus, "");
       if (response.status === 409 && response.body?.detail === "Cart checkout recovery required") {
         // A saved order prevents normal cart writes until its original attempt is replayed.
@@ -325,6 +327,7 @@ async function createCart() {
 async function doCheckout() {
   if (busy || !attempt) return;
   const original = { ...attempt };
+  let revisionChanged = false;
   setBusy(true);
   message(cartError, "");
   message(cartStatus, "Placing order…");
@@ -348,17 +351,34 @@ async function doCheckout() {
       }
       return;
     }
-    if (response.status >= 400 && response.status < 500) {
+    if (response.status === 409 && response.body?.detail === "Cart revision changed") {
+      // Another session changed the cart. Hide the obsolete quote until a
+      // fresh GET succeeds; the customer must review it before a new checkout.
+      clearAttempt();
+      cart = null;
+      cartContent.hidden = true;
+      revisionChanged = true;
+    } else if (response.status >= 400 && response.status < 500) {
       clearAttempt();
       message(cartStatus, "");
       message(cartError, customerError(response.status, response.body));
       return;
+    } else {
+      showRecovery("Checkout outcome is uncertain. Checking order history before any manual retry…");
     }
-    showRecovery("Checkout outcome is uncertain. Checking order history before any manual retry…");
   } catch {
     showRecovery("Checkout response was lost or timed out. Checking order history; no automatic repeat will be made.");
   } finally {
     setBusy(false);
+  }
+  if (revisionChanged) {
+    await refreshCart({ reconcile: false });
+    if (cart) {
+      message(cartStatus, "Cart changed in another session. Review the updated cart and total before placing an order.");
+    } else {
+      message(cartError, "Cart revision changed. Could not load the updated cart; refresh before trying again.");
+    }
+    return;
   }
   await refreshCart({ reconcile: true });
 }
