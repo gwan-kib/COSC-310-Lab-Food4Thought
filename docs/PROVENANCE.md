@@ -1191,7 +1191,18 @@ its pending-auth and local-only status.
 - PR: [#133](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/133).
 - Student review status: Pending; neither agent changes nor automated checks establish student understanding or peer review.
 
-### Entry 87: M2 handoff documentation audit and #104 backlog coordination
+### Entry 87: Cross-subsystem persistence verification (#95)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #95 coordinator and requester; personal review and understanding are not inferred from automated checks.
+- Artifact: `tests/test_cross_subsystem_persistence.py`, `docs/CROSS_SUBSYSTEM_VERIFICATION.md`, the issue #95 milestone evidence in `docs/milestones/M2.md`, and this provenance entry.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT (OpenAI GPT-6).
+- Purpose and influence: Generated a consolidated cross-subsystem test suite and a traceability matrix for stable customer/restaurant/menu/cart/order identifiers, owner boundaries, fresh-instance persistence, malformed and unreadable stores, validation-before-write and checkout's saved-order/failed-cart-reset policy. Reused the existing implementation and isolated storage fixtures rather than duplicating subsystem repositories.
+- Validation: Inspected the source, API contracts, owner tests and repository boundaries. In [GitHub Actions diagnostic run 44877528951](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877528951), `python -m pytest -q tests/test_cross_subsystem_persistence.py` passed **22 tests** in 0.63s. With `REQUIRE_BROWSER_TESTS=1`, `timeout --signal=INT 120s python -m pytest -vv --tb=short` passed **943 tests** in 27.85s. `python -m compileall app` and the committed-data guard completed successfully. An earlier focused diagnostic failed one test because the test patched `Path.read_bytes` while the restaurant repository uses `Path.read_text`; the injection was corrected and all 22 tests then passed. The temporary CI diagnostics were restored to the normal workflow on the branch; the final ordinary CI rerun is separately tracked on the PR. No local Python run, student walkthrough or teammate review is claimed.
+- PR or commit: [PR #132](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/132), branch `feature/95-cross-subsystem-verification`. Refs #95 without an auto-close keyword.
+- Student review status: Pending responsible-student walkthrough and teammate review. No review, merge or acceptance is asserted.
+
+### Entry 88: M2 handoff documentation audit and #104 backlog coordination
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), issue coordinator and requesting student; responsible-student review is pending.
 - Artifact: [Issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/DATA_MODEL.md`, `docs/milestones/M2.md`, `docs/AUTH_DESIGN.md`, `docs/M2_API_CONTRACT.md`, `docs/TESTING.md`, and this provenance entry.
@@ -1199,6 +1210,6 @@ its pending-auth and local-only status.
 - AI tool: ChatGPT.
 - Purpose: Translate the M2 integration/release backlog into an evidence-based documentation audit, correct stale setup/status text, and build a source-to-issue/test/PR handoff checklist.
 - Influence: AI authored substantial changes to the cited documentation, the M2 handoff matrix and release/demo checks; issue #104 itself records AI-GENERATED backlog planning. No student-authored review or agreement is inferred.
-- Validation: Inspected the repository's `main` tree, relevant documentation, issue #104 and merged/open PR metadata on 2026-11-20 and rechecked against merged PRs #133 and #134 on 2026-11-21; checked that pending integration work was not represented as delivered. The reconciled branch was checked across **all 26 Markdown files and 325 relative repository-path links**, with no missing targets. External URLs and fragment anchors were not checked.  External URLs and fragment anchors were not verified. Documentation-only changes; no application tests or manual demo were run. Student review and integrated-release checks remain separate gates.
+- Validation: Inspected the repository's `main` tree, relevant documentation, issue #104 and merged/open PR metadata on 2026-11-20 and rechecked against merged PRs #132–#134 on 2026-11-21; checked that pending integration work was not represented as delivered. The earlier branch was checked across **26 Markdown files and 325 relative repository-path links**, with no missing targets; the #132 document requires a fresh link check. External URLs and fragment anchors were not checked.  External URLs and fragment anchors were not verified. Documentation-only changes; no application tests or manual demo were run. Student review and integrated-release checks remain separate gates.
 - PR or commit: [PR #137](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/137), branch `docs/104-m2-handoff-audit`; [issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104).
 - Student review status: Pending. Gwantana must review/validate the final documentation and confirm understanding; Thomas's requested peer review remains pending.

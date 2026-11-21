@@ -2,7 +2,7 @@
 
 ## Authority and implementation status
 
-The [M1 contract](M1_API_CONTRACT.md#persistence-and-layer-boundaries) describes the restaurant/menu baseline. The [M2 contract](M2_API_CONTRACT.md) began as the #77 proposal; the customer, cart, session, staff and order repositories now implement the six-store baseline described below. Staff accounts are provisioned with `python -m app.scripts.create_staff_account` (#107). End-to-end restart and relationship sign-off remains tracked in [#95](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/95) and the [M2 handoff audit](milestones/M2.md#m2-submission-readiness-audit-issue-104). Historical proposals should not be treated as evidence that the integrated release passed.
+The [M1 contract](M1_API_CONTRACT.md#persistence-and-layer-boundaries) describes the restaurant/menu baseline. The [M2 contract](M2_API_CONTRACT.md) began as the #77 proposal; the customer, cart, session, staff and order repositories now implement the six-store baseline described below. Staff accounts are provisioned with `python -m app.scripts.create_staff_account` (#107). Cross-subsystem persistence/relationship checks for [#95](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/95) are now merged in [PR #132](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/132), with a [real-store verification matrix](CROSS_SUBSYSTEM_VERIFICATION.md). Complete customer-to-order workflow testing and final assessed-revision sign-off remain under [#101](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/101) and the [M2 handoff audit](milestones/M2.md#m2-submission-readiness-audit-issue-104). Historical proposals are not proof that the final release passed.
 
 ## Store ownership and configuration
 
