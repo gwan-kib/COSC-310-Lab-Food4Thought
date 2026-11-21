@@ -1,5 +1,5 @@
-# Align Food4Thought's generated OpenAPI responses with the adopted restaurant and
-# menu contract. Remove automatic 422 documentation only from explicitly listed
+# Align Food4Thought's generated OpenAPI responses with the restaurant, menu and
+# order-detail contracts. Remove automatic 422 documentation only from explicitly listed
 # operations with opaque string IDs, leaving runtime validation and other
 # operations' schemas intact.
 
@@ -8,7 +8,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
-# Operations the M1 contract defines as having no 422: their only input is an
+# Operations the contracts define as having no 422: their only path input is an
 # opaque, non-empty string path segment, so request validation cannot fail.
 # Add an operation here only when the contract says so; any other operation,
 # including a GET with a validated path parameter, keeps FastAPI's 422.
@@ -16,6 +16,7 @@ CONTRACT_NO_VALIDATION_ERROR_OPERATIONS: frozenset[tuple[str, str]] = frozenset(
     {
         ("get", "/restaurants/{restaurant_id}"),
         ("get", "/restaurants/{restaurant_id}/menu"),
+        ("get", "/customers/me/orders/{order_id}"),
     }
 )
 
