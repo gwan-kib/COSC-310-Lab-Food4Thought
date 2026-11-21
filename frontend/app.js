@@ -4,6 +4,7 @@
 // the current filter or selection.
 
 import { requestJson } from "./api-client.js";
+import { managementError, staffRequest } from "./staff-session.js";
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -179,7 +180,7 @@ async function showDetails(selection) {
   try {
     const menu = await menuPromise;
     if (request !== detailsRequest) return;
-    renderMenu(menu);
+    renderMenu(menu, restaurantId);
   } catch (error) {
     if (request !== detailsRequest) return;
     setStatus(menuStatus, `Could not load the menu: ${error.message}`, true);
@@ -198,13 +199,14 @@ function renderRestaurant(restaurant) {
   detailsContent.hidden = false;
 }
 
-function renderMenu(menu) {
+function renderMenu(menu, restaurantId) {
   menuList.replaceChildren();
   if (menu.items.length === 0) {
     setStatus(menuStatus, "This restaurant has no menu items yet.");
     return;
   }
   setStatus(menuStatus, "");
+  const selectionVersion = detailsRequest;
   for (const menuItem of menu.items) {
     const item = document.createElement("li");
     const heading = document.createElement("div");
@@ -214,11 +216,58 @@ function renderMenu(menu) {
     name.textContent = menuItem.name;
     const price = document.createElement("span");
     price.className = "price";
-    price.textContent = `$${menuItem.price}`;
+    price.textContent = `${menuItem.price}`;
     heading.append(name, price);
     const description = document.createElement("p");
     description.textContent = menuItem.description;
-    item.append(heading, description);
+
+    const controls = document.createElement("div");
+    controls.className = "menu-item-controls";
+    const availability = document.createElement("span");
+    const button = document.createElement("button");
+    button.type = "button";
+    function displayAvailability() {
+      availability.textContent = menuItem.available ? "Available" : "Unavailable";
+      button.textContent = menuItem.available ? "Mark unavailable" : "Mark available";
+      button.setAttribute("aria-label", `${button.textContent} for ${menuItem.name}`);
+    }
+    displayAvailability();
+
+    // Display the action without guessing the caller's role or assignments:
+    // permission checks live on the backend and may return 401 or 403.
+    button.addEventListener("click", async () => {
+      if (button.disabled) return;
+      button.disabled = true;
+      setStatus(menuStatus, "Saving availability…");
+      const path = `/restaurants/${encodeURIComponent(restaurantId)}/menu/items/${encodeURIComponent(menuItem.id)}`;
+      try {
+        const { ok, status, body } = await staffRequest(path, {
+          method: "PATCH", payload: { available: !menuItem.available },
+        });
+        if (selectionVersion !== detailsRequest) return;
+        if (!ok) {
+          setStatus(menuStatus, managementError(status, body), true);
+          button.disabled = false;
+          return;
+        }
+        if (status !== 200 || body?.id !== menuItem.id || typeof body.available !== "boolean") {
+          setStatus(menuStatus, "Could not confirm availability. Reload the menu before trying again.", true);
+          return;
+        }
+        menuItem.available = body.available;
+        displayAvailability();
+        setStatus(menuStatus, "Availability saved.");
+        button.disabled = false;
+      } catch {
+        if (selectionVersion !== detailsRequest) return;
+        // A PATCH may have succeeded even if its response was lost. Do not
+        // retry blindly or claim the displayed availability is current.
+        setStatus(menuStatus, "Could not confirm availability. Reload the menu before trying again.", true);
+      }
+    });
+
+    controls.append(availability, button);
+    item.append(heading, description, controls);
     menuList.append(item);
   }
 }
