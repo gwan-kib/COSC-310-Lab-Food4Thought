@@ -9,11 +9,12 @@ from uuid import uuid4
 
 from pydantic import TypeAdapter, ValidationError
 
+from app.core.pricing import Money, line_total, sum_line_totals
 from app.core.storage import StorageFailure
 from app.core.workflow import workflow_lock
 from app.repositories.order import OrderRepository
 from app.repositories.restaurant import RestaurantDataError
-from app.schemas.order import CheckoutRequest, CheckoutResponse, Money, Order, PurchasedItem, cents, money
+from app.schemas.order import CheckoutRequest, CheckoutResponse, Order, PurchasedItem
 from app.schemas.restaurant import Restaurant
 
 
@@ -134,7 +135,7 @@ class CheckoutService[Principal]:
         if menu is None:
             raise CheckoutDataError()
         items = [self._purchase_line(menu, line) for line in cart.items]
-        total = money(sum(cents(item.line_total) for item in items))
+        total = sum_line_totals(item.line_total for item in items)
         order_id = str(uuid4())
         while self.orders.get_order(order_id) is not None:
             order_id = str(uuid4())
@@ -155,7 +156,7 @@ class CheckoutService[Principal]:
             raise CheckoutConflict("Menu item is unavailable")
         price = _price.validate_python(item.price, strict=True)
         return PurchasedItem(item_id=item.id, name=item.name, quantity=line.quantity,
-                             unit_price=price, line_total=money(cents(price) * line.quantity))
+                             unit_price=price, line_total=line_total(price, line.quantity))
 
     def _reset_purchased_cart(self, order: Order) -> bool:
         """A conditional mismatch is safe. An uncertain write needs a fresh read."""
