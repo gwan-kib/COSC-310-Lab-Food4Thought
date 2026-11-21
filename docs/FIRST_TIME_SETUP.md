@@ -168,7 +168,17 @@ No environment variable is required for normal local use.
 
 The repository supports `RESTAURANTS_DATA_PATH` for another existing UTF-8 JSON file. Its parent directory must be writable for atomic replacement. The value is read per request; set it before starting the server. Tests configure their own temporary copies.
 
-Active carts are stored in `data/carts.json` (committed as an empty array `[]`); `CARTS_DATA_PATH` selects another file in the same way. Signed-in customers use it through `PUT`/`GET /customers/me/cart` and `POST /customers/me/cart/items`; copy it with the customer and session files for manual experiments.
+Active carts are stored in `data/carts.json` (committed as an empty array `[]`); `CARTS_DATA_PATH` selects another file in the same way. Signed-in customers use it through `PUT`/`GET /customers/me/cart`, `POST /customers/me/cart/items`, and `DELETE /customers/me/cart/items/{item_id}`; copy it with the customer and session files for manual experiments.
+
+With disposable stores configured and an active customer token authorized in `/docs`,
+create the cart with PUT, add a menu item with POST, then DELETE its returned `item_id`
+without a request body. The 200 response contains the resulting cart and current totals.
+Removing the last line keeps the cart/customer IDs, increments revision once, and returns
+`restaurant_id: null`, empty items and `"0.00"` totals. Add an item from another restaurant
+to verify the released binding; restart with the same paths and GET the cart to verify
+persistence. A repeated removal returns 404 `Cart item not found`. Inactive customers
+receive 403; a purchased revision awaiting checkout reset receives 409. See the
+[removal contract](M2_API_CONTRACT.md#implemented-item-removal-88) for error details.
 
 To try a quantity update on disposable data, sign in as an active customer, create a cart and add an item. In `/docs`, send `PATCH /customers/me/cart/items/{item_id}` with that item's ID and `{"quantity": 3}`. The returned cart shows three units at the current menu price. Repeat the request to verify the revision stays the same.
 

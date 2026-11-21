@@ -1,6 +1,6 @@
-"""Expose the signed-in customer's shopping cart: create or read it (#85), add menu
-items (#86), set their quantities (#87) and see backend-calculated totals (#90). Every route needs a customer
-token (#84); cart changes also need an active account. Cart rules live in CartService.
+"""Expose the signed-in customer's cart, quantities, removal and current totals.
+Every route requires a customer token; mutations also require an active account.
+Business rules stay in CartService.
 """
 
 from typing import Annotated
@@ -116,5 +116,21 @@ def update_quantity(item_id: str, request: UpdateCartQuantityRequest, principal:
     Repeating the same quantity keeps the cart revision. Zero cannot remove a line."""
     try:
         return service.update_quantity(principal.account_id, item_id, request)
+    except HANDLED as error:
+        raise _http_error(error) from None
+
+
+@router.delete("/items/{item_id}", response_model=CartView, summary="Remove an item from my cart",
+               responses={**ERRORS,
+                          404: {"model": ErrorResponse, "description": "Cart not found or Cart item not found"},
+                          409: {"model": ErrorResponse, "description": "Cart checkout recovery required"}})
+def remove_item(item_id: str, principal: ActiveCustomer, service: Service) -> CartView:
+    """Remove an owned line, even if unavailable, and return current backend totals.
+
+    The last removal releases the restaurant binding; cart/customer IDs stay stable.
+    Each removal increments revision once. Repeating it returns 404 without a write.
+    """
+    try:
+        return service.remove_item(principal.account_id, item_id)
     except HANDLED as error:
         raise _http_error(error) from None
