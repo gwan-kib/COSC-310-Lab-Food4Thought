@@ -24,8 +24,8 @@ class CustomerAccess(Protocol):
 
 
 class CatalogAccess(Protocol):
-    def get_restaurant(self, restaurant_id: str) -> object | None: ...
-    def get_item(self, restaurant_id: str, item_id: str) -> CatalogItem | None: ...
+    def get_menu(self, restaurant_id: str) -> dict[str, CatalogItem] | None:
+        """All items of one restaurant from a single read; None if the restaurant is missing."""
 
 
 class OrderReceipts(Protocol):
@@ -95,9 +95,11 @@ class CartService:
                 raise CheckoutRecoveryRequiredError(cart.id)
             if cart.restaurant_id not in (None, request.restaurant_id):
                 raise CartRestaurantConflictError(cart.restaurant_id)
-            if self.catalog.get_restaurant(request.restaurant_id) is None:
+            # One menu snapshot validates the item and prices the whole response.
+            menu = self.catalog.get_menu(request.restaurant_id)
+            if menu is None:
                 raise RestaurantNotFoundError(request.restaurant_id)
-            item = self.catalog.get_item(request.restaurant_id, request.item_id)
+            item = menu.get(request.item_id)
             if item is None:
                 raise MenuItemNotFoundError(request.item_id)
             if not item.available:
@@ -111,7 +113,7 @@ class CartService:
                 existing.quantity += request.quantity
             updated = CartRecord(id=cart.id, customer_id=customer_id, revision=cart.revision + 1,
                                  restaurant_id=request.restaurant_id, items=items)
-            view = self._view(updated)  # every fallible read happens before the write
+            view = self._view(updated, menu)  # every fallible read happens before the write
             self.carts.save_cart(updated)
             return view
 
@@ -130,10 +132,14 @@ class CartService:
             raise CartDataError(f"Order receipt for cart {cart.id} belongs to another customer")
         return receipt
 
-    def _view(self, cart: CartRecord) -> CartView:
+    def _view(self, cart: CartRecord, menu: dict[str, CatalogItem] | None = None) -> CartView:
+        if cart.items and menu is None:
+            menu = self.catalog.get_menu(cart.restaurant_id)
+            if menu is None:
+                raise CartDataError(f"Cart {cart.id} references missing restaurant {cart.restaurant_id}")
         lines = []
         for line in cart.items:
-            item = self.catalog.get_item(cart.restaurant_id, line.item_id)
+            item = menu.get(line.item_id)
             if item is None:
                 # A stored reference to a missing item is corrupt data, not a free item.
                 raise CartDataError(f"Cart {cart.id} references missing item {line.item_id}")

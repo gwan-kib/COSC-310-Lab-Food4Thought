@@ -59,7 +59,7 @@ workflow lock; repositories do not import each other to own business rules.
 `Customer`: implemented `id`, `name`, `email`, `delivery_address`, `status`.
 The complete stored record additionally holds a library-produced `password_hash`
 and server-assigned customer role. Never serialize the complete record through a
-public response model. Proposed deactivation sets `inactive`, preserves the ID,
+public response model. Deactivation (#115) sets `inactive`, preserves the ID,
 cart and orders, and does not support reactivation or cascade deletion. See the
 contract's source gap before treating any field/permission as final.
 
@@ -108,8 +108,9 @@ writer coordination, power-loss durability, or complete M3 recovery is made.
 
 Checkout acquires [the workflow lock](../app/core/workflow.py). The other
 writers must acquire that same lock for cross-store serialization to hold in the
-integrated app. Customer authentication and repository adapters are implemented; cart HTTP
-routes and checkout integration remain separate work (#115 and #84).
+integrated app. Customer authentication and repository adapters are implemented,
+and cart create/read/add HTTP routes are provided by #115. Checkout HTTP integration
+remains separate work (#84).
 
 ## Verification responsibilities
 
