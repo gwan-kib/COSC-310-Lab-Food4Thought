@@ -112,11 +112,7 @@ function renderCart(view) {
   el("cart-subtotal").textContent = `$${view.subtotal}`;
   el("cart-total").textContent = `$${view.total}`;
   if (view.items.length === 0) {
-    const item = document.createElement("li");
-    item.textContent = "Your cart is empty.";
-    cartItems.append(item);
-    // Empty-state rows are messages, not editable cart lines.
-    item.className = "cart-empty";
+    // Leave the list empty; the cart status and totals describe this state.
   } else {
     for (const line of view.items) {
       const item = document.createElement("li");
