@@ -1,13 +1,8 @@
-# Data model: implemented M1 and proposed M2
+# Data model: implemented M1 and M2 storage
 
 ## Authority and implementation status
 
-The [M1 contract](M1_API_CONTRACT.md#persistence-and-layer-boundaries) describes
-implemented restaurant/menu storage. The [M2 contract](M2_API_CONTRACT.md) proposes
-the additions below for #77. The [order repository](../app/repositories/order.py)
-implements order storage for #91–#93. Customer, cart, session and staff-account repositories are implemented (staff accounts are provisioned with `python -m app.scripts.create_staff_account`, #107).
-Course traceability and unresolved
-source/role questions are recorded in that contract and [M2 evidence](milestones/M2.md).
+The [M1 contract](M1_API_CONTRACT.md#persistence-and-layer-boundaries) describes the restaurant/menu baseline. The [M2 contract](M2_API_CONTRACT.md) began as the #77 proposal; the customer, cart, session, staff and order repositories now implement the six-store baseline described below. Staff accounts are provisioned with `python -m app.scripts.create_staff_account` (#107). End-to-end restart and relationship sign-off remains tracked in [#95](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/95) and the [M2 handoff audit](milestones/M2.md#m2-submission-readiness-audit-issue-104). Historical proposals should not be treated as evidence that the integrated release passed.
 
 ## Store ownership and configuration
 
