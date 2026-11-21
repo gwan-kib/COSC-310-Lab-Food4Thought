@@ -5,7 +5,7 @@
 The [M1 contract](M1_API_CONTRACT.md#persistence-and-layer-boundaries) describes
 implemented restaurant/menu storage. The [M2 contract](M2_API_CONTRACT.md) proposes
 the additions below for #77. The [order repository](../app/repositories/order.py)
-implements order storage for #91–#93. Customer, cart and session repositories are implemented; staff-account provisioning remains in #107.
+implements order storage for #91–#93. Customer, cart, session and staff-account repositories are implemented (staff accounts are provisioned with `python -m app.scripts.create_staff_account`, #107).
 Course traceability and unresolved
 source/role questions are recorded in that contract and [M2 evidence](milestones/M2.md).
 
@@ -17,15 +17,15 @@ source/role questions are recorded in that contract and [M2 evidence](milestones
 | Customer | Implemented `data/customers.json`, `CUSTOMERS_DATA_PATH` (`app/repositories/customer.py`, #79–#82) | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
 | Cart | Implemented `data/carts.json`, `CARTS_DATA_PATH` (`app/repositories/cart.py`, #85/#86) | Sreeram; JSON array of `CartRecord` objects |
 | Order | Implemented `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; append-only JSON array of order snapshots |
-| Staff account | Proposed `data/staff.json`, `STAFF_DATA_PATH` | Sreeram (#78); provisioned restaurant users and administrators: `id`, `name`, `email`, `role`, `restaurant_ids`, Argon2id `password_hash` |
+| Staff account | Implemented `data/staff.json`, `STAFF_DATA_PATH` (`app/repositories/staff.py`, #107) | Sreeram (#78); provisioned restaurant users and administrators: `id`, `name`, `email`, `role`, `restaurant_ids`, Argon2id `password_hash` |
 | Session | Implemented `data/sessions.json`, `SESSIONS_DATA_PATH` (#80) | Sreeram (#78); `token_sha256`, `account_id`, `account_type`, `issued_at`, `expires_at`; never the token itself |
 
 New repositories should match M1's explicit `path: Path | str | None` injection,
 resolve overrides at construction rather than import time, and keep file I/O out
-of routes/services. The staff repository validates and reads provisioned accounts; provisioning itself
-remains in #107. Session storage, Argon2id password hashing and bearer-token
+of routes/services. The staff repository validates, reads and adds provisioned accounts; the
+provisioning command is #107. Session storage, Argon2id password hashing and bearer-token
 identity are implemented as agreed in [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78).
-The [shared fixtures](../tests/conftest.py) isolate both stores in tests.
+The [shared fixtures](../tests/conftest.py) isolate project stores in tests. New JSON-array stores should use `app/core/json_file.py` (#96) for strict UTF-8 parsing, exact large-integer round trips, store-specific failures, and atomic replacement with best-effort temporary-file cleanup. Customer, session and cart repositories use the helper for writes and reads; staff uses its reader, the order reader uses `loads_exact`, and restaurant/order writes retain their existing implementations.
 
 Feature PRs must initialize deliberately empty new stores and explain first-run
 configuration in both setup guides when implemented. Once configured, a missing,
@@ -93,7 +93,7 @@ validates the complete result before saving. Atomic same-directory replacement
 and a process-shared repository mutation lock retain M1's failure guarantees.
 Unknown complete restaurant fields remain preserved; do not write public read
 models back over full stored records. Legacy omitted `menu_items` still means an
-empty menu; the proposed omitted menu `available` means true only once #94 lands.
+empty menu; an omitted menu `available` now reads as true. A successful full-file save materializes that default on legacy items, including unrelated items. An explicit false is preserved.
 Explicit null/invalid values are corruption. Reads never migrate data implicitly.
 
 Multiple files are not a transaction. The contract's workflow lock serializes

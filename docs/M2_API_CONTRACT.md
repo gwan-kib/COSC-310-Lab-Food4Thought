@@ -122,7 +122,7 @@ signing algorithm, or an authentication library.
 This table covers customer operations. The complete matrix, including restaurant
 users and administrators and the protection of the M1 management routes, is in
 [AUTH_DESIGN.md](AUTH_DESIGN.md#access-matrix) (#78). Restaurant mutation routes
-keep their paths and payloads but require a staff token once #84/#94 land. Do not
+keep their paths and payloads and require a staff token. Do not
 treat the existing unauthenticated M1 management routes as proof that
 unauthenticated writes are acceptable for final M2 integration.
 No public role-assignment, customer listing, deletion, password-reset, or
@@ -194,12 +194,16 @@ bodies forbid unknown fields. IDs are opaque nonempty strings, not UUID-only.
 
 Preserve all eight M1 restaurant/menu operations, response projections, paths,
 decimal-string prices, filtering, partial-update and 404/422/500 semantics.
-The planned #94 extension adds `available` to menu item create/read/update models;
+The #94 catalog implementation adds `available` to menu item create/read/update models;
 old valid create/PATCH requests remain valid and omitted PATCH fields retain their
-value. Legacy items read as available, with no read-time rewrite. Current M1
-`MenuItem` forbids extra fields, so it **cannot yet accept persisted `available`**:
-#94 must update the models and compatibility tests before adding the field to
-data. Do not claim this proposal already changed OpenAPI or runtime behavior.
+value. Legacy items read as available, with no read-time rewrite. Successful whole-file saves include the default on legacy items. A supplied
+`available` must be a JSON boolean. Restaurant creation requires an administrator bearer token. Restaurant edits and both menu item write operations require a bearer token from the assigned restaurant user.
+For a parseable body, identity and role checks precede body validation. The service
+checks the parent exists and verifies current staff ownership under the workflow
+lock before editing its menu. An unknown parent returns 404 and an existing
+unmanaged parent returns 403. Public menu reads include unavailable items.
+Cart addition and checkout both read current availability under the same
+single-process workflow lock. A rejected purchase preserves the cart and orders.
 
 ### Concrete examples
 

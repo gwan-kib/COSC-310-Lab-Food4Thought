@@ -17,6 +17,12 @@ if os.environ.get("REQUIRE_BROWSER_TESTS") != "1":
 from playwright.sync_api import expect  # noqa: E402
 
 
+pytestmark = [
+    pytest.mark.usefixtures("staff_browser_session"),
+    pytest.mark.parametrize("staff_browser_session", ["administrator"], indirect=True),
+]
+
+
 def open_form(page, live_server):
     page.goto(f"{live_server}/app/create-restaurant.html")
     expect(page.get_by_role("heading", name="Create restaurant", exact=True)).to_be_visible(

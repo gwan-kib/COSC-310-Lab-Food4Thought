@@ -79,3 +79,14 @@ def page(browser):
     new_page.page_errors = errors
     yield new_page
     context.close()
+
+
+@pytest.fixture
+def staff_browser_session(page, live_server, auth_accounts, request):
+    """Exercise staff-authorized form submissions while #108 owns browser sign-in."""
+    account = auth_accounts.accounts[request.param]
+    login = page.request.post(f"{live_server}/auth/login", data={
+        "email": account.record.email, "password": account.password,
+    })
+    assert login.status == 200
+    page.set_extra_http_headers({"Authorization": "Bearer " + login.json()["access_token"]})

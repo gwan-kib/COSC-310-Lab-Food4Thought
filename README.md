@@ -81,7 +81,7 @@ Follow **Create restaurant**, enter name, cuisine, and description, then submit.
 | `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
 | `GET /customers/me/orders` | Own saved orders in insertion order; `[]` if none; inactive customers retain read access |
 
-In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors.
+In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors. Restaurant users and administrators are created with `python -m app.scripts.create_staff_account` (see the [disposable-data steps](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments)).
 
 Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRACT.md) maintains request/response models, cuisine matching, validation, decimal-string prices, partial updates, error precedence, and persistence decisions. `/docs` shows interactive forms and generated schemas.
 

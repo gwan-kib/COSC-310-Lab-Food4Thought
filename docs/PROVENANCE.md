@@ -838,29 +838,125 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
 - Student review status: Pending confirmation by responsible students.
 
-### Issue 92: customer order history service
+### Entry 65: Menu availability and legacy compatibility (#94)
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu schemas, restaurant service and routes, availability and regression tests, API/data contract and setup guides on the #94 branch.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Implement the catalog portion of #94. Thomas chose to materialize omitted legacy flags on a successful full-store save.
+- Influence: Codex wrote the implementation, tests and documentation. Explicit flag changes use an injected restaurant permission check pending the shared staff identity implementation.
+- Validation: In the isolated worktree, 407 baseline tests passed. The initial new test run had 6 expected failures and 7 passes. After implementation all 13 focused tests passed. Compilation passed and the full browser-required suite passed 420 tests with committed data intact. Real staff login, cart and checkout integration and cross-workflow locking are pending.
+- PR or commit: Initial catalog implementation at `0f55371`, [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Implementation review and peer feedback pending.
+
+### Entry 66: Integrate menu availability with authentication, cart and checkout
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu authentication, restaurant service, catalog adapter, API and integration tests, regression fixtures, setup guides, API contract and M2 evidence.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Integrate #94 with the shared staff, cart and checkout implementation from main.
+- Influence: Codex resolved the documentation conflicts, connected bearer identity and staff ownership to menu writes, applied the shared workflow lock, and wrote the integration tests and documentation.
+- Validation: After merging main, 9 of 18 focused tests failed before the integration. The final focused run passed 19, including a concurrent disable and checkout. The complete browser-required suite passed 636 tests. Compilation and committed-data checks passed.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible student walkthrough and human review pending.
+
+### Entry 67: Restaurant management authorization review fixes
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner. Gwantana Kiboigo supplied the [requested changes](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109#pullrequestreview-6002389649).
+- Artifact: Restaurant route and service authorization, staff role dependencies, regression and browser tests, setup and API documentation.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Address the unprotected restaurant create/edit operations and make the service’s staff store injectable.
+- Influence: Codex wrote the fixes and tests. The reviewer identified the policy gaps and dependency change.
+- Validation: Before implementation the new policy tests produced 17 failures and 4 passes. The authorization and availability tests subsequently passed together (40 tests). The browser-required full suite passed 657 tests using isolated data.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible-student validation and teammate re-review of the fixes pending.
+
+### Entry 68: Shared JSON-array store helper (architectural improvement)
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #96.
+- Artifact: `app/core/json_file.py`, `app/repositories/cart.py`, the reader in `app/repositories/order.py`, `tests/test_json_file.py`, two monkeypatch targets in `tests/test_cart_repository.py` and `tests/test_cart_service.py`, and a convention sentence in `docs/DATA_MODEL.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Remove a design weakness exposed by Sreeram's M2 work and its reviews: each repository had its own copy of JSON reading and atomic saving, and defects found by Thomas Chen in PR #113 (a temporary file left after a serialization failure, and integers past Python's 4300-digit text limit) had to be fixed separately in the cart and order repositories while the shared helper used by customers, sessions and staff still had the integer defect.
+- Influence: Claude proposed consolidating on one helper rather than a generic repository base class (larger change across owners) or leaving per-repository copies (the cause of the repeated defects). It made `app/core/json_file.py` read with exact integers and write with Pydantic's serializer, cleaning up on any failure; moved the cart repository's read and save onto it; and made the order reader use the shared `loads_exact` instead of its own copy. The order write path and the restaurant repository were left to their owner.
+- Validation: Before the change, the existing cart, customer, order and checkout-integration tests passed (120, characterization) and the new helper test for a 5,001-digit integer failed. After the change, `tests/test_json_file.py` and the same suites passed (128). `pyflakes` reported no unused imports. The diff removes 57 lines and adds 32 in `app/`.
+- PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116), branch `feature/96-shared-json-store`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #116. Claude wrote failing regressions, then made `loads_exact` decode bytes strictly as UTF-8 (so a UTF-16 or UTF-32 store is the store's error instead of being silently accepted and later rewritten), and made `write_json_array` raise the store's error even when deleting its temporary file also fails, noting in the message that the temporary file may remain. The branch was first synced with `main` after #115 merged; the final merge later incorporated #109 and renumbered this disclosure to avoid overwriting the existing entry 66.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 69: Integrate shared JSON helper with merged menu availability
+- Student(s): Gwantana Kiboigo (`gwan-kib`), integration requester; Sreeram Nara remains the owner of the #96 implementation.
+- Artifact: Merge resolution of [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116) into the current `main` after [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109); `docs/DATA_MODEL.md` and `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Preserve PR #109's restaurant authorization/menu availability and provenance entries while integrating the reviewed JSON helper improvement.
+- Influence: ChatGPT reconciled the two documentation files, retained main's entries 65–67, numbered Sreeram's original #96 disclosure 68, and constructed the integration merge commit with the unchanged feature code and current main as parents.
+- Validation: Inspected the compared file lists and overlapping documentation changes; CI and final merge outcome are checked separately, and no student code-understanding claim is made.
+- PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116).
+- Student review status: Pending responsible-student confirmation.
+
+### Entry 70: Staff account provisioning command
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #107.
+- Artifact: `app/scripts/create_staff_account.py`, `app/scripts/__init__.py`, `app/services/staff.py`, the write methods in `app/repositories/staff.py`, `tests/test_staff_provisioning.py`, and staff-account instructions in `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md` and `README.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Let the team create restaurant users and administrators, which have no public sign-up, so staff can sign in for the M2 demo and menu-availability work (#94).
+- Influence: Claude wrote the tests first, then a provisioning service and an argparse command (`create`, `assign`) that reads the password twice with a hidden prompt, applies the customer password and email rules, stores only an Argon2id hash, rejects unknown restaurants and administrators with restaurants, keeps emails unique across customers and staff under the shared account-email lock, and never prints the password.
+- Validation: `tests/test_staff_provisioning.py` first failed with `No module named 'app.scripts'`; after implementation its 13 tests passed. The real command was also run through `python -m` on disposable copies of the data files: it created a manager for `restaurant-001`, `POST /auth/login` returned 200 with role `restaurant_user`, and `data/` was unchanged. The PowerShell form of the commands was not run.
+- PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117), branch `feature/107-staff-provisioning`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #117. Claude wrote two regressions that run a second process holding the account lock (`tests/account_lock_holder.py`); with a thread-only lock both failed (a duplicate email was accepted, and a concurrent assignment was lost). Claude then replaced the in-process `ACCOUNT_EMAIL_LOCK` with `app/core/account_lock.py`, a thread lock plus a `filelock` lock file beside the customer store (new pinned dependency `filelock==3.20.0`), held by every customer write and every staff write; made `assign` read, check and update the latest stored record in one locked step (`StaffRepository.update_by_email`); and reordered the first-time setup guide so staff accounts are created while the disposable overrides are set, before starting the server, with the overrides cleared last. The reordered shell commands were run on disposable copies (manager login 200 `restaurant_user`, a customer registration with the administrator's email 409, `data/` unchanged); the PowerShell commands were checked by reading only.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 71: Integrate staff provisioning with merged JSON helper
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and integrator; Sreeram Nara (`SreeramNara`) remains responsible for the #107 implementation.
+- Artifact: Conflict resolution for [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117) on `feature/107-staff-provisioning`, including `docs/DATA_MODEL.md`, `docs/PROVENANCE.md` and the merge of shared JSON helper changes from `main`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Integrate reviewed staff account provisioning with the merged shared JSON-array helper (#96) and menu authorization (#94), without dropping either team's work.
+- Influence: ChatGPT constructed a merge tree retaining PR #117's implementation and the latest `main` source changes, combined non-overlapping data-model edits, preserved the existing provenance entries 65–69, retained Sreeram's entry 70, and added this integration entry. No application business logic was rewritten as part of conflict resolution.
+- Validation: Compared both branches against their common ancestor and verified the overlapping documentation edits; subsequent CI and merge outcome are verified separately, and this does not claim student understanding.
+- PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117).
+- Student review status: Pending responsible-student confirmation.
+
+### Entry 72: Customer order history service
 
 Historical service-only contribution; the endpoint integration below supersedes
 its pending-auth and local-only status.
 
 - Student(s): Thomas Chen (`Tc2006415`), assignee of [#92](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/92).
-- Artifacts: `app/services/order_history.py`, `tests/test_order_history_service.py`, `docs/superpowers/plans/2026-11-19-order-history.md`, and history additions to the M2 API contract, testing guide, M2 evidence and this record.
+- Artifacts: `app/services/order_history.py`, `tests/test_order_history_service.py`, a temporary working plan (removed during PR review), and history additions to the M2 API contract, testing guide, M2 evidence and this record.
 - Label: `AI-GENERATED`.
 - AI tool: OpenAI Codex.
 - Purpose and influence: Thomas requested waiting for #111 to merge, then rechecking dependencies and starting #92. Codex verified that merge, current main, issue ownership and live board/PR dependencies; wrote the history service using the existing repository and checkout's injected authorization pattern; and wrote independent persisted fixtures, service tests and documentation. No customer/auth subsystem or HTTP route was added. The service will bind #84's shared helper with `active=False`; current tests use an explicit authorization double.
 - Validation: In a new Python 3.12.10 virtual environment, the required-browser baseline passed 462 tests. An earlier attempt ran before dependency installation finished and failed on missing packages; it was an environment timing failure. Before implementation, `python -m pytest -q tests/test_order_history_service.py --tb=short` failed all 19 tests because `app.services.order_history` did not exist. `python -m pytest -q tests/test_order_history_service.py tests/test_order_repository.py tests/test_checkout_service.py` then passed 56 tests. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed 481 tests, with no skips. `python -m compileall app`, `git diff --exit-code -- data/`, `git diff --check`, and 65 local documentation-link checks passed. All Python commands used this worktree's `.venv/Scripts/python.exe`. The committed-data guard passed. Service tests do not establish real authentication or HTTP behavior.
 - Setup/API impact: Both setup guides were inspected. Dependencies, configuration, seed data, entry points, default test commands and available endpoints are unchanged, so neither guide needs new operational instructions. OpenAPI remains unchanged because history is not yet an HTTP operation.
-- Agent review: A separate read-only review inspected the complete change and related service/repository/auth contracts. It found no blocking defects and suggested an optional additional test with an opaque principal; the suggestion is recorded in the plan. This is not human peer review or proof of full issue acceptance.
+- Agent review: A separate read-only review inspected the complete change and related service/repository/auth contracts. It found no blocking defects and suggested an optional additional test with an opaque principal; the optional suggestion was a successful-call test with an opaque principal. This is not human peer review or proof of full issue acceptance.
 - Issue/branch: #92, `feature/92-order-history`, based on refreshed main `31e4320d003cdd8a6ae019ce74b155564e97d59a`. Local work only; no PR or commit yet.
 - Student review status: Implementation understanding and human peer review remain pending. Agent checks are not student approval. Real #79/#80/#84 auth, HTTP denial tests and a fully real purchase-to-history workflow remain outstanding; #92 is not complete.
 
-### Issue 92: authenticated history endpoint and integration
+### Entry 73: Authenticated history endpoint and integration
 
 - Student(s): Thomas Chen (`Tc2006415`), #92 assignee and requester.
-- Artifacts: `app/api/routes/order_history.py`, the resolver in `app/services/order_history.py`, router registration in `app/main.py`, `tests/test_order_history_api.py`, README, both setup guides, M2 API/testing/milestone documentation, implementation plan and this record.
+- Artifacts: `app/api/routes/order_history.py`, the resolver in `app/services/order_history.py`, router registration in `app/main.py`, `tests/test_order_history_api.py`, README, both setup guides, M2 API/testing/milestone documentation, the temporary working plan (removed during PR review) and this record.
 - Label: `AI-GENERATED`.
 - AI tool: OpenAI Codex.
 - Purpose and influence: Thomas authorized finishing #92 using the merged authentication foundation and opening a PR. Codex restored the prior service work from the app's saved snapshot, merged main `95c7c8e`, and resolved the provenance append conflict by preserving both histories. It wrote the thin history route, service-layer read authorization adapter, real-auth API and real-store purchase integration tests, and documentation. Authentication remains in the existing shared bearer/session implementation; inactive customers retain history access. No shared customer repository or #93 order-detail code was changed.
 - Validation: After integrating main, the required-browser baseline passed 636 tests. Before endpoint implementation, `python -m pytest -q tests/test_order_history_api.py --tb=short` failed 24 tests on the missing route/module/OpenAPI operation. After implementation, `python -m pytest -q tests/test_order_history_api.py tests/test_order_history_service.py tests/test_order_repository.py tests/test_checkout_service.py` passed 80 tests. `python -m compileall app` succeeded; `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed 660 tests with no skips. The committed-data guard, `git status --porcelain --untracked-files=all --ignored -- data/`, `git diff --check`, and 113 local documentation-link checks passed. Commands used this worktree's Python 3.12.10 `.venv/Scripts/python.exe`. An independent read-only agent review found no blocking defects; published-head CI is recorded in the PR.
 - Integration limits: Registration, login, cart operations and history run through HTTP; the purchase step calls the real checkout service with real customer/cart/catalog/order stores and a principal resolved from the issued token. The clock is fixed. A fresh history application reopens the same temporary stores. This does not claim #91's checkout HTTP route exists or that #84's entire rollout is complete. Human peer review, student understanding and merge remain pending.
-- PR/branch: [PR #120](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120), #92, `feature/92-order-history`; endpoint implementation commit `5fd7962`. Human review and merge remain pending; no self-approval or merge is authorized.
+- PR/branch: [PR #120](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120), #92, `feature/92-order-history`; endpoint implementation commit `5fd7962`. [Sreeram's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120#pullrequestreview-6002459546) approved `b5b6460`; review of subsequent changes and merge remain pending. No self-approval or merge is authorized.
+
+### Entry 74: Order history review cleanup and main integration
+
+- Student(s): Thomas Chen (`Tc2006415`), #92 assignee and requester; Sreeram Nara (`SreeramNara`) supplied the PR feedback.
+- Artifact: Removal of the temporary agent working plan, history entry numbering and references in this record and `docs/milestones/M2.md`, PR description, and documentation conflict resolutions while merging main `aaca156` into `feature/92-order-history`.
+- Label: `AI-GENERATED`.
+- AI tool: OpenAI Codex.
+- Purpose and influence: Thomas asked Codex to address PR #120 feedback, run tests and push the revision. Codex verified the approving review, removed the working plan, numbered the two existing history disclosures 72 and 73 after main's entries 1–71, and updated their links. It preserved both provenance histories, both setup instructions, and the #92/#94 milestone evidence when resolving conflicts with merged menu availability, JSON helper and staff-provisioning changes. No new history behavior or test logic was introduced by this cleanup.
+- Validation: The focused command `python -m pytest -q tests/test_order_history_api.py tests/test_order_history_service.py tests/test_order_repository.py tests/test_checkout_service.py` passed 80 tests after the merge. `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed 727 tests after integrating `aaca156`; compilation and 113 local documentation-link checks passed. Test-first new-behavior coverage is not applicable to this documentation cleanup; existing tests verify integration with main.
+- PR or commit: [PR #120](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120), addressing [review 6002459546](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120#pullrequestreview-6002459546).
+- Student review status: Sreeram approved the previous `b5b6460` revision with non-blocking suggestions. Re-review of this revision, responsible-student understanding and merge remain pending.
