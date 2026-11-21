@@ -996,3 +996,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: Installed current pinned requirements. Before the test adjustment, `python -m pytest -q tests/test_order_details.py` yielded 1 failed / 30 passed, with the unauthenticated menu update returning 401. After adjustment, the same command passed 31 tests. `python -m compileall app` succeeded; `REQUIRE_BROWSER_TESTS=1` with `python -m pytest -q` passed 735 tests with no skips or warnings. Whitespace and data-status checks passed; all main provenance text was verified retained, and 128 local documentation links/anchors passed. Hosted CI for the pushed merge is separate evidence in the PR.
 - PR or commit: [PR #119](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119), synchronization follow-up to review of `927a4d5`.
 - Student review status: Independent human peer review, approval and student understanding remain pending; this records automated verification and agent integration work.
+
+### Issue 87: Update a cart line's quantity
+
+- Student: Thomas Chen (`Tc2006415`), assigned to [#87](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/87).
+- Artifact: Quantity PATCH route, service, request schema, API tests, README, setup guides and M2 contract clarification on branch `feature/87-update-cart-quantity`.
+- Label: `AI-GENERATED`
+- AI tool: Codex (OpenAI).
+- Purpose and influence: Codex implemented the endpoint and tests using the shared cart, catalog, pricing, authorization and order-receipt interfaces. Codex chose to reject an unavailable target even when the submitted quantity is the same.
+- Validation: `python -m pytest -q tests/test_cart_api.py -k quantity_patch --tb=line` failed all 16 selected cases on the missing route, then passed all 16. `python -m compileall -q app` succeeded. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q --tb=line` passed all 701 tests.
+- Review follow-up: After [peer review on PR #125](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/125#pullrequestreview-6002737142), Codex merged `main` at `9474129`, retained the #99 and #87 provenance entries, and added two characterization cases in [commit d21e482](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/d21e482). Both passed against the existing implementation. A missing target or sibling menu reference returns a generic 500 and preserves the stored cart bytes.
+- Integration evidence: `python -m pytest -q tests/test_cart_api.py tests/test_cart_service.py tests/test_cart_repository.py --tb=line` passed 93 tests. In an isolated local merge with [PR #123](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/123) at `c95a8ae`, `python -m pytest -q tests/test_cart_api.py tests/test_cart_remove.py --tb=line` passed 80 tests. Both HTTP operations shared one missing-line exception and HTTP mapping in that merge.
+- Student review status: Peer changes requested and addressed on the feature branch. Responsible-student walkthrough and renewed peer approval pending.

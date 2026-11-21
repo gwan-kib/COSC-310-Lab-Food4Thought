@@ -169,6 +169,8 @@ The repository supports `RESTAURANTS_DATA_PATH` for another existing UTF-8 JSON 
 
 Active carts are stored in `data/carts.json` (committed as an empty array `[]`); `CARTS_DATA_PATH` selects another file in the same way. Signed-in customers use it through `PUT`/`GET /customers/me/cart` and `POST /customers/me/cart/items`; copy it with the customer and session files for manual experiments.
 
+To try a quantity update on disposable data, sign in as an active customer, create a cart and add an item. In `/docs`, send `PATCH /customers/me/cart/items/{item_id}` with that item's ID and `{"quantity": 3}`. The returned cart shows three units at the current menu price. Repeat the request to verify the revision stays the same.
+
 If the variable is not set, the application uses `data/restaurants.json`. Stored menu-item prices must also be at most `999.00`. An over-limit stored price makes the file invalid, causing generic HTTP 500 data errors without changing the file; correct it before starting normal use. The committed sample data already satisfies this rule.
 
 ### Disposable data for manual experiments

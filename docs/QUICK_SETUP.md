@@ -83,6 +83,10 @@ Menu reads include `available`. For manual writes, sign in with a provisioned st
 
 Stop the server with `Ctrl+C`.
 
+To change a cart quantity on disposable data, authorize as the active cart owner in
+`/docs` and send `PATCH /customers/me/cart/items/{item_id}` for an existing available
+line. The body `{"quantity": 3}` sets its quantity to three.
+
 For order repository experiments, set `ORDERS_DATA_PATH` to a disposable copy
 of the empty `data/orders.json` before constructing the repository. Run
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`

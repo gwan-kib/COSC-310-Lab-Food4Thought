@@ -1,5 +1,5 @@
 """Expose the signed-in customer's shopping cart: create or read it (#85), add menu
-items (#86) and see backend-calculated totals (#90). Every route needs a customer
+items (#86), set their quantities (#87) and see backend-calculated totals (#90). Every route needs a customer
 token (#84); cart changes also need an active account. Cart rules live in CartService.
 """
 
@@ -13,10 +13,10 @@ from app.repositories.cart import CartRepository
 from app.repositories.customer import CustomerRepository
 from app.repositories.order import OrderRepository
 from app.repositories.restaurant import RestaurantDataError
-from app.schemas.cart import AddCartItemRequest, CartView
+from app.schemas.cart import AddCartItemRequest, CartView, UpdateCartQuantityRequest
 from app.schemas.restaurant import ErrorResponse
 from app.services.cart import (
-    CartNotFoundError, CartRestaurantConflictError, CartService, CheckoutRecoveryRequiredError,
+    CartItemNotFoundError, CartNotFoundError, CartRestaurantConflictError, CartService, CheckoutRecoveryRequiredError,
     CustomerInactiveError, CustomerNotFoundError, MenuItemUnavailableError,
 )
 from app.services.catalog import RestaurantCatalog
@@ -47,6 +47,8 @@ def _http_error(error: Exception) -> HTTPException:
     match error:
         case CartNotFoundError():
             return HTTPException(404, "Cart not found")
+        case CartItemNotFoundError():
+            return HTTPException(404, "Cart item not found")
         case RestaurantNotFoundError():
             return HTTPException(404, "Restaurant not found")
         case MenuItemNotFoundError():
@@ -67,7 +69,7 @@ def _http_error(error: Exception) -> HTTPException:
             return HTTPException(500, "Cart data is unavailable")
 
 
-HANDLED = (CartNotFoundError, RestaurantNotFoundError, MenuItemNotFoundError,
+HANDLED = (CartItemNotFoundError, CartNotFoundError, RestaurantNotFoundError, MenuItemNotFoundError,
            CartRestaurantConflictError, MenuItemUnavailableError, CheckoutRecoveryRequiredError,
            CustomerInactiveError, CustomerNotFoundError, RestaurantDataError, StorageFailure)
 
@@ -100,5 +102,19 @@ def add_item(principal: ActiveCustomer, request: AddCartItemRequest, service: Se
     """Adding an item already in the cart increases its quantity. Prices come from the menu."""
     try:
         return service.add_item(principal.account_id, request)
+    except HANDLED as error:
+        raise _http_error(error) from None
+
+
+@router.patch("/items/{item_id}", response_model=CartView, summary="Set a cart item's quantity",
+              responses={**ERRORS,
+                         404: {"model": ErrorResponse, "description": "Cart not found or Cart item not found"},
+                         409: {"model": ErrorResponse, "description": "Menu item is unavailable or Cart checkout recovery required"}})
+def update_quantity(item_id: str, request: UpdateCartQuantityRequest, principal: ActiveCustomer,
+                    service: Service) -> CartView:
+    """Set an available line to a positive integer quantity and return current menu totals.
+    Repeating the same quantity keeps the cart revision. Zero cannot remove a line."""
+    try:
+        return service.update_quantity(principal.account_id, item_id, request)
     except HANDLED as error:
         raise _http_error(error) from None

@@ -1,6 +1,6 @@
 """Exercise Food4Thought's protected cart API and account deactivation end to end.
 Covers #83 (deactivate), #84 (cart routes need a customer token), #85 (create or read
-the cart), #86 (add an item) and #90 (cart contents and backend totals), using real
+the cart), #86 (add an item), #87 (set its quantity) and #90 (cart contents and backend totals), using real
 routes, services and isolated stores with a fixed clock.
 """
 
@@ -320,3 +320,125 @@ def test_cart_and_checkout_reprice_but_retry_keeps_the_saved_order(client, ada, 
     retry = _real_checkout().checkout(ADA_PRINCIPAL, request)
     assert not retry.created
     assert retry.response.order == order
+
+
+ITEM_URL = "/customers/me/cart/items/item-001"
+
+
+@pytest.fixture
+def two_line_cart(client, ada):
+    assert client.put("/customers/me/cart", headers=ada).status_code == 201
+    for line in (ADD, {**ADD, "item_id": "item-002", "quantity": 1}):
+        response = client.post("/customers/me/cart/items", headers=ada, json=line)
+        assert response.status_code == 200
+    return response.json()
+
+
+def test_quantity_patch_reprices_and_persists_only_the_selected_quantity(client, ada, two_line_cart):
+    response = client.patch(ITEM_URL, headers=ada, json={"quantity": 3})
+    assert response.status_code == 200
+    original, sibling = two_line_cart["items"]
+    assert response.json() == {
+        **two_line_cart, "revision": two_line_cart["revision"] + 1,
+        "items": [{**original, "quantity": 3, "line_total": "37.50"}, sibling],
+        "subtotal": "51.50", "total": "51.50",
+    }
+    assert client.get("/customers/me/cart", headers=ada).json() == response.json()
+
+
+def test_quantity_patch_noop_returns_current_price_without_saving(
+    client, ada, auth_accounts, two_line_cart, monkeypatch
+):
+    updated = client.patch("/restaurants/restaurant-001/menu/items/item-001",
+                           headers=auth_accounts.headers("restaurant_user"), json={"price": "10.25"})
+    assert updated.status_code == 200
+    monkeypatch.setattr(CartRepository, "save_cart", lambda *args: pytest.fail("unexpected cart save"))
+    response = client.patch(ITEM_URL, headers=ada, json={"quantity": 2})
+    assert response.status_code == 200
+    assert response.json()["revision"] == two_line_cart["revision"]
+    assert response.json()["total"] == "34.50"
+
+
+@pytest.mark.parametrize("body", [
+    {}, {"quantity": 0}, {"quantity": -1}, {"quantity": 2.0}, {"quantity": 1.5},
+    {"quantity": "2"}, {"quantity": True}, {"quantity": None},
+    {"quantity": 3, "customer_id": "customer-002"}, {"quantity": 3, "unit_price": "0.01"},
+])
+def test_quantity_patch_validates_body_before_mutation(client, ada, two_line_cart, m2_store_paths, body):
+    before = m2_store_paths["carts"].read_bytes()
+    response = client.patch(ITEM_URL, headers=ada, json=body)
+    assert response.status_code == 422
+    assert m2_store_paths["carts"].read_bytes() == before
+
+
+def test_quantity_patch_protects_the_owners_cart(client, ada, auth_accounts, two_line_cart, m2_store_paths):
+    before = m2_store_paths["carts"].read_bytes()
+    for headers, status, detail in [
+        ({}, 401, "Authentication required"),
+        (auth_accounts.headers("restaurant_user"), 403, "Operation not permitted"),
+        (auth_accounts.headers("customer_b"), 404, "Cart not found"),
+    ]:
+        result = client.patch(ITEM_URL, headers=headers, json={"quantity": 1})
+        assert (result.status_code, result.json()) == (status, {"detail": detail})
+    result = client.patch("/customers/me/cart/items/missing", headers=ada, json={"quantity": 1})
+    assert (result.status_code, result.json()) == (404, {"detail": "Cart item not found"})
+    assert client.post("/customers/me/deactivate", headers=ada).status_code == 200
+    result = client.patch(ITEM_URL, headers=ada, json={"quantity": 0})
+    assert (result.status_code, result.json()) == (403, {"detail": "Customer is inactive"})
+    assert m2_store_paths["carts"].read_bytes() == before
+
+
+def test_quantity_patch_rechecks_availability_even_for_a_noop(
+    client, ada, auth_accounts, two_line_cart, m2_store_paths
+):
+    changed = client.patch("/restaurants/restaurant-001/menu/items/item-001",
+                           headers=auth_accounts.headers("restaurant_user"), json={"available": False})
+    assert changed.status_code == 200
+    before = m2_store_paths["carts"].read_bytes()
+    for quantity in (1, 2, 3):
+        result = client.patch(ITEM_URL, headers=ada, json={"quantity": quantity})
+        assert (result.status_code, result.json()) == (409, {"detail": "Menu item is unavailable"})
+    assert m2_store_paths["carts"].read_bytes() == before
+
+
+def test_quantity_patch_rejects_purchased_revision(client, ada, two_line_cart, m2_store_paths, monkeypatch):
+    def fail_reset(*args):
+        raise OSError("reset failed")
+
+    monkeypatch.setattr(CartRepository, "reset_after_order", fail_reset)
+    purchase = _real_checkout().checkout(ADA_PRINCIPAL, CheckoutRequest(
+        cart_id=two_line_cart["id"], cart_revision=two_line_cart["revision"]))
+    assert purchase.response.cart_reset_pending
+    before = {name: m2_store_paths[name].read_bytes() for name in ("carts", "orders")}
+    result = client.patch(ITEM_URL, headers=ada, json={"quantity": 2})
+    assert (result.status_code, result.json()) == (409, {"detail": "Cart checkout recovery required"})
+    assert {name: m2_store_paths[name].read_bytes() for name in before} == before
+
+
+def test_quantity_patch_failed_replace_keeps_original_cart(client, ada, two_line_cart, m2_store_paths, monkeypatch):
+    def fail_replace(*args):
+        raise OSError("replace failed")
+
+    before = m2_store_paths["carts"].read_bytes()
+    monkeypatch.setattr("app.core.json_file.os.replace", fail_replace)
+    result = client.patch(ITEM_URL, headers=ada, json={"quantity": 1})
+    assert (result.status_code, result.json()) == (500, {"detail": "Cart data is unavailable"})
+    assert m2_store_paths["carts"].read_bytes() == before
+    assert client.get("/customers/me/cart", headers=ada).json() == two_line_cart
+
+
+@pytest.mark.parametrize("missing_id", ["item-001", "item-002"], ids=["target", "sibling"])
+def test_quantity_patch_dangling_menu_reference_preserves_cart(
+    client, ada, two_line_cart, m2_store_paths, missing_id
+):
+    catalog = m2_store_paths["restaurants"]
+    restaurants = json.loads(catalog.read_bytes())
+    restaurant = next(r for r in restaurants if r["id"] == two_line_cart["restaurant_id"])
+    restaurant["menu_items"] = [item for item in restaurant["menu_items"] if item["id"] != missing_id]
+    catalog.write_text(json.dumps(restaurants), encoding="utf-8")
+    before = m2_store_paths["carts"].read_bytes()
+
+    response = client.patch(ITEM_URL, headers=ada, json={"quantity": 3})
+
+    assert (response.status_code, response.json()) == (500, {"detail": "Cart data is unavailable"})
+    assert m2_store_paths["carts"].read_bytes() == before
