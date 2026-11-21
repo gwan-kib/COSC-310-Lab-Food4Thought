@@ -20,8 +20,8 @@
       <div id="signed-out" class="account-sections">
         <section class="panel" aria-labelledby="signin-heading">
           <h3 id="signin-heading">Sign in</h3>
-          <form id="signin-form">
-            <fieldset class="create-fields">
+          <form id="signin-form" method="post">
+            <fieldset class="create-fields" disabled>
               <legend class="visually-hidden">Sign-in details</legend>
               <label for="signin-email">Email</label>
               <input id="signin-email" name="email" type="email" autocomplete="username" required />
@@ -36,8 +36,8 @@
 
         <section class="panel" aria-labelledby="register-heading">
           <h3 id="register-heading">Create a customer account</h3>
-          <form id="register-form">
-            <fieldset class="create-fields">
+          <form id="register-form" method="post">
+            <fieldset class="create-fields" disabled>
               <legend class="visually-hidden">Registration details</legend>
               <label for="register-name">Name</label>
               <input id="register-name" name="name" type="text" autocomplete="name" required />
@@ -61,7 +61,7 @@
           <button id="signout-button" type="button">Sign out of this tab</button>
         </div>
         <p id="account-state" class="status" role="status"></p>
-        <dl class="account-details">
+        <dl id="profile-details" class="account-details" hidden>
           <dt>Email</dt><dd id="profile-email"></dd>
           <dt>Saved name</dt><dd id="saved-name"></dd>
           <dt>Saved delivery address</dt><dd id="saved-address"></dd>
@@ -70,7 +70,7 @@
         <p id="refresh-status" class="status" role="status"></p>
         <div id="refresh-errors" class="status error" role="alert"></div>
 
-        <form id="profile-form">
+        <form id="profile-form" method="post">
           <fieldset class="create-fields">
             <legend>Update profile</legend>
             <label for="profile-name">Name</label>
@@ -83,7 +83,7 @@
         <p id="profile-status" class="status" role="status"></p>
         <div id="profile-errors" class="status error" role="alert"></div>
 
-        <form id="deactivate-form" class="deactivate-form">
+        <form id="deactivate-form" class="deactivate-form" method="post">
           <fieldset class="create-fields">
             <legend>Deactivate account</legend>
             <p>Deactivation cannot be undone here. Your profile stays readable, but you cannot change your cart or check out.</p>
