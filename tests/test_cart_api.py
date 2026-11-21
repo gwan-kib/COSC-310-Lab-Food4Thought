@@ -15,10 +15,12 @@ from app.main import app
 from app.repositories.cart import CartRepository
 from app.repositories.customer import CustomerRepository
 from app.repositories.order import OrderRepository
+from app.schemas.customer import Principal
 from app.schemas.order import CheckoutRequest
 from app.services.cart import CartService
 from app.services.checkout import CheckoutService
 from app.services.catalog import RestaurantCatalog
+from app.services.customer import CustomerInactiveError, CustomerService
 from contracts.auth import FIXED_NOW
 from contracts.m2 import CatalogItem, FakeCatalog
 
@@ -221,11 +223,8 @@ def test_profile_update_after_checkout_keeps_ids_carts_and_the_order_snapshot(cl
     cart = client.post("/customers/me/cart/items", headers=ada, json=ADD).json()
     assert client.get("/customers/me/cart", headers=ben).json()["items"] == []
 
-    customers = CustomerRepository()
-    checkout = CheckoutService(lambda _p: customers.get_customer("customer-001"), carts=CartRepository(),
-                               catalog=RestaurantCatalog(), orders=OrderRepository())
-    order = checkout.checkout("principal", CheckoutRequest(cart_id=cart["id"],
-                                                           cart_revision=cart["revision"])).response.order
+    order = _real_checkout().checkout(ADA_PRINCIPAL, CheckoutRequest(
+        cart_id=cart["id"], cart_revision=cart["revision"])).response.order
     orders_before = m2_store_paths["orders"].read_bytes()
 
     updated = client.patch("/customers/me", headers=ada,
@@ -248,3 +247,35 @@ def test_staff_record_claiming_the_customer_role_cannot_reach_the_cart(client, m
 
     assert (response.status_code, response.json()) == (500, {"detail": "Authentication data is unavailable"})
     assert {name: m2_store_paths[name].read_bytes() for name in before} == before
+
+
+# --- PR #115 second review (gwan-kib) -------------------------------------------------------
+
+ADA_PRINCIPAL = Principal(account_id="customer-001", role="customer")
+
+
+def _real_checkout():
+    # The composition the checkout route must use: the stored customer, rechecked
+    # for active status inside checkout's workflow lock.
+    return CheckoutService(CustomerService(CustomerRepository()).active_customer_for,
+                           carts=CartRepository(), catalog=RestaurantCatalog(), orders=OrderRepository())
+
+
+def test_checkout_rejects_a_customer_deactivated_after_signing_in(client, m2_store_paths, auth_accounts, ada):
+    # Sign in, fill the cart, then deactivate: the old token's route pre-check already
+    # passed, so the authoritative check is the one inside checkout's lock.
+    client.put("/customers/me/cart", headers=ada)
+    cart = client.post("/customers/me/cart/items", headers=ada, json=ADD).json()
+    assert client.post("/customers/me/deactivate", headers=ada).status_code == 200
+    before = {name: m2_store_paths[name].read_bytes() for name in ("customers", "carts", "orders")}
+
+    with pytest.raises(CustomerInactiveError):
+        _real_checkout().checkout(ADA_PRINCIPAL, CheckoutRequest(cart_id=cart["id"],
+                                                                 cart_revision=cart["revision"]))
+
+    assert {name: m2_store_paths[name].read_bytes() for name in ("customers", "carts", "orders")} == before
+
+
+def test_active_customer_resolver_returns_the_stored_customer_for_checkout(auth_accounts):
+    customer = CustomerService(CustomerRepository()).active_customer_for(ADA_PRINCIPAL)
+    assert (customer.id, customer.delivery_address) == ("customer-001", "101 Example Street, Kelowna, BC")
