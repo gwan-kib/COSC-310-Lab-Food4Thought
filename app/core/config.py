@@ -21,3 +21,11 @@ def get_orders_data_path() -> Path:
     if override:
         return Path(override)
     return Path(__file__).resolve().parents[2] / "data" / "orders.json"
+
+
+def get_carts_data_path() -> Path:
+    """Resolve cart storage when constructing the repository."""
+    override = os.getenv("CARTS_DATA_PATH")
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parents[2] / "data" / "carts.json"
