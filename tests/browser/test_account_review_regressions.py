@@ -38,7 +38,7 @@ def test_forms_do_not_submit_credentials_if_javascript_is_unavailable(page, live
     for form_id in ("signin-form", "register-form"):
         form = page.locator(f"#{form_id}")
         expect(form).to_have_attribute("method", "post")
-        expect(form.locator("fieldset")).to_be_disabled()
+        expect(form.locator("fieldset")).to_have_attribute("disabled", "")
         expect(form.locator("button[type=submit]")).to_be_disabled()
     page.unroute("**/account.js")
     page.reload()
