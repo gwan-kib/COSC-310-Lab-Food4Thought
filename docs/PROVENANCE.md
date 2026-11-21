@@ -1150,7 +1150,7 @@ its pending-auth and local-only status.
 - Validation: The behaviour already existed on `main` (`10f0b2f`), so the tests passed when first run; they are characterization and integration evidence, not test-first. With the checkout route temporarily switched to the non-active dependency and the in-lock status check removed, the #83 test failed (an inactive customer's checkout returned 201); the change was reverted. `python -m pytest -q` passed 859 tests and `REQUIRE_BROWSER_TESTS=1 python -m pytest -q tests/browser` passed 62 (run separately to avoid an intermittent local browser hang).
 - PR or commit: [PR #131](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/131), branch `feature/83-84-protection-evidence`.
 - Review follow-up: Gwantana Kiboigo (`gwan-kib`) noted that the inactive-write list left out `PATCH /customers/me`. Claude added profile edits to the old-token scenario (403 `Customer is inactive`, no writes), checked that repeating deactivation is an allowed no-op, and linked this PR.
-- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+- Student review status: Sreeram Nara reported on 2026-11-20 that he has read this code and can explain it. This is his own statement, not an agent check.
 
 ### Entry 84: Team Receipt M2.3 evidence for #96
 
