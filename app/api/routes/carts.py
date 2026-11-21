@@ -1,6 +1,6 @@
-"""Expose the signed-in customer's shopping cart: create or read it (#85), add menu
-items (#86), remove lines (#88) and see backend-calculated totals (#90). Every route needs a customer
-token (#84); cart changes also need an active account. Cart rules live in CartService.
+"""Expose the signed-in customer's cart, quantities, removal and current totals.
+Every route requires a customer token; mutations also require an active account.
+Business rules stay in CartService.
 """
 
 from typing import Annotated
@@ -13,7 +13,7 @@ from app.repositories.cart import CartRepository
 from app.repositories.customer import CustomerRepository
 from app.repositories.order import OrderRepository
 from app.repositories.restaurant import RestaurantDataError
-from app.schemas.cart import AddCartItemRequest, CartView
+from app.schemas.cart import AddCartItemRequest, CartView, UpdateCartQuantityRequest
 from app.schemas.restaurant import ErrorResponse
 from app.services.cart import (
     CartItemNotFoundError, CartNotFoundError, CartRestaurantConflictError, CartService, CheckoutRecoveryRequiredError,
@@ -102,6 +102,20 @@ def add_item(principal: ActiveCustomer, request: AddCartItemRequest, service: Se
     """Adding an item already in the cart increases its quantity. Prices come from the menu."""
     try:
         return service.add_item(principal.account_id, request)
+    except HANDLED as error:
+        raise _http_error(error) from None
+
+
+@router.patch("/items/{item_id}", response_model=CartView, summary="Set a cart item's quantity",
+              responses={**ERRORS,
+                         404: {"model": ErrorResponse, "description": "Cart not found or Cart item not found"},
+                         409: {"model": ErrorResponse, "description": "Menu item is unavailable or Cart checkout recovery required"}})
+def update_quantity(item_id: str, request: UpdateCartQuantityRequest, principal: ActiveCustomer,
+                    service: Service) -> CartView:
+    """Set an available line to a positive integer quantity and return current menu totals.
+    Repeating the same quantity keeps the cart revision. Zero cannot remove a line."""
+    try:
+        return service.update_quantity(principal.account_id, item_id, request)
     except HANDLED as error:
         raise _http_error(error) from None
 

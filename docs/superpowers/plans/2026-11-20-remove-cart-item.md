@@ -77,3 +77,10 @@ tests; the intermediate full suite passed 735. Final compileall and required-bro
 `python -m pytest -vv -o faulthandler_timeout=30` passed 766 tests in 44.88 seconds,
 without skips. Diff, dependency and committed-data checks passed. CI is verified on
 the pushed head separately; a reviewer has not approved this work.
+
+Main then advanced to `0d812e3` (#87 quantity updates). Service/router conflicts were
+resolved by preserving both operations and the single shared missing-line error. A
+follow-up agent review found no integration defects. The combined focused suite
+passed 148 tests, and required-browser full verification passed 784 tests in 47.06
+seconds without skips. Compilation, dependency, whitespace and committed-data checks
+passed; human review remains pending.

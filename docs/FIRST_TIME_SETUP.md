@@ -179,6 +179,8 @@ persistence. A repeated removal returns 404 `Cart item not found`. Inactive cust
 receive 403; a purchased revision awaiting checkout reset receives 409. See the
 [removal contract](M2_API_CONTRACT.md#implemented-item-removal-88) for error details.
 
+To try a quantity update on disposable data, sign in as an active customer, create a cart and add an item. In `/docs`, send `PATCH /customers/me/cart/items/{item_id}` with that item's ID and `{"quantity": 3}`. The returned cart shows three units at the current menu price. Repeat the request to verify the revision stays the same.
+
 If the variable is not set, the application uses `data/restaurants.json`. Stored menu-item prices must also be at most `999.00`. An over-limit stored price makes the file invalid, causing generic HTTP 500 data errors without changing the file; correct it before starting normal use. The committed sample data already satisfies this rule.
 
 ### Disposable data for manual experiments
