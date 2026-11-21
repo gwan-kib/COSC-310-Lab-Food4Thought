@@ -15,6 +15,7 @@ from app.main import app
 from app.repositories.cart import CartRepository
 from app.repositories.customer import CustomerRepository
 from app.repositories.order import OrderRepository
+from app.repositories.restaurant import RestaurantRepository
 from app.schemas.customer import Principal
 from app.schemas.order import CheckoutRequest
 from app.services.cart import CartService
@@ -450,26 +451,39 @@ def test_unavailable_line_stays_visible_priced_and_counted_through_the_real_stor
     client, m2_store_paths, auth_accounts, ada
 ):
     # M2 contract: viewing an existing unavailable item shows `available: false` and its
-    # current price and still counts in totals; adding it again is 409 with no write.
-    client.put("/customers/me/cart", headers=ada)
-    client.post("/customers/me/cart/items", headers=ada, json=ADD)  # item-001 x2 at 12.50
-    client.post("/customers/me/cart/items", headers=ada,
-                json={"restaurant_id": "restaurant-001", "item_id": "item-002", "quantity": 1})
-    disabled = client.patch("/restaurants/restaurant-001/menu/items/item-001",
-                            headers=auth_accounts.headers("restaurant_user"), json={"available": False})
-    assert disabled.status_code == 200
+    # *current* price and still counts in totals; adding it again is 409 with no write.
+    assert client.put("/customers/me/cart", headers=ada).status_code == 201
+    assert client.post("/customers/me/cart/items", headers=ada, json=ADD).status_code == 200  # item-001 x2 at 12.50
+    assert client.post("/customers/me/cart/items", headers=ada, json={
+        "restaurant_id": "restaurant-001", "item_id": "item-002", "quantity": 1}).status_code == 200
     before = m2_store_paths["carts"].read_bytes()
+    # Disable the item *and* change its price after it is in the cart, so a view that
+    # kept the price from add time (12.50) cannot pass.
+    disabled = client.patch("/restaurants/restaurant-001/menu/items/item-001",
+                            headers=auth_accounts.headers("restaurant_user"),
+                            json={"available": False, "price": "13.00"})
+    assert (disabled.status_code, disabled.json()["available"], disabled.json()["price"]) == (200, False, "13.00")
 
     read = client.get("/customers/me/cart", headers=ada)
 
     assert read.status_code == 200
     lines = {line["item_id"]: line for line in read.json()["items"]}
     assert (lines["item-001"]["available"], lines["item-001"]["quantity"]) == (False, 2)
-    assert (lines["item-001"]["unit_price"], lines["item-001"]["line_total"]) == ("12.50", "25.00")
+    assert (lines["item-001"]["unit_price"], lines["item-001"]["line_total"]) == ("13.00", "26.00")
     assert lines["item-002"]["available"] is True
-    assert (read.json()["subtotal"], read.json()["total"]) == ("39.00", "39.00")
-    # A fresh application and stores give the same view, and reading never writes.
-    assert TestClient(app).get("/customers/me/cart", headers=ada).json() == read.json()
+    assert (read.json()["subtotal"], read.json()["total"]) == ("40.00", "40.00")
+    # The cart stores IDs and quantities only: the menu change and the read leave it as saved.
+    assert m2_store_paths["carts"].read_bytes() == before
+
+    # Restart check: a second HTTP read, and a separately constructed CartService with
+    # brand-new repositories on the same files, both give the same priced view.
+    second = client.get("/customers/me/cart", headers=ada)
+    assert (second.status_code, second.json()) == (200, read.json())
+    independent = CartService(carts=CartRepository(m2_store_paths["carts"]),
+                              customers=CustomerRepository(m2_store_paths["customers"]),
+                              catalog=RestaurantCatalog(RestaurantRepository(m2_store_paths["restaurants"])),
+                              receipts=OrderRepository(m2_store_paths["orders"]))
+    assert independent.get_cart("customer-001").model_dump(mode="json") == read.json()
     assert m2_store_paths["carts"].read_bytes() == before
 
     again = client.post("/customers/me/cart/items", headers=ada, json=ADD)
