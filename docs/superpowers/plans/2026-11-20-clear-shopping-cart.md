@@ -114,7 +114,14 @@ Results: 28 focused passed; compilation exit 0; 675 tests passed in 43.01s
 cover every one of the 732 collected cases, with no skips. Data status was empty
 and whitespace checks passed. Logs stay local in the ignored virtual environment.
 The complete staged diff was inspected. A PR body was prepared locally outside
-the checkout; nothing was pushed, posted, merged or marked Done.
+the checkout. At the initial implementation handoff, nothing had been pushed,
+posted, merged or marked Done.
 
 Task 1: implementation and split-process local verification complete. Human peer
 review, remote CI, single-process test-run reliability and integration remain pending.
+
+Publication follow-up: Thomas requested the push, PR creation and CI monitoring.
+Branch `feature/89-clear-shopping-cart` was pushed and [PR #126](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/126)
+was opened against `main` with the prepared description. Remote check results
+are tracked on the PR; human peer approval, student explanation and merge are
+not implied by publication or agent verification.
