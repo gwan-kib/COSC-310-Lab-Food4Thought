@@ -24,7 +24,7 @@ def _record(identifier: str, name: str) -> dict[str, object]:
     }
 
 
-def test_create_restaurant_persists_and_preserves_existing_menu(isolated_restaurants_path):
+def test_create_restaurant_persists_and_preserves_existing_menu(admin_client, isolated_restaurants_path):
     existing = _record("restaurant-001", "Cedar Bowl")
     existing["menu_items"] = [
         {
@@ -37,7 +37,7 @@ def test_create_restaurant_persists_and_preserves_existing_menu(isolated_restaur
     ]
     isolated_restaurants_path.write_text(json.dumps([existing]), encoding="utf-8")
 
-    response = TestClient(app).post(
+    response = admin_client.post(
         "/restaurants",
         json={
             "name": "  New Cafe  ",
@@ -62,7 +62,7 @@ def test_create_restaurant_persists_and_preserves_existing_menu(isolated_restaur
     assert stored[1] == {**created, "menu_items": []}
     reloaded = RestaurantRepository(isolated_restaurants_path).load_records()
     assert [item.id for item in reloaded[0].menu_items] == ["item-001"]
-    listed = TestClient(app).get("/restaurants")
+    listed = admin_client.get("/restaurants")
     assert listed.status_code == 200
     assert listed.json() == [
         {key: value for key, value in existing.items() if key != "menu_items"},
@@ -82,20 +82,20 @@ def test_create_restaurant_persists_and_preserves_existing_menu(isolated_restaur
         {"name": "Cafe", "cuisine": "Cafe", "description": "Food", "menu_items": []},
     ],
 )
-def test_create_rejects_invalid_body_without_writing(isolated_restaurants_path, body):
+def test_create_rejects_invalid_body_without_writing(admin_client, isolated_restaurants_path, body):
     original = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).post("/restaurants", json=body)
+    response = admin_client.post("/restaurants", json=body)
 
     assert response.status_code == 422
     assert isinstance(response.json()["detail"], list)
     assert isolated_restaurants_path.read_bytes() == original
 
 
-def test_create_reports_storage_failure_without_exposing_details(isolated_restaurants_path):
+def test_create_reports_storage_failure_without_exposing_details(admin_client, isolated_restaurants_path):
     isolated_restaurants_path.unlink()
 
-    response = TestClient(app).post(
+    response = admin_client.post(
         "/restaurants",
         json={"name": "Cafe", "cuisine": "Cafe", "description": "Food"},
     )
@@ -105,7 +105,7 @@ def test_create_reports_storage_failure_without_exposing_details(isolated_restau
 
 
 def test_create_save_failure_keeps_existing_file_and_removes_temp_file(
-    isolated_restaurants_path, monkeypatch
+    admin_client, isolated_restaurants_path, monkeypatch
 ):
     original = isolated_restaurants_path.read_bytes()
     files_before = set(isolated_restaurants_path.parent.iterdir())
@@ -114,7 +114,7 @@ def test_create_save_failure_keeps_existing_file_and_removes_temp_file(
         raise OSError("private write failure")
 
     monkeypatch.setattr("app.repositories.restaurant.os.replace", fail_replace)
-    response = TestClient(app).post(
+    response = admin_client.post(
         "/restaurants",
         json={"name": "Cafe", "cuisine": "Cafe", "description": "Food"},
     )
@@ -133,7 +133,8 @@ def test_create_openapi_describes_contract():
     response_schema = operation["responses"]["201"]["content"]["application/json"]["schema"]
     assert request_schema["$ref"] == "#/components/schemas/RestaurantCreate"
     assert response_schema["$ref"] == "#/components/schemas/Restaurant"
-    assert "422" in operation["responses"]
+    assert operation["security"]
+    assert {"401", "403", "422"} <= operation["responses"].keys()
     assert "500" in operation["responses"]
 
 
@@ -166,11 +167,11 @@ def test_legacy_record_loads_with_empty_menu_without_rewriting(isolated_restaura
     assert isolated_restaurants_path.read_bytes() == original
 
 
-def test_create_preserves_unrecognized_legacy_restaurant_fields(isolated_restaurants_path):
+def test_create_preserves_unrecognized_legacy_restaurant_fields(admin_client, isolated_restaurants_path):
     existing = {**_record("legacy", "Existing"), "legacy_note": "Keep this value"}
     isolated_restaurants_path.write_text(json.dumps([existing]), encoding="utf-8")
 
-    response = TestClient(app).post(
+    response = admin_client.post(
         "/restaurants",
         json={"name": "New", "cuisine": "Cafe", "description": "Food"},
     )
@@ -178,7 +179,7 @@ def test_create_preserves_unrecognized_legacy_restaurant_fields(isolated_restaur
     assert response.status_code == 201
     stored = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
     assert stored[0]["legacy_note"] == "Keep this value"
-    listed = TestClient(app).get("/restaurants")
+    listed = admin_client.get("/restaurants")
     assert listed.status_code == 200
     assert "legacy_note" not in listed.json()[0]
 
@@ -201,7 +202,7 @@ def test_menu_item_normalizes_price():
     assert item.price == "12.50"
 
 
-def test_create_retries_generated_id_collision(isolated_restaurants_path, monkeypatch):
+def test_create_retries_generated_id_collision(admin_client, isolated_restaurants_path, monkeypatch):
     existing_id = "f20dbbc4-5266-4f7b-bc5d-35cef3632c1c"
     new_id = "a4143258-5314-4576-92b8-8838c5b69c1f"
     isolated_restaurants_path.write_text(
@@ -210,7 +211,7 @@ def test_create_retries_generated_id_collision(isolated_restaurants_path, monkey
     identifiers = iter([UUID(existing_id), UUID(new_id)])
     monkeypatch.setattr("app.services.restaurant.uuid4", lambda: next(identifiers))
 
-    response = TestClient(app).post(
+    response = admin_client.post(
         "/restaurants",
         json={"name": "New", "cuisine": "Cafe", "description": "Food"},
     )

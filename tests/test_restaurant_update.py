@@ -27,7 +27,7 @@ from app.repositories.restaurant import RestaurantRepository
     ],
 )
 def test_update_persists_only_supplied_fields_and_preserves_menus(
-    isolated_restaurants_path, changes, expected_changes
+    manager_client, isolated_restaurants_path, changes, expected_changes
 ):
     before = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
     for restaurant in before:
@@ -36,7 +36,7 @@ def test_update_persists_only_supplied_fields_and_preserves_menus(
     target = before[1]  # Selecting the second record catches updating the wrong one.
     expected = {**target, **expected_changes}
 
-    response = TestClient(app).patch(f"/restaurants/{target['id']}", json=changes)
+    response = manager_client.patch(f"/restaurants/{target['id']}", json=changes)
 
     assert response.status_code == 200
     assert response.json() == {
@@ -44,21 +44,21 @@ def test_update_persists_only_supplied_fields_and_preserves_menus(
     }
     reloaded = RestaurantRepository(isolated_restaurants_path).load_records()
     assert [record.model_dump(mode="json") for record in reloaded] == [before[0], expected]
-    assert TestClient(app).get(f"/restaurants/{target['id']}/menu").json() == {
+    assert manager_client.get(f"/restaurants/{target['id']}/menu").json() == {
         "restaurant_id": target["id"], "items": target["menu_items"]
     }
-    listed = TestClient(app).get("/restaurants").json()
+    listed = manager_client.get("/restaurants").json()
     assert listed[1] == response.json()
 
 
-def test_update_accepts_unchanged_value(isolated_restaurants_path):
+def test_update_accepts_unchanged_value(manager_client, isolated_restaurants_path):
     original = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
     for restaurant in original:
         for item in restaurant["menu_items"]:
             item.setdefault("available", True)
     target = original[0]
 
-    response = TestClient(app).patch(
+    response = manager_client.patch(
         f"/restaurants/{target['id']}", json={"name": target["name"]}
     )
 
@@ -67,7 +67,7 @@ def test_update_accepts_unchanged_value(isolated_restaurants_path):
 
 
 def test_update_preserves_legacy_fields_and_omitted_unnormalized_text(
-    isolated_restaurants_path,
+    manager_client, isolated_restaurants_path,
 ):
     original = {
         "id": "legacy", "name": "  Original name  ", "cuisine": " ",
@@ -75,7 +75,7 @@ def test_update_preserves_legacy_fields_and_omitted_unnormalized_text(
     }
     isolated_restaurants_path.write_text(json.dumps([original]), encoding="utf-8")
 
-    response = TestClient(app).patch("/restaurants/legacy", json={"description": "New"})
+    response = manager_client.patch("/restaurants/legacy", json={"description": "New"})
 
     assert response.status_code == 200
     assert response.json() == {
@@ -89,11 +89,11 @@ def test_update_preserves_legacy_fields_and_omitted_unnormalized_text(
 @pytest.mark.parametrize("field", ["name", "cuisine", "description"])
 @pytest.mark.parametrize("value", [None, "", " \t\n", 12, True, [], {}])
 def test_update_rejects_invalid_fields_without_writing(
-    isolated_restaurants_path, field, value
+    manager_client, isolated_restaurants_path, field, value
 ):
     original = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).patch("/restaurants/restaurant-001", json={field: value})
+    response = manager_client.patch("/restaurants/restaurant-001", json={field: value})
 
     assert response.status_code == 422
     assert isinstance(response.json()["detail"], list)
@@ -106,11 +106,11 @@ def test_update_rejects_invalid_fields_without_writing(
      {"restaurant_id": "chosen"}, {"menu_id": "chosen"}, {"unknown": "value"}],
 )
 def test_update_rejects_empty_or_unsupported_body_without_writing(
-    isolated_restaurants_path, body
+    manager_client, isolated_restaurants_path, body
 ):
     original = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).patch("/restaurants/restaurant-001", json=body)
+    response = manager_client.patch("/restaurants/restaurant-001", json=body)
 
     assert response.status_code == 422
     assert isinstance(response.json()["detail"], list)
@@ -118,10 +118,10 @@ def test_update_rejects_empty_or_unsupported_body_without_writing(
 
 
 @pytest.mark.parametrize("body", ["", "null", "{broken"])
-def test_update_rejects_missing_null_or_malformed_json(isolated_restaurants_path, body):
+def test_update_rejects_missing_null_or_malformed_json(manager_client, isolated_restaurants_path, body):
     original = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).patch(
+    response = manager_client.patch(
         "/restaurants/restaurant-001", content=body,
         headers={"Content-Type": "application/json"},
     )
@@ -130,16 +130,16 @@ def test_update_rejects_missing_null_or_malformed_json(isolated_restaurants_path
     assert isolated_restaurants_path.read_bytes() == original
 
 
-def test_update_unknown_opaque_id_does_not_create_restaurant(isolated_restaurants_path):
+def test_update_unknown_opaque_id_does_not_create_restaurant(manager_client, isolated_restaurants_path):
     original = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).patch("/restaurants/not-a-uuid", json={"name": "New"})
+    response = manager_client.patch("/restaurants/not-a-uuid", json={"name": "New"})
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Restaurant not found"}
     assert isolated_restaurants_path.read_bytes() == original
     # A failed lookup must release the shared lock for subsequent writes.
-    assert TestClient(app).patch(
+    assert manager_client.patch(
         "/restaurants/restaurant-001", json={"name": "Still writable"}
     ).status_code == 200
 
@@ -147,14 +147,14 @@ def test_update_unknown_opaque_id_does_not_create_restaurant(isolated_restaurant
 @pytest.mark.parametrize("identifier", ["restaurant-001", "unknown"])
 @pytest.mark.parametrize("contents", [None, "{broken", '[{"id":"invalid"}]'])
 def test_update_storage_error_precedes_not_found_and_exposes_no_details(
-    isolated_restaurants_path, identifier, contents
+    manager_client, isolated_restaurants_path, identifier, contents
 ):
     if contents is None:
         isolated_restaurants_path.unlink()
     else:
         isolated_restaurants_path.write_text(contents, encoding="utf-8")
 
-    response = TestClient(app).patch(f"/restaurants/{identifier}", json={"name": "New"})
+    response = manager_client.patch(f"/restaurants/{identifier}", json={"name": "New"})
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
@@ -164,17 +164,17 @@ def test_update_storage_error_precedes_not_found_and_exposes_no_details(
         assert isolated_restaurants_path.read_text(encoding="utf-8") == contents
 
 
-def test_update_invalid_request_precedes_storage_and_lookup(isolated_restaurants_path):
+def test_update_invalid_request_precedes_storage_and_lookup(manager_client, isolated_restaurants_path):
     isolated_restaurants_path.unlink()
 
-    response = TestClient(app).patch("/restaurants/unknown", json={"name": None})
+    response = manager_client.patch("/restaurants/unknown", json={"name": None})
 
     assert response.status_code == 422
     assert not isolated_restaurants_path.exists()
 
 
 def test_update_save_failure_preserves_file_and_allows_retry(
-    isolated_restaurants_path, monkeypatch
+    manager_client, isolated_restaurants_path, monkeypatch
 ):
     original = isolated_restaurants_path.read_bytes()
     files_before = set(isolated_restaurants_path.parent.iterdir())
@@ -184,7 +184,7 @@ def test_update_save_failure_preserves_file_and_allows_retry(
 
     with monkeypatch.context() as patch:
         patch.setattr("app.repositories.restaurant.os.replace", fail_replace)
-        response = TestClient(app).patch(
+        response = manager_client.patch(
             "/restaurants/restaurant-001", json={"name": "New"}
         )
 
@@ -192,7 +192,7 @@ def test_update_save_failure_preserves_file_and_allows_retry(
     assert response.json() == {"detail": "Restaurant data is unavailable"}
     assert isolated_restaurants_path.read_bytes() == original
     assert set(isolated_restaurants_path.parent.iterdir()) == files_before
-    assert TestClient(app).patch(
+    assert manager_client.patch(
         "/restaurants/restaurant-001", json={"name": "Retry"}
     ).status_code == 200
     assert RestaurantRepository(isolated_restaurants_path).get_record(
@@ -215,7 +215,7 @@ def test_update_openapi_describes_partial_nonnullable_input_and_errors():
         "$ref": "#/components/schemas/RestaurantUpdate"
     }
     responses = operation["responses"]
-    assert set(responses) == {"200", "404", "422", "500"}
+    assert set(responses) == {"200", "401", "403", "404", "422", "500"}
     for status, model in [("200", "Restaurant"), ("404", "ErrorResponse"),
                           ("422", "HTTPValidationError"), ("500", "ErrorResponse")]:
         assert responses[status]["content"]["application/json"]["schema"]["$ref"] == (
@@ -233,7 +233,7 @@ def test_update_openapi_describes_partial_nonnullable_input_and_errors():
 
 
 def test_overlapping_updates_through_independent_services_preserve_both_changes(
-    isolated_restaurants_path, monkeypatch
+    menu_manager, isolated_restaurants_path, monkeypatch
 ):
     import app.repositories.restaurant as repository_module
     from app.schemas.restaurant import RestaurantUpdate
@@ -265,12 +265,12 @@ def test_overlapping_updates_through_independent_services_preserve_both_changes(
     monkeypatch.setattr(first, "load_records", load_first)
     with ThreadPoolExecutor(max_workers=2) as pool:
         one = pool.submit(
-            RestaurantService(first).update_restaurant, "restaurant-001",
+            RestaurantService(first, principal=menu_manager).update_restaurant, "restaurant-001",
             RestaurantUpdate(name="Concurrent name"),
         )
         assert first_loaded.wait(5)
         two = pool.submit(
-            RestaurantService(second).update_restaurant, "restaurant-001",
+            RestaurantService(second, principal=menu_manager).update_restaurant, "restaurant-001",
             RestaurantUpdate(description="Concurrent description"),
         )
         assert one.result(timeout=10).name == "Concurrent name"

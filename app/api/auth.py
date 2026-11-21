@@ -73,3 +73,9 @@ def require_restaurant_user(principal: Annotated[Principal, Depends(get_current_
     if principal.role != "restaurant_user":
         raise HTTPException(403, "Operation not permitted")
     return principal
+
+
+def require_administrator(principal: Annotated[Principal, Depends(get_current_principal)]) -> Principal:
+    if principal.role != "administrator":
+        raise HTTPException(403, "Operation not permitted")
+    return principal

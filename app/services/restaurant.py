@@ -6,7 +6,7 @@
 from uuid import uuid4
 
 from app.core.workflow import workflow_lock
-from app.repositories.staff import StaffRepository
+from app.repositories.staff import StaffAccount, StaffRepository
 from app.schemas.customer import Principal
 from app.repositories.restaurant import RestaurantRepository
 from app.schemas.restaurant import (
@@ -29,12 +29,12 @@ class MenuItemNotFoundError(Exception):
     """No item exists with the requested identifier under this restaurant."""
 
 
-class MenuAuthenticationRequired(Exception):
-    """No authenticated manager permission check was provided."""
+class AuthenticationRequired(Exception):
+    """The caller has no current authenticated account."""
 
 
-class MenuPermissionDenied(Exception):
-    """The caller cannot manage this restaurant's menu."""
+class PermissionDenied(Exception):
+    """The caller lacks the required role or restaurant assignment."""
 
 
 class RestaurantService:
@@ -42,21 +42,28 @@ class RestaurantService:
 
     def __init__(
         self, repository: RestaurantRepository, *,
-        principal: Principal | None = None,
+        principal: Principal | None = None, staff: StaffRepository | None = None,
     ) -> None:
         self.repository = repository
         self.principal = principal
+        self.staff = staff if staff is not None else StaffRepository()
 
-    def _require_menu_permission(self, restaurant_id: str) -> None:
+    def _require_staff(self, role: str) -> StaffAccount:
         if self.principal is None:
-            raise MenuAuthenticationRequired()
-        if self.principal.role != "restaurant_user":
-            raise MenuPermissionDenied()
-        staff = StaffRepository().get_staff(self.principal.account_id)
-        if staff is None:
-            raise MenuAuthenticationRequired()
-        if staff.role != "restaurant_user" or restaurant_id not in staff.restaurant_ids:
-            raise MenuPermissionDenied()
+            raise AuthenticationRequired()
+        if self.principal.role != role:
+            raise PermissionDenied()
+        account = self.staff.get_staff(self.principal.account_id)
+        if account is None:
+            raise AuthenticationRequired()
+        if account.role != role:
+            raise PermissionDenied()
+        return account
+
+    @staticmethod
+    def _require_assignment(account: StaffAccount, restaurant_id: str) -> None:
+        if restaurant_id not in account.restaurant_ids:
+            raise PermissionDenied()
 
     def list_restaurants(self, cuisine: str | None = None) -> list[Restaurant]:
         """Return restaurants in stored order, optionally only one cuisine.
@@ -85,6 +92,8 @@ class RestaurantService:
         return Menu(restaurant_id=record.id, items=record.menu_items)
 
     def create_restaurant(self, request: RestaurantCreate) -> Restaurant:
+        self._require_staff("administrator")
+
         def add(records: list[RestaurantRecord]) -> None:
             existing_ids = {record.id for record in records}
             identifier = str(uuid4())
@@ -101,12 +110,14 @@ class RestaurantService:
     def update_restaurant(
         self, restaurant_id: str, request: RestaurantUpdate
     ) -> Restaurant:
+        manager = self._require_staff("restaurant_user")
         changes = request.model_dump(exclude_unset=True)
 
         def update(records: list[RestaurantRecord]) -> None:
             # Look up current state inside the mutation lock, never a stale snapshot.
             for record in records:
                 if record.id == restaurant_id:
+                    self._require_assignment(manager, restaurant_id)
                     for field, value in changes.items():
                         setattr(record, field, value)
                     return
@@ -125,7 +136,7 @@ class RestaurantService:
             record = next((r for r in records if r.id == restaurant_id), None)
             if record is None:
                 raise RestaurantNotFoundError(restaurant_id)
-            self._require_menu_permission(restaurant_id)
+            self._require_assignment(manager, restaurant_id)
 
             existing_ids = {item.id for item in record.menu_items}
             identifier = str(uuid4())
@@ -135,6 +146,7 @@ class RestaurantService:
             record.menu_items.append(MenuItem(id=identifier, **request.model_dump()))
 
         with workflow_lock:
+            manager = self._require_staff("restaurant_user")
             saved = self.repository.mutate_records(add)
         parent = next(record for record in saved if record.id == restaurant_id)
         return next(item for item in parent.menu_items if item.id == created_id)
@@ -149,7 +161,7 @@ class RestaurantService:
             parent = next((r for r in records if r.id == restaurant_id), None)
             if parent is None:
                 raise RestaurantNotFoundError(restaurant_id)
-            self._require_menu_permission(restaurant_id)
+            self._require_assignment(manager, restaurant_id)
             item = next((i for i in parent.menu_items if i.id == item_id), None)
             if item is None:
                 raise MenuItemNotFoundError(item_id)
@@ -157,6 +169,7 @@ class RestaurantService:
                 setattr(item, field, value)
 
         with workflow_lock:
+            manager = self._require_staff("restaurant_user")
             saved = self.repository.mutate_records(update)
         parent = next(record for record in saved if record.id == restaurant_id)
         return next(item for item in parent.menu_items if item.id == item_id)

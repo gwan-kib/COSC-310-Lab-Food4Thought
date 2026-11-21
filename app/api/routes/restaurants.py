@@ -3,12 +3,13 @@
 # build the service/repository dependency and map missing resources to 404 or
 # storage failures to a generic 500.
 
+from contextlib import contextmanager
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import StringConstraints
 
-from app.api.auth import require_restaurant_user
+from app.api.auth import authentication_required, require_administrator, require_restaurant_user
 from app.repositories.staff import StaffDataError
 from app.schemas.customer import Principal
 from app.repositories.restaurant import RestaurantDataError, RestaurantRepository
@@ -23,8 +24,8 @@ from app.schemas.restaurant import (
     RestaurantUpdate,
 )
 from app.services.restaurant import (
-    MenuAuthenticationRequired,
-    MenuPermissionDenied,
+    AuthenticationRequired,
+    PermissionDenied,
     MenuItemNotFoundError,
     RestaurantNotFoundError,
     RestaurantService,
@@ -32,9 +33,10 @@ from app.services.restaurant import (
 
 router = APIRouter()
 
-MENU_PERMISSION_RESPONSES = {
-    401: {"model": ErrorResponse, "description": "Menu writes require authentication"},
-    403: {"model": ErrorResponse, "description": "Caller cannot manage this restaurant"},
+MANAGEMENT_PERMISSION_RESPONSES = {
+    401: {"model": ErrorResponse, "description": "Management writes require authentication"},
+    403: {"model": ErrorResponse, "description": "Caller lacks the required role or restaurant assignment"},
+    500: {"model": ErrorResponse, "description": "Restaurant or authentication data is unavailable"},
 }
 
 # A supplied filter must contain more than whitespace; blank values are a 422.
@@ -46,10 +48,35 @@ def get_restaurant_service() -> RestaurantService:
     return RestaurantService(RestaurantRepository())
 
 
-def get_menu_management_service(
+def get_manager_service(
     principal: Annotated[Principal, Depends(require_restaurant_user)],
 ) -> RestaurantService:
     return RestaurantService(RestaurantRepository(), principal=principal)
+
+
+def get_admin_service(
+    principal: Annotated[Principal, Depends(require_administrator)],
+) -> RestaurantService:
+    return RestaurantService(RestaurantRepository(), principal=principal)
+
+
+@contextmanager
+def management_errors():
+    """Translate write failures consistently for all restaurant management routes."""
+    try:
+        yield
+    except StaffDataError as exc:
+        raise HTTPException(500, "Authentication data is unavailable") from exc
+    except AuthenticationRequired as exc:
+        raise authentication_required() from exc
+    except PermissionDenied as exc:
+        raise HTTPException(403, "Operation not permitted") from exc
+    except RestaurantNotFoundError as exc:
+        raise HTTPException(404, "Restaurant not found") from exc
+    except MenuItemNotFoundError as exc:
+        raise HTTPException(404, "Menu item not found") from exc
+    except RestaurantDataError as exc:
+        raise HTTPException(500, "Restaurant data is unavailable") from exc
 
 
 @router.get(
@@ -89,25 +116,21 @@ def list_restaurants(
     "/restaurants",
     summary="Create a restaurant",
     description=(
-        "Create and persist a restaurant with a server-generated stable ID "
+        "An administrator can create and persist a restaurant with a server-generated stable ID "
         "and an empty menu."
     ),
     response_model=Restaurant,
     status_code=201,
     responses={
-        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"}
+        **MANAGEMENT_PERMISSION_RESPONSES,
     },
 )
 def create_restaurant(
     request: RestaurantCreate,
-    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+    service: Annotated[RestaurantService, Depends(get_admin_service)],
 ) -> Restaurant:
-    try:
+    with management_errors():
         return service.create_restaurant(request)
-    except RestaurantDataError as exc:
-        raise HTTPException(
-            status_code=500, detail="Restaurant data is unavailable"
-        ) from exc
 
 
 @router.get(
@@ -144,15 +167,15 @@ def get_restaurant(
     "/restaurants/{restaurant_id}",
     summary="Update a restaurant",
     description=(
-        "Persist a partial update to name, cuisine, or description. Supply at least "
+        "The assigned restaurant manager can persist a partial update to name, cuisine, or description. Supply at least "
         "one non-null, nonblank string; surrounding whitespace is trimmed. Omitted "
         "fields, the stable ID, and menu items are preserved. Unsupported fields "
         "are rejected. Returns the complete restaurant only after saving."
     ),
     response_model=Restaurant,
     responses={
+        **MANAGEMENT_PERMISSION_RESPONSES,
         404: {"model": ErrorResponse, "description": "Restaurant not found"},
-        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
     },
 )
 def update_restaurant(
@@ -161,16 +184,10 @@ def update_restaurant(
         Path(description="Stable restaurant identifier, for example `restaurant-001`."),
     ],
     request: RestaurantUpdate,
-    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+    service: Annotated[RestaurantService, Depends(get_manager_service)],
 ) -> Restaurant:
-    try:
+    with management_errors():
         return service.update_restaurant(restaurant_id, request)
-    except RestaurantNotFoundError as exc:
-        raise HTTPException(status_code=404, detail="Restaurant not found") from exc
-    except RestaurantDataError as exc:
-        raise HTTPException(
-            status_code=500, detail="Restaurant data is unavailable"
-        ) from exc
 
 
 @router.get(
@@ -216,9 +233,8 @@ def get_menu(
     response_model=MenuItem,
     status_code=201,
     responses={
-        **MENU_PERMISSION_RESPONSES,
+        **MANAGEMENT_PERMISSION_RESPONSES,
         404: {"model": ErrorResponse, "description": "Restaurant not found"},
-        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
     },
 )
 def add_menu_item(
@@ -227,23 +243,10 @@ def add_menu_item(
         Path(description="Stable restaurant identifier, for example `restaurant-001`."),
     ],
     request: MenuItemCreate,
-    service: Annotated[RestaurantService, Depends(get_menu_management_service)],
+    service: Annotated[RestaurantService, Depends(get_manager_service)],
 ) -> MenuItem:
-    try:
+    with management_errors():
         return service.add_menu_item(restaurant_id, request)
-    except StaffDataError as exc:
-        raise HTTPException(500, "Authentication data is unavailable") from exc
-    except MenuAuthenticationRequired as exc:
-        raise HTTPException(status_code=401, detail="Authentication required",
-                            headers={"WWW-Authenticate": "Bearer"}) from exc
-    except MenuPermissionDenied as exc:
-        raise HTTPException(status_code=403, detail="Operation not permitted") from exc
-    except RestaurantNotFoundError as exc:
-        raise HTTPException(status_code=404, detail="Restaurant not found") from exc
-    except RestaurantDataError as exc:
-        raise HTTPException(
-            status_code=500, detail="Restaurant data is unavailable"
-        ) from exc
 
 
 @router.patch(
@@ -261,12 +264,11 @@ def add_menu_item(
     ),
     response_model=MenuItem,
     responses={
-        **MENU_PERMISSION_RESPONSES,
+        **MANAGEMENT_PERMISSION_RESPONSES,
         404: {
             "model": ErrorResponse,
             "description": "Restaurant not found, or menu item not found under that restaurant",
         },
-        500: {"model": ErrorResponse, "description": "Restaurant data is unavailable"},
     },
 )
 def update_menu_item(
@@ -279,22 +281,7 @@ def update_menu_item(
         Path(description="Stable item identifier from this restaurant's menu response."),
     ],
     request: MenuItemUpdate,
-    service: Annotated[RestaurantService, Depends(get_menu_management_service)],
+    service: Annotated[RestaurantService, Depends(get_manager_service)],
 ) -> MenuItem:
-    try:
+    with management_errors():
         return service.update_menu_item(restaurant_id, item_id, request)
-    except StaffDataError as exc:
-        raise HTTPException(500, "Authentication data is unavailable") from exc
-    except MenuAuthenticationRequired as exc:
-        raise HTTPException(status_code=401, detail="Authentication required",
-                            headers={"WWW-Authenticate": "Bearer"}) from exc
-    except MenuPermissionDenied as exc:
-        raise HTTPException(status_code=403, detail="Operation not permitted") from exc
-    except RestaurantNotFoundError as exc:
-        raise HTTPException(status_code=404, detail="Restaurant not found") from exc
-    except MenuItemNotFoundError as exc:
-        raise HTTPException(status_code=404, detail="Menu item not found") from exc
-    except RestaurantDataError as exc:
-        raise HTTPException(
-            status_code=500, detail="Restaurant data is unavailable"
-        ) from exc

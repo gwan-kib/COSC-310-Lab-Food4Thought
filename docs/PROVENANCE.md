@@ -861,3 +861,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: After merging main, 9 of 18 focused tests failed before the integration. The final focused run passed 19, including a concurrent disable and checkout. The complete browser-required suite passed 636 tests. Compilation and committed-data checks passed.
 - PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
 - Student review status: Responsible student walkthrough and human review pending.
+
+### Entry 67: Restaurant management authorization review fixes
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner. Gwantana Kiboigo supplied the [requested changes](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109#pullrequestreview-6002389649).
+- Artifact: Restaurant route and service authorization, staff role dependencies, regression and browser tests, setup and API documentation.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Address the unprotected restaurant create/edit operations and make the service’s staff store injectable.
+- Influence: Codex wrote the fixes and tests. The reviewer identified the policy gaps and dependency change.
+- Validation: Before implementation the new policy tests produced 17 failures and 4 passes. The authorization and availability tests subsequently passed together (40 tests). The browser-required full suite passed 657 tests using isolated data.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible-student validation and teammate re-review of the fixes pending.

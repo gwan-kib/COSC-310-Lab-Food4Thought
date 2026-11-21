@@ -89,7 +89,7 @@ def menu_manager(auth_accounts, monkeypatch):
     path = auth_accounts.paths["staff"]
     staff = json.loads(path.read_bytes())
     owner = next(account for account in staff if account["role"] == "restaurant_user")
-    owner["restaurant_ids"].append("target")
+    owner["restaurant_ids"].extend(["target", "legacy", "restaurant-002"])
     path.write_text(json.dumps(staff), encoding="utf-8")
     monkeypatch.setitem(app.dependency_overrides, get_now, lambda: auth_accounts.now)
     return Principal(account_id=owner["id"], role=owner["role"])
@@ -101,4 +101,14 @@ def manager_client(menu_manager, auth_accounts):
     from app.main import app
 
     return TestClient(app, headers=auth_accounts.headers("restaurant_user"),
+                      raise_server_exceptions=False)
+
+@pytest.fixture
+def admin_client(auth_accounts, monkeypatch):
+    from fastapi.testclient import TestClient
+    from app.api.auth import get_now
+    from app.main import app
+
+    monkeypatch.setitem(app.dependency_overrides, get_now, lambda: auth_accounts.now)
+    return TestClient(app, headers=auth_accounts.headers("administrator"),
                       raise_server_exceptions=False)

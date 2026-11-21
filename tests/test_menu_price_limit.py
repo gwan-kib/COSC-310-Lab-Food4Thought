@@ -104,7 +104,7 @@ def test_repository_rejects_stored_prices_above_limit_without_rewriting(
     ],
 )
 def test_out_of_range_stored_price_returns_generic_500_across_operations(
-    manager_client, isolated_restaurants_path, method, path, body
+    manager_client, admin_client, isolated_restaurants_path, method, path, body
 ):
     records = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
     # Invalid data in another restaurant must not be ignored or silently repaired.
@@ -112,7 +112,8 @@ def test_out_of_range_stored_price_returns_generic_500_across_operations(
     isolated_restaurants_path.write_text(json.dumps(records), encoding="utf-8")
     before = isolated_restaurants_path.read_bytes()
 
-    response = manager_client.request(method, path, json=body)
+    client = admin_client if path == "/restaurants" else manager_client
+    response = client.request(method, path, json=body)
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}

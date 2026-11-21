@@ -26,7 +26,7 @@ import pytest
 )
 @pytest.mark.parametrize("raw_value", ["1e309", "NaN", "Infinity", "-Infinity", '"\\ud800"'])
 def test_invalid_values_return_serializable_422_without_writing(
-    manager_client, isolated_restaurants_path, path, valid_body, field, raw_value
+    manager_client, admin_client, isolated_restaurants_path, path, valid_body, field, raw_value
 ):
     # Send raw JSON: encoding through the client's json= parameter can reject
     # non-finite numbers before the request reaches the application.
@@ -34,7 +34,8 @@ def test_invalid_values_return_serializable_422_without_writing(
     body = json.dumps(remaining_fields)[:-1] + f', "{field}": {raw_value}' + "}"
     before = isolated_restaurants_path.read_bytes()
 
-    response = manager_client.post(
+    client = admin_client if path == "/restaurants" else manager_client
+    response = client.post(
         path, content=body, headers={"Content-Type": "application/json"}
     )
 
@@ -125,12 +126,13 @@ def test_invalid_body_still_precedes_storage_failure(manager_client, isolated_re
     ],
 )
 def test_invalid_input_always_has_serializable_validation_response(
-    manager_client, isolated_restaurants_path, method, path, fields, invalid_field, error_type
+    manager_client, admin_client, isolated_restaurants_path, method, path, fields, invalid_field, error_type
 ):
     original = isolated_restaurants_path.read_bytes()
     body = '{' + fields + ',"cuisine":"Cafe","description":"Food"}'
 
-    response = manager_client.request(
+    client = admin_client if path == "/restaurants" else manager_client
+    response = client.request(
         method, path, content=body, headers={"Content-Type": "application/json"}
     )
 
@@ -153,11 +155,12 @@ def test_invalid_input_always_has_serializable_validation_response(
     [("patch", "/restaurants/restaurant-001"), ("post", "/restaurants")],
 )
 def test_non_json_invalid_utf8_body_returns_validation_error(
-    manager_client, isolated_restaurants_path, method, path
+    manager_client, admin_client, isolated_restaurants_path, method, path
 ):
     original = isolated_restaurants_path.read_bytes()
 
-    response = manager_client.request(
+    client = admin_client if path == "/restaurants" else manager_client
+    response = client.request(
         method, path, content=b"\xff\xfe", headers={"Content-Type": "text/plain"}
     )
 
