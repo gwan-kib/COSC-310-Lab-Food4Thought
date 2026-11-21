@@ -187,3 +187,29 @@ Record:
 - Any environment limitation, pre-existing failure, product failure, and remaining risk.
 
 Never fabricate output, report an unrun command as passing, weaken assertions to hide a defect, or treat API tests as proof that a frontend works. Documentation-only changes need appropriate link/template/content checks, not invented application test results.
+
+## #101 full workflow integration checks
+
+The backend [complete-workflow tests](../tests/test_complete_workflow.py) run
+real account creation and sign-in through the HTTP application, catalog/menu,
+cart, checkout and saved-order reads through a fresh API instance. They also
+check authorized/unauthorized paths, changed catalog values, rejected requests
+and both persistence failure stages. The associated
+[browser journey](../tests/browser/test_complete_workflow_browser.py) uses the
+real frontend merged through #100 / PR #133 and verifies a visible saved receipt and an owned
+order-detail read. These tests do not mock application services, repositories
+or HTTP responses; only the clock and deliberate filesystem failures are
+controlled. All six data paths are isolated by `tests/conftest.py`.
+
+Focused commands from the repository root (with dependencies and Chromium
+installed):
+
+```sh
+REQUIRE_BROWSER_TESTS=1 python -m pytest -q tests/test_complete_workflow.py tests/browser/test_complete_workflow_browser.py
+python -m compileall app
+REQUIRE_BROWSER_TESTS=1 python -m pytest
+git status --porcelain --untracked-files=all --ignored -- data/
+```
+
+These are verification commands, not claims that a particular execution passed.
+PR #136's earlier stacked revision `ec2e271` passed [hosted CI run 44877877769](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877877769). The branch was synchronized again with `main` after #100 / PR #133, #103 / PR #134, #95 / PR #132, #102 / PR #135 and #104 / PR #137 merged; validate the resolved revision in CI before merging. The browser test now follows the actual Browse restaurants and My cart links instead of opening those pages directly.

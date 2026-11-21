@@ -1226,3 +1226,15 @@ its pending-auth and local-only status.
 - Validation: Inspected the repository's `main` tree, relevant documentation, issue #104 and merged/open PR metadata on 2026-11-20 and rechecked against merged PRs #132–#135 and #138 on 2026-11-21; checked that pending integration work was not represented as delivered. The reconciled branch was checked across **27 Markdown files and 347 relative repository-path links**, with no missing repository targets. External URLs and fragment anchors were not verified. Documentation-only changes; no application tests or manual demo were run. Student review and integrated-release checks remain separate gates.
 - PR or commit: [PR #137](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/137), branch `docs/104-m2-handoff-audit`; [issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104).
 - Student review status: Pending. Gwantana must review/validate the final documentation and confirm understanding; Sreeram's requested change was applied; re-review is pending.
+
+### Entry 90: Complete customer-to-order workflow integration evidence (#101)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), responsible for issue #101; student walkthrough and understanding remain unconfirmed.
+- Artifact: `tests/test_complete_workflow.py`, `tests/browser/test_complete_workflow_browser.py`, `docs/TESTING.md`, and `docs/milestones/M2.md`.
+- Label: `AI-GENERATED`.
+- AI tool: OpenAI ChatGPT (GPT-6).
+- Purpose: Add integrated verification of the actual customer journey, customer/restaurant/cart/order boundaries, checkout failure recovery and visible browser receipt.
+- Influence: ChatGPT authored the HTTP and Chromium tests, assertions, rule matrix, documentation and this provenance entry. Production business rules and repositories were not changed. The browser tests originally depended on #100's frontend branch; PR #133 has since merged into main.
+- Validation: Original stacked PR #136 revision ec2e271 passed hosted required-browser CI ([run 44877877769](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877877769)). On reviewed head `2a6bce4`, Thomas's Codex-assisted technical review reported 12 focused tests passing and 978 tests passing with required Chromium, plus successful compilation and clean `data/` guard. That revision preceded the merge of #102/#104 into main and the navigational test improvement; the resolved head needs new CI verification. No local tests were run by this assistant. Human reviewer sign-off and responsible-student walkthrough remain pending. #95 persistence verification PR #132 has merged.
+- PR or commit: [Issue #101](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/101); feature branch `feature/101-complete-workflow-tests`. [PR #136](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/136).
+- Student review status: Pending. Automated results and agent checks do not establish independent human review or individual understanding.
