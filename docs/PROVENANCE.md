@@ -840,6 +840,9 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 ### Issue 92: customer order history service
 
+Historical service-only contribution; the endpoint integration below supersedes
+its pending-auth and local-only status.
+
 - Student(s): Thomas Chen (`Tc2006415`), assignee of [#92](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/92).
 - Artifacts: `app/services/order_history.py`, `tests/test_order_history_service.py`, `docs/superpowers/plans/2026-11-19-order-history.md`, and history additions to the M2 API contract, testing guide, M2 evidence and this record.
 - Label: `AI-GENERATED`.
@@ -850,3 +853,14 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Agent review: A separate read-only review inspected the complete change and related service/repository/auth contracts. It found no blocking defects and suggested an optional additional test with an opaque principal; the suggestion is recorded in the plan. This is not human peer review or proof of full issue acceptance.
 - Issue/branch: #92, `feature/92-order-history`, based on refreshed main `31e4320d003cdd8a6ae019ce74b155564e97d59a`. Local work only; no PR or commit yet.
 - Student review status: Implementation understanding and human peer review remain pending. Agent checks are not student approval. Real #79/#80/#84 auth, HTTP denial tests and a fully real purchase-to-history workflow remain outstanding; #92 is not complete.
+
+### Issue 92: authenticated history endpoint and integration
+
+- Student(s): Thomas Chen (`Tc2006415`), #92 assignee and requester.
+- Artifacts: `app/api/routes/order_history.py`, the resolver in `app/services/order_history.py`, router registration in `app/main.py`, `tests/test_order_history_api.py`, README, both setup guides, M2 API/testing/milestone documentation, implementation plan and this record.
+- Label: `AI-GENERATED`.
+- AI tool: OpenAI Codex.
+- Purpose and influence: Thomas authorized finishing #92 using the merged authentication foundation and opening a PR. Codex restored the prior service work from the app's saved snapshot, merged main `95c7c8e`, and resolved the provenance append conflict by preserving both histories. It wrote the thin history route, service-layer read authorization adapter, real-auth API and real-store purchase integration tests, and documentation. Authentication remains in the existing shared bearer/session implementation; inactive customers retain history access. No shared customer repository or #93 order-detail code was changed.
+- Validation: After integrating main, the required-browser baseline passed 636 tests. Before endpoint implementation, `python -m pytest -q tests/test_order_history_api.py --tb=short` failed 24 tests on the missing route/module/OpenAPI operation. After implementation, `python -m pytest -q tests/test_order_history_api.py tests/test_order_history_service.py tests/test_order_repository.py tests/test_checkout_service.py` passed 80 tests. `python -m compileall app` succeeded; `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed 660 tests with no skips. The committed-data guard, `git status --porcelain --untracked-files=all --ignored -- data/`, `git diff --check`, and 113 local documentation-link checks passed. Commands used this worktree's Python 3.12.10 `.venv/Scripts/python.exe`. An independent read-only agent review found no blocking defects; published-head CI is recorded in the PR.
+- Integration limits: Registration, login, cart operations and history run through HTTP; the purchase step calls the real checkout service with real customer/cart/catalog/order stores and a principal resolved from the issued token. The clock is fixed. A fresh history application reopens the same temporary stores. This does not claim #91's checkout HTTP route exists or that #84's entire rollout is complete. Human peer review, student understanding and merge remain pending.
+- PR/branch: #92, `feature/92-order-history`; PR creation authorized and pending. No self-approval or merge is authorized.

@@ -6,8 +6,25 @@ from collections.abc import Callable
 from typing import Protocol
 
 from app.core.workflow import workflow_lock
+from app.repositories.customer import CustomerRepository
 from app.repositories.order import OrderRepository
+from app.schemas.customer import Customer as PublicCustomer, Principal as CustomerPrincipal
 from app.schemas.order import Order
+from app.services.auth import AuthenticationRequiredError
+
+
+class OrderHistoryNotPermittedError(Exception):
+    """Only a customer can retrieve their order history."""
+
+
+def require_history_customer(principal: CustomerPrincipal, *, customers: CustomerRepository) -> PublicCustomer:
+    """Resolve read access inside the history service's workflow lock, including inactive customers."""
+    if principal.role != "customer":
+        raise OrderHistoryNotPermittedError()
+    customer = customers.get_customer(principal.account_id)
+    if customer is None:
+        raise AuthenticationRequiredError()
+    return customer.public()
 
 
 class Customer(Protocol):
@@ -17,7 +34,7 @@ class Customer(Protocol):
 class OrderHistoryService[Principal]:
     def __init__(self, require_customer: Callable[[Principal], Customer],
                  orders: OrderRepository) -> None:
-        # Bind #84's shared helper to its customer store and active=False.
+        # Production binds require_history_customer to the merged customer store.
         self.require_customer = require_customer
         self.orders = orders
 

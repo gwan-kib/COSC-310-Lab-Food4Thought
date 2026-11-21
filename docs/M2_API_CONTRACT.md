@@ -218,35 +218,47 @@ revision 2, return `cart_reset_pending: true` so the client can retry that
 revision. If the read confirms the purchased revision is gone, return
 `cart_reset_pending: false`. If the cart cannot be read, return `true`.
 
-## Order history service implementation (#92)
+## Order history implementation (#92)
 
 [`OrderHistoryService.list_orders(principal)`](../app/services/order_history.py)
 uses the existing order repository from #91. It acquires the shared workflow
-lock, resolves the authorized customer through an injected helper, then calls
-`list_for_customer(customer.id)`. At composition time, bind #84's
-`require_customer(principal, customers, active=False)` so inactive customers
-retain read access. The callback pattern matches the checkout service; it is
-not an alternative authentication implementation.
+lock, resolves the authorized customer through `require_history_customer`, then
+calls `list_for_customer(customer.id)`. The helper rechecks the customer role
+and reloads the customer from `CustomerRepository`, allowing inactive customers.
+This adapts the actual merged auth interfaces; the earlier proposed
+`app/services/access.py` helper is not present. Token/session resolution stays
+in the shared auth foundation, and no authentication implementation is duplicated.
 
 Results are saved `Order` snapshots in persisted insertion order, with `[]` for
 a customer with no orders. Reads do not recalculate historical values, consult
 the current cart/catalog, or write files. Access/customer-store failures propagate
-from the shared helper; missing, unreadable or corrupt order storage raises
+from the helper; missing, unreadable or corrupt order storage raises
 `OrderDataError("Order data is unavailable")` rather than returning an empty list.
 
-The [history tests](../tests/test_order_history_service.py) use independent
-A1/B1/A2 persisted fixtures and real order storage. They also exercise checkout
-service → saved receipt → history reload with customer/cart/catalog/auth doubles.
-`GET /customers/me/orders` is **not registered yet**: real identity and access
-dependencies (#79/#80/#84), 200/401/403/500 HTTP tests, OpenAPI, and the complete
-real purchase-to-history workflow remain integration work. No HTTP availability
-is implied by the service tests.
+[`GET /customers/me/orders`](../app/api/routes/order_history.py) uses the shared
+`CurrentCustomer` dependency and returns `200` with an array of `Order` snapshots.
+No request body or customer-ID parameter selects the owner. Missing, invalid,
+expired or removed-customer identities return `401 Authentication required`
+with `WWW-Authenticate: Bearer`; noncustomer roles return
+`403 Operation not permitted`. Auth-store corruption returns
+`500 Authentication data is unavailable`. A failed customer reload inside the
+service returns `500 Customer data is unavailable`; failed order reads return
+`500 Order data is unavailable`. No storage diagnostics are exposed. Generated
+OpenAPI documents the response array, bearer security and these error statuses.
+
+[Service tests](../tests/test_order_history_service.py) retain independent
+A1/B1/A2 persisted fixtures. [API tests](../tests/test_order_history_api.py)
+exercise real bearer resolution and stores, inactive reads and direct denials,
+and registration/login → cart API → real checkout service → history HTTP. The
+purchase integration uses no auth/customer/cart/catalog/repository doubles and
+reopens history with a fresh application and repositories. Checkout itself is
+called at its service boundary; its HTTP route remains separate #91 work.
 
 ## Checkout ordering, failures, and retry contract
 
 The [checkout service](../app/services/checkout.py) and [JSON order store](../app/repositories/order.py)
-implement the purchase and replay sequence below. The HTTP route awaits the real
-dependencies. Bind #84's `require_customer(principal, customers, active=True)` as the
+implement the purchase and replay sequence below. The HTTP route remains #91 work.
+Bind `CustomerService(CustomerRepository()).active_customer_for` as the
 service's active-customer resolver. It executes inside `app.core.workflow.workflow_lock`.
 Cart access must return validated records, distinguish absence from storage failure,
 and signal storage failures with `app.core.storage.StorageFailure`. The active

@@ -183,6 +183,15 @@ Customer accounts, sign-in sessions and provisioned staff accounts use `data/cus
 [disposable copies](#disposable-data-for-manual-experiments) for manual experiments. To try it in `/docs`: `POST /customers`, then
 `POST /auth/login`, click **Authorize**, paste the `access_token`, and call `GET /customers/me`.
 
+Call `GET /customers/me/orders` with the same token to read saved orders in
+persisted insertion order. A newly registered customer receives `200` with `[]`;
+an inactive customer can still read previous orders. Missing/invalid identity
+returns 401, staff roles return 403, and an unavailable order store returns a
+generic 500 rather than an empty history. Reads leave carts and snapshots unchanged.
+Run `python -m pytest -q tests/test_order_history_api.py` for real-auth history
+and purchase-to-history integration checks using temporary stores. The purchase
+step uses the real checkout service; a checkout HTTP route is not included here.
+
 **HTTP experiments (restaurants, accounts, carts, orders)**
 
 Stop any existing server first. Registering, signing in, editing a cart and changing restaurants all write to `data/`, so point every store at a disposable copy. From the repository root, with the virtual environment active, these commands copy each store that exists into a new temporary directory and set its `*_DATA_PATH` variable (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, `CARTS_DATA_PATH`, `ORDERS_DATA_PATH`). They create a new copy each time; to verify persistence after restarting, keep the same terminal instead of repeating the copy step.

@@ -1,5 +1,32 @@
 # Customer order history implementation plan
 
+## Endpoint integration continuation — 2026-11-20
+
+Thomas authorized finishing the endpoint against the merged auth foundation and
+creating a PR. The earlier service-only scope and dependency notes below are
+historical. Main `95c7c8e` includes #114/#115: bearer resolution, customer storage,
+customer-role prechecks, and real cart/catalog/checkout services. #84 remains
+open for broader rollout; it does not block history. #93 is being implemented
+in separate `order_details` modules; preserve that parallel work.
+
+- [x] Merge current main, retaining both provenance histories, and run the baseline suite.
+- [x] Add failing `tests/test_order_history_api.py` cases using real tokens/stores for scoped insertion-order responses, empty results, inactive reads, missing/invalid identities, wrong roles, damaged stores and OpenAPI.
+- [x] Bind the existing history service to a service-layer customer resolver using `CustomerRepository`; role denial precedes customer/order reads, missing customers use `AuthenticationRequiredError`, and inactive customers remain readable.
+- [x] Add a thin `app/api/routes/order_history.py` router using `CurrentCustomer`, register it in `app/main.py`, and map 401/403/500 without exposing store errors.
+- [x] Verify real registration/login → cart API → real checkout service → history HTTP, plus fresh application/repository reads and unchanged snapshots after current profile/menu changes. Checkout's HTTP route remains #91's scope; no doubles replace its service or participating stores.
+- [x] Update README, both setup guides, API/testing/milestone docs and provenance; run focused tests, compileall, required-browser full suite, data isolation and diff/link checks.
+- [ ] Obtain an independent agent review, commit, push, create and attach the PR, and check its CI. Human review and merge remain pending.
+
+The production callback interface stays intact. Its new resolver adapts the
+merged customer repository and principal to read authorization; token parsing
+and session verification remain exclusively in the shared auth foundation.
+
+Continuation results: 636 baseline tests passed; 24 API tests failed before the
+endpoint existed; 80 focused tests and 660 required-browser tests passed afterward,
+with no skips. Compilation, data isolation, whitespace and 113 local documentation
+links passed. Independent agent review found no blocking defects. Human review
+and merge are separate from these checks.
+
 > **For agentic workers:** Use superpowers:executing-plans to implement this plan task by task. Track verification below.
 
 **Goal:** Start #92 with a customer-scoped history service using the merged order repository, while keeping missing HTTP/auth integration explicit.

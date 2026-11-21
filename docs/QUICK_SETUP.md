@@ -85,6 +85,12 @@ of the empty `data/orders.json` before constructing the repository. Run
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
 to exercise checkout with isolated storage. The checkout HTTP route is pending.
 
+After signing in through `/docs`, use **Authorize** with the returned token and
+call `GET /customers/me/orders`: it returns your saved snapshots, or `[]` when
+you have no orders. Inactive customers retain read access. Run
+`python -m pytest -q tests/test_order_history_api.py` for isolated real-auth and
+purchase-to-history checks; no manual seed edits are required.
+
 ## Short version
 
 For a normal returning session, the sequence is:

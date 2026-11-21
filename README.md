@@ -79,6 +79,7 @@ Follow **Create restaurant**, enter name, cuisine, and description, then submit.
 | `PUT /customers/me/cart` | Create the cart (201) or return the existing one (200) |
 | `GET /customers/me/cart` | Cart items with backend-calculated subtotal and total |
 | `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
+| `GET /customers/me/orders` | Own saved orders in insertion order; `[]` if none; inactive customers retain read access |
 
 In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors.
 
