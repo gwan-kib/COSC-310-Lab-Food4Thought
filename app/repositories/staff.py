@@ -43,6 +43,10 @@ class StaffRepository:
             raise StaffDataError(f"Invalid staff record in {self.path}: {exc}") from exc
         if len({account.id for account in staff}) != len(staff):
             raise StaffDataError(f"Duplicate staff ID in {self.path}")
+        # One account per email, compared case-insensitively, so sign-in never depends
+        # on which of two matching records appears first.
+        if len({account.email.casefold() for account in staff}) != len(staff):
+            raise StaffDataError(f"Duplicate staff email in {self.path}")
         return staff
 
     def get_staff(self, staff_id: str) -> StaffAccount | None:

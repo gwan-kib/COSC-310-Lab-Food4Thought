@@ -324,3 +324,34 @@ def test_staff_record_with_a_customer_role_is_a_storage_error(client, m2_store_p
 
     assert (response.status_code, response.json()) == (500, {"detail": "Authentication data is unavailable"})
     assert _all_bytes(m2_store_paths) == before
+
+
+# --- PR #114 second review (gwan-kib) ------------------------------------------------------
+
+@pytest.mark.parametrize("encoding", ["text", "form"])
+def test_profile_update_with_a_raw_or_form_body_never_echoes_a_password(client, m2_store_paths, auth_accounts, encoding):
+    body = {"password": "EXAMPLE-SECRET-not-real"}
+    before = _all_bytes(m2_store_paths)
+    headers = auth_accounts.headers("customer_a")
+    if encoding == "text":
+        response = client.patch("/customers/me", content=json.dumps(body),
+                                headers={**headers, "Content-Type": "text/plain"})
+    else:
+        response = client.patch("/customers/me", data=body, headers=headers)
+
+    assert response.status_code == 422
+    assert body["password"] not in response.text
+    assert _all_bytes(m2_store_paths) == before
+
+
+def test_duplicate_staff_emails_in_any_case_are_a_storage_error(client, m2_store_paths, auth_accounts):
+    staff = json.loads(m2_store_paths["staff"].read_text())
+    twin = {**staff[0], "id": "staff-999", "email": staff[0]["email"].upper()}
+    m2_store_paths["staff"].write_text(json.dumps(staff + [twin]), encoding="utf-8")
+    before = _all_bytes(m2_store_paths)
+    owner = auth_accounts.accounts["restaurant_user"]
+
+    response = client.post("/auth/login", json={"email": owner.record.email, "password": owner.password})
+
+    assert (response.status_code, response.json()) == (500, {"detail": "Authentication data is unavailable"})
+    assert _all_bytes(m2_store_paths) == before

@@ -9,7 +9,9 @@ from app.core.security import hash_password
 from app.core.workflow import workflow_lock
 from app.repositories.customer import CustomerRepository, DuplicateEmailError
 from app.repositories.staff import StaffRepository
-from app.schemas.customer import Customer, CustomerProfileUpdate, CustomerRegistration, StoredCustomer
+from app.schemas.customer import (
+    Customer, CustomerProfileUpdate, CustomerRegistration, Principal, StoredCustomer,
+)
 
 
 class CustomerNotFoundError(Exception):
@@ -17,7 +19,7 @@ class CustomerNotFoundError(Exception):
 
 
 class CustomerInactiveError(Exception):
-    """A deactivated customer cannot change their profile."""
+    """A deactivated customer cannot change their profile, edit a cart or check out."""
 
 
 __all__ = ["CustomerService", "CustomerNotFoundError", "CustomerInactiveError", "DuplicateEmailError"]
@@ -51,6 +53,20 @@ class CustomerService:
         if customer is None:
             raise CustomerNotFoundError(customer_id)
         return customer.public()
+
+    def active_customer_for(self, principal: Principal) -> StoredCustomer:
+        """Checkout's customer resolver: the current stored record, only while it is active.
+
+        CheckoutService calls this inside workflow_lock, after the route's pre-check, so a
+        deactivation that lands between the two still blocks the purchase. The checkout
+        route maps CustomerInactiveError to 403 "Customer is inactive".
+        """
+        customer = self.repository.get_customer(principal.account_id)
+        if principal.role != "customer" or customer is None:
+            raise CustomerNotFoundError(principal.account_id)
+        if customer.status != "active":
+            raise CustomerInactiveError(principal.account_id)
+        return customer
 
     def update_profile(self, customer_id: str, request: CustomerProfileUpdate) -> Customer:
         with workflow_lock:
