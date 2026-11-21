@@ -1164,3 +1164,16 @@ its pending-auth and local-only status.
 - Validation: The contract, live API routing, source and tests were inspected through the connected GitHub repository. Browser tests were committed before implementation, but local pytest/Chromium could not run through the connector. Initial GitHub Actions detected a Playwright locator ambiguity (1 failed, 926 passed), which was corrected. The customer-switch regression then failed before its app fix ([run 44877401379](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877401379): 1 failed, 930 passed) and passed afterward ([run 44877414386](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877414386): 931 passed). The complete final implementation with the explicit pending-reset replay regression passed [run 44877477188](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877477188): Python 3.12, `python -m compileall app`, `REQUIRE_BROWSER_TESTS=1 python -m pytest` (932 passed), and the CI committed-data guard. These verify the code revision `4c221b0`; the provenance-only update itself does not change app behavior. Responsible-student demonstration/understanding confirmation and independent teammate review remain pending.
 - PR: [#133](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/133).
 - Student review status: Pending; neither agent changes nor automated checks establish student understanding or peer review.
+
+
+### Issue #101: Complete customer-to-order workflow integration evidence
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), responsible for issue #101; student walkthrough and understanding remain unconfirmed.
+- Artifact: `tests/test_complete_workflow.py`, `tests/browser/test_complete_workflow_browser.py`, `docs/TESTING.md`, and `docs/milestones/M2.md`.
+- Label: `AI-GENERATED`.
+- AI tool: OpenAI ChatGPT (GPT-6).
+- Purpose: Add integrated verification of the actual customer journey, customer/restaurant/cart/order boundaries, checkout failure recovery and visible browser receipt.
+- Influence: ChatGPT authored the HTTP and Chromium tests, assertions, rule matrix, documentation and this provenance entry. Production business rules and repositories were not changed. The work is based on #100's frontend branch while that PR is pending integration.
+- Validation: The issue, application implementation, test fixtures, related #95/#100 changes and team testing conventions were inspected. This GitHub-connector environment cannot run local pytest/Chromium; hosted CI and exact results must be checked and recorded separately. Test creation alone is not passing evidence, and student/peer reviews are pending.
+- PR or commit: [Issue #101](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/101); feature branch `feature/101-complete-workflow-tests`. Add the PR number after creation.
+- Student review status: Pending. Automated results and agent checks do not establish independent human review or individual understanding.
