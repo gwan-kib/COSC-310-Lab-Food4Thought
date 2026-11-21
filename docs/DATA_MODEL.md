@@ -4,9 +4,9 @@
 
 The [M1 contract](M1_API_CONTRACT.md#persistence-and-layer-boundaries) describes
 implemented restaurant/menu storage. The [M2 contract](M2_API_CONTRACT.md) proposes
-the additions below for #77. **There are no customer, cart or order repositories
-in the application yet.** These are design targets, not setup instructions or a
-claim that the application accepts these files. Course traceability and unresolved
+the additions below for #77. The [order repository](../app/repositories/order.py)
+implements order storage for #91–#93. Customer, cart and session repositories are implemented; staff-account provisioning remains in #107.
+Course traceability and unresolved
 source/role questions are recorded in that contract and [M2 evidence](milestones/M2.md).
 
 ## Store ownership and configuration
@@ -14,16 +14,18 @@ source/role questions are recorded in that contract and [M2 evidence](milestones
 | Store | Existing / proposed file and override | Owner / format |
 | --- | --- | --- |
 | Restaurant/menu | Implemented `data/restaurants.json`, `RESTAURANTS_DATA_PATH` | Existing repository; Thomas owns #94 availability extension; JSON array of complete restaurant records |
-| Customer | Proposed `data/customers.json`, `CUSTOMERS_DATA_PATH` | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
-| Cart | Proposed `data/carts.json`, `CARTS_DATA_PATH` | Sreeram; JSON array of `CartRecord` objects |
-| Order | Proposed `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; JSON array of immutable `Order` snapshots |
+| Customer | Implemented `data/customers.json`, `CUSTOMERS_DATA_PATH` (`app/repositories/customer.py`, #79–#82) | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
+| Cart | Implemented `data/carts.json`, `CARTS_DATA_PATH` (`app/repositories/cart.py`, #85/#86) | Sreeram; JSON array of `CartRecord` objects |
+| Order | Implemented `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; append-only JSON array of order snapshots |
+| Staff account | Proposed `data/staff.json`, `STAFF_DATA_PATH` | Sreeram (#78); provisioned restaurant users and administrators: `id`, `name`, `email`, `role`, `restaurant_ids`, Argon2id `password_hash` |
+| Session | Implemented `data/sessions.json`, `SESSIONS_DATA_PATH` (#80) | Sreeram (#78); `token_sha256`, `account_id`, `account_type`, `issued_at`, `expires_at`; never the token itself |
 
 New repositories should match M1's explicit `path: Path | str | None` injection,
 resolve overrides at construction rather than import time, and keep file I/O out
-of routes/services. Customer credential hashing and any token/session storage are
-unresolved #78 implementation choices; this document does not invent an auth
-file or configure a working session store. Final tests must isolate such a store
-as well if one is added.
+of routes/services. The staff repository validates and reads provisioned accounts; provisioning itself
+remains in #107. Session storage, Argon2id password hashing and bearer-token
+identity are implemented as agreed in [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78).
+The [shared fixtures](../tests/conftest.py) isolate both stores in tests.
 
 Feature PRs must initialize deliberately empty new stores and explain first-run
 configuration in both setup guides when implemented. Once configured, a missing,
@@ -54,10 +56,10 @@ workflow lock; repositories do not import each other to own business rules.
 
 ## Records and projections
 
-`Customer`: proposed `id`, `name`, `email`, `delivery_address`, `status`.
+`Customer`: implemented `id`, `name`, `email`, `delivery_address`, `status`.
 The complete stored record additionally holds a library-produced `password_hash`
 and server-assigned customer role. Never serialize the complete record through a
-public response model. Proposed deactivation sets `inactive`, preserves the ID,
+public response model. Deactivation (#115) sets `inactive`, preserves the ID,
 cart and orders, and does not support reactivation or cascade deletion. See the
 contract's source gap before treating any field/permission as final.
 
@@ -104,13 +106,15 @@ The full [retry policy](M2_API_CONTRACT.md#checkout-ordering-failures-and-retry-
 also prevents clearing a later cart revision. No claim of multiworker/external
 writer coordination, power-loss durability, or complete M3 recovery is made.
 
-No existing runtime configuration or M1 schema changes in this PR. The two setup
-guides therefore stay unchanged; implementing owners must update both when their
-configuration/data files become operational.
+Checkout acquires [the workflow lock](../app/core/workflow.py). The other
+writers must acquire that same lock for cross-store serialization to hold in the
+integrated app. Customer authentication and repository adapters are implemented,
+and cart create/read/add HTTP routes are provided by #115. Checkout HTTP integration
+remains separate work (#84).
 
 ## Verification responsibilities
 
-Use the [disposable store fixture](../tests/contracts/conftest.py) as a starting
+Use the [disposable store fixture](../tests/conftest.py) as a starting
 point for feature tests. It points all proposed customer/cart/order paths into
 `tmp_path` and reuses the existing isolated restaurant copy. The root test guard
 already hashes **all** files under `data/`, so it covers future stores without a

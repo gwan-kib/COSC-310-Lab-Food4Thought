@@ -76,9 +76,16 @@ http://127.0.0.1:8000
 | Restaurant details/menu | `/restaurants/restaurant-001` and `/restaurants/restaurant-001/menu` |
 | API documentation/schema | `http://127.0.0.1:8000/docs` and `/openapi.json` |
 
-Before trying the form or any POST/PATCH operation, stop the server and follow the [disposable data-copy commands](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments). They set `RESTAURANTS_DATA_PATH` to a new temporary copy before running the same startup command. Reuse that path on restart to verify persistence, and clear the override afterward. Menu reads include `available`. Explicit availability writes require a manager permission check; the default server currently returns 401 for valid explicit writes pending staff authentication. Full mutation examples and data validation are in [first-time setup](FIRST_TIME_SETUP.md#8-verify-the-current-application) and the [API contract](M1_API_CONTRACT.md).
+Before trying the form, registering, signing in, or any other POST/PATCH operation, stop the server and follow the [disposable data-copy commands](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments). They point every store (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, and the cart and order paths) at new temporary copies before running the same startup command. Reuse that path on restart to verify persistence, and clear the override afterward. Full mutation examples and data validation are in [first-time setup](FIRST_TIME_SETUP.md#8-verify-the-current-application) and the [API contract](M1_API_CONTRACT.md).
+
+Menu reads include `available`. Sign in with a restaurant user assigned to the restaurant before adding or editing its menu items.
 
 Stop the server with `Ctrl+C`.
+
+For order repository experiments, set `ORDERS_DATA_PATH` to a disposable copy
+of the empty `data/orders.json` before constructing the repository. Run
+`python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
+to exercise checkout with isolated storage. The checkout HTTP route is pending.
 
 ## Short version
 

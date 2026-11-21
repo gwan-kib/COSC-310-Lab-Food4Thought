@@ -71,12 +71,22 @@ Follow **Create restaurant**, enter name, cuisine, and description, then submit.
 | `PATCH /restaurants/{restaurant_id}` | Update supplied restaurant fields |
 | `POST /restaurants/{restaurant_id}/menu/items` | Add a menu item |
 | `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` | Update supplied menu-item fields |
+| `POST /customers` | Register a customer (name, email, delivery address, password) |
+| `POST /auth/login` | Sign in; returns a bearer token valid for 24 hours |
+| `GET /customers/me` | Read the signed-in customer's profile (`Authorization: Bearer <token>`) |
+| `PATCH /customers/me` | Update the signed-in customer's name and/or delivery address |
+| `POST /customers/me/deactivate` | Deactivate the signed-in account (it can still sign in and read, but not change the cart) |
+| `PUT /customers/me/cart` | Create the cart (201) or return the existing one (200) |
+| `GET /customers/me/cart` | Cart items with backend-calculated subtotal and total |
+| `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
+
+In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors.
 
 Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRACT.md) maintains request/response models, cuisine matching, validation, decimal-string prices, partial updates, error precedence, and persistence decisions. `/docs` shows interactive forms and generated schemas.
 
 ## Data
 
-Representative data lives in `data/restaurants.json`. Set `RESTAURANTS_DATA_PATH` before starting the server to use another JSON file; no environment variable is required for normal use. For manual POST/PATCH experiments, follow the [disposable data-copy procedure](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) so the committed sample stays unchanged.
+Representative data lives in `data/restaurants.json`. Customer accounts and sign-in sessions are stored in `data/customers.json` and `data/sessions.json` (committed empty; `CUSTOMERS_DATA_PATH` and `SESSIONS_DATA_PATH` select other files). Passwords are stored only as Argon2id hashes and tokens only as SHA-256 digests. Set `RESTAURANTS_DATA_PATH` before starting the server to use another JSON file; no environment variable is required for normal use. For manual POST/PATCH experiments, follow the [disposable data-copy procedure](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) so the committed sample stays unchanged.
 
 Menu items are stored inside their restaurant record. Writes persist before returning success and use atomic replacement with a process-wide mutation lock. This supports a single application process; multiple workers and external writers are not coordinated. Invalid/unavailable data produces generic HTTP 500 errors. Stored menu prices above `999.00` are invalid and must be corrected before data operations can succeed; the sample data satisfies the limit.
 
@@ -103,12 +113,13 @@ See [Testing](docs/TESTING.md) for required-browser mode, focused commands, isol
 ```text
 app/main.py             FastAPI entry point, routers, frontend serving
 app/api/                Routes, error responses, OpenAPI handling
-app/services/           Restaurant/menu rules and orchestration
+app/services/           Restaurant/menu rules and checkout orchestration
 app/repositories/       JSON loading, validation, and persistence
 app/schemas/            Pydantic request, response, and persistence models
-app/core/config.py      Configurable restaurant-data path
+app/core/config.py      Configurable restaurant and order data paths
 frontend/               Customer, Create restaurant, and Edit restaurant pages and shared styles
 data/restaurants.json   Representative restaurant/menu data
+data/orders.json        Empty order store for the checkout service
 tests/                  Backend/API tests; tests/browser/ for customer and management pages
 scrum/                  Signed team agreement and M1 sprint planning
 docs/                   Setup, testing, API contract, milestones, provenance
@@ -123,7 +134,7 @@ requirements-dev.txt    Pinned browser-test dependencies
 - [Testing conventions](docs/TESTING.md)
 - [M0 checkpoint](docs/milestones/M0.md) and [M1 checkpoint](docs/milestones/M1.md)
 - [M1 API/data contract](docs/M1_API_CONTRACT.md)
-- [Proposed M2 API/persistence contract](docs/M2_API_CONTRACT.md), [data model](docs/DATA_MODEL.md), and [M2 evidence/status](docs/milestones/M2.md) — design handoff only; new workflows are not implemented yet.
+- [M2 API/persistence contract](docs/M2_API_CONTRACT.md), [data model](docs/DATA_MODEL.md), and [M2 evidence/status](docs/milestones/M2.md). The checkout service and order store are implemented. The HTTP checkout workflow awaits integration.
 - [M1 Engineering Decision Receipt — menu-item price validation](docs/DECISION_RECEIPT.md)
 - [Shared AI provenance record](docs/PROVENANCE.md)
 - [M1 sprint plan](scrum/SPRINT-Planning-M1.md) and [signed team agreement](scrum/team-agreement.md)

@@ -669,7 +669,176 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #105](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105) and [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105#pullrequestreview-5791463356).
 - Student review status: Pending for this revision.
 
-### Entry 53: Menu availability and legacy compatibility (#94)
+### Entry 53: M2 authentication and authorization design
+
+- Student(s): Sreeram Nara (`SreeramNara`), issue #78 assignee.
+- Artifact: `docs/AUTH_DESIGN.md`; password redaction in `app/api/errors.py` and `tests/test_credential_redaction.py`; `tests/contracts/auth.py`, `tests/contracts/conftest.py` and `tests/contracts/test_auth_fixtures.py`; the store-list check in `tests/contracts/test_m2_contract.py`; `requirements.txt`; and the #78 links in `docs/M2_API_CONTRACT.md`, `docs/DATA_MODEL.md`, `docs/examples/m2.json`, `docs/milestones/M2.md` and `docs/FIRST_TIME_SETUP.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Complete #78: record what the project brief and M2 assignment require for authentication, propose the mechanism, role/ownership/customer-state matrix, identity/authorization boundary, errors and lifecycle, and provide isolated fixtures and a denial-test list for #79–#84 and #94.
+- Influence: Claude drafted the design and its decisions: email/password with pwdlib Argon2id hashing, opaque server-side bearer tokens stored as SHA-256 digests with 24-hour expiry, provisioned staff accounts with restaurant ownership, administrators limited to creating restaurants, and authorization in services. Sreeram did not choose between the options offered, so Claude applied its recommended options; they are listed as open questions for team review. Claude found that the shared 422 handler echoed submitted passwords, including valid ones inside missing-field errors, and changed it to redact `password` values. It wrote the fixtures and updated the related documents.
+- Validation: A probe app on the pinned FastAPI showed that the old handler returned a rejected password and a valid password, that a dependency 401 precedes body validation, that malformed JSON returns 422 before dependencies run, and that pwdlib produces verifiable Argon2id hashes. The redaction tests failed 3 of 4 against the old handler and passed after the change. The fixture tests first failed collection because the module was missing, then passed; the #77 store-list test was updated for the two new stores. With Python 3.12, `python -m compileall -q app` passed and `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 419 tests with the committed-data guard. `git diff --check` and a local Markdown link/anchor check of the changed documents passed; `data/` was unchanged. The Figma mockup could not be opened and remains unverified. No authentication route is implemented yet.
+- PR or commit: [PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106), commit [`0b01511`](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/0b01511abe7f2f5d943553ca69418b9e25e603a0); branch `docs/78-auth-design`. Review follow-up: Entry 54.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this design, and Thomas's and Gwantana's agreement is required before adoption.
+
+### Entry 54: PR #106 review follow-up for the authentication design
+
+- Student(s): Sreeram Nara (`SreeramNara`), issue #78 assignee and PR #106 author. Review findings by Thomas Chen (`Tc2006415`) and Gwantana Kiboigo (`gwan-kib`) on PR #106. Sreeram created issues #107 and #108, checked the Figma sign-in screen, and reported the team's agreement on the policy choices.
+- Artifact: `app/api/errors.py`; `tests/test_credential_redaction.py`; `tests/conftest.py` (now holds `m2_store_paths` and `auth_accounts`; `tests/contracts/conftest.py` removed); `tests/test_shared_auth_fixtures.py`; `tests/contracts/auth.py` and `tests/contracts/test_auth_fixtures.py` (`LoginResponse`); `docs/AUTH_DESIGN.md`; and related lines in `docs/M2_API_CONTRACT.md`, `docs/DATA_MODEL.md`, `docs/examples/m2.json`, `docs/milestones/M2.md` and this record.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Address the six PR #106 review findings and align login with the Figma sign-in screen.
+- Influence: Claude wrote the code, tests and document changes: redaction of passwords from 422 `msg` and `ctx`; moving the fixtures to the shared conftest; a route-level pre-check dependency so an inactive customer with an invalid body gets 403 rather than 422; the ownership workflow from a clean setup naming #107 and #108; the agreed-policy table with alternatives; the Figma findings; and a single `POST /auth/login` returning `role` for every role, replacing the separate staff login.
+- Validation: The new redaction tests failed 2 of 7 before the change and passed after it. The shared-fixture test failed with "fixture 'm2_store_paths' not found" before the move and passed after it. The login-response test failed with an import error before `LoginResponse` existed and passed after it. A probe app on the pinned FastAPI showed an inactive customer's invalid quantity returned 422 with identity-only authentication and 403 with the pre-check dependency, while malformed JSON still returned 422 first. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 425 tests with the committed-data guard; `python -m compileall -q app`, `git diff --check` and a local Markdown link/anchor check passed; `data/` was unchanged. Only the Figma sign-in screen was checked.
+- PR or commit: [PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106); branch `docs/78-auth-design`, review follow-up commit.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain these changes; Thomas's and Gwantana's re-review is required.
+
+### Issue 91: checkout service and durable order receipts
+
+- Student: Thomas Chen (`Tc2006415`), implementation assignee for [#91](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/91).
+- Artifacts: order models, JSON repository, checkout service, workflow lock and storage error, empty order seed and path configuration, checkout/repository tests and test fixtures, README, setup guides, M2 API/data/testing documentation and milestone evidence.
+- Label: `AI-GENERATED`.
+- AI tool: OpenAI Codex.
+- Purpose and influence: Thomas confirmed the first PR scope, the shared workflow lock and equal treatment of foreign carts and receipts. Codex wrote the implementation, tests and documentation. Agent review identified a mutable collection inside returned snapshots, a reset exception mismatch and a foreign-receipt error difference during a cart-store outage. Regression tests reproduced these cases before correction.
+- Validation: On Python 3.12 the baseline suite had 425 passing tests. The initial repository and checkout test runs each failed on missing implementation modules. The first full run after implementing the feature found four existing restaurant tests affected by eager order fixture creation. After limiting file initialization to tests that request it, `python -m compileall app` succeeded and `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed all 461 tests, including the committed-data guard. Of these, 36 exercise the new repository and service. They use real temporary order storage with customer, cart, authorization and catalog doubles. Full HTTP integration and human review are pending.
+- Issue/branch: #91, `feature/91-checkout-order` (first implementation change).
+- Student review status: Thomas confirmed the design. Student review of the implementation and individual understanding remain pending.
+
+### PR #111 review follow-up: quantity range and cart reset documentation
+
+- Student: Thomas Chen (`Tc2006415`), #91 assignee. Gwantana Kiboigo requested the changes in [the PR review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/111#pullrequestreview-5985221321).
+- Artifacts: `app/schemas/order.py`, `tests/contracts/m2.py`, `tests/test_checkout_service.py`, and the reset example and step 5 in `docs/M2_API_CONTRACT.md`.
+- Label: `AI-GENERATED`. AI tool: OpenAI Codex.
+- Purpose and influence: Thomas chose to preserve the cart's accepted quantity range. Codex wrote the exact money conversion and regression test and revised the reset documentation to match the service's fresh-read behavior.
+- Validation: The new checkout test first failed during money formatting, then exposed the same digit limit in the contract model's parser. After both fixes it verified the exact total, receipt reload, and replay. `python -m pytest -q tests/test_checkout_service.py tests/test_order_repository.py tests/contracts` passed 67 tests. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed 462 tests. `python -m compileall app` and `git diff --exit-code -- data/` succeeded.
+- PR: [#111](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/111). Student review of the revision and peer re-review are pending.
+
+### Entry 55: Regression coverage for issue #102
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue coordinator.
+- Artifact: `app/api/errors.py`, credential/restaurant/isolation tests under `tests/`, `.github/workflows/ci.yml`, `docs/AUTH_DESIGN.md`, `docs/FIRST_TIME_SETUP.md`, `docs/TESTING.md`, `docs/milestones/M2.md`, this entry and the task PR.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address the documented cross-field disclosure and keep M1 catalog coverage and isolated storage ready for M2 integration.
+- Influence: Codex continued the task branch's existing edits, wrote the regression and targeted handler fix, adapted write-failure assertions for the shared store fixtures, and documented observed and pending verification.
+- Validation: The cross-field regression failed on the original handler and passed after the fix. Five isolation checks failed with the original fixtures and passed with automatic M2 paths. The final local backend suite passed 400 tests, and a scratch combination with PR #109 passed 413 backend tests. Compilation and local data-guard checks passed. Browser launch in the local environment failed because Chromium could not open a Unix socket. GitHub CI results are tracked in the task PR.
+- PR or commit: [Issue #102](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/102), [PR #106 review finding](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106#pullrequestreview-5984850396), and branch `chore/102-regression-coverage`.
+- Student review status: Pending. Gwantana's review and a teammate's approval are still required.
+
+### Entry 56: PR #110 credential redaction review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue coordinator and requester. Thomas Chen (`Tc2006415`) identified the two cases in review.
+- Artifact: `app/api/errors.py`, `tests/test_credential_redaction.py`, `docs/AUTH_DESIGN.md`, `docs/milestones/M2.md` and this entry.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address Thomas's findings about passwords in rejected input and in escaped validator diagnostics.
+- Influence: Codex wrote both regression tests and updated the shared 422 handler to redact equal input values and scrub literal and `repr`-escaped password text from diagnostics.
+- Validation: `python -m pytest -q tests/test_credential_redaction.py` showed two failures and eight passes before the fix. The focused credential and validation-error suite passed 35 tests after the fix, and `python -m pytest -q --ignore=tests/browser` passed 402 tests. Compilation, the local data guard and `git diff --check` passed.
+- PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110) and [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985133060).
+- Student review status: Pending for the follow-up.
+
+### Entry 57: PR #110 second credential redaction review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and issue coordinator. Thomas Chen (`Tc2006415`) identified both cases in review.
+- Artifact: `app/api/errors.py`, `tests/test_credential_redaction.py`, `docs/AUTH_DESIGN.md`, `docs/milestones/M2.md` and this entry.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Address Thomas's follow-up findings about passwords embedded in rejected values and short passwords changing standard error wording.
+- Influence: Codex wrote the two regression tests and changed the shared handler to mask input strings containing a submitted password and preserve canonical fixed diagnostics. Custom messages and error context still undergo redaction.
+- Validation: `python -m pytest -q tests/test_credential_redaction.py` showed two failures and 10 passes before the fix. The focused credential and validation-error suite passed 37 tests after the fix, and `python -m pytest -q --ignore=tests/browser` passed 404 tests. Compilation, the local data guard and `git diff --check` passed.
+- PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110) and [Thomas's second review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985366789).
+- Student review status: Pending for the follow-up.
+
+### Entry 58: Shared frontend JSON transport for issue #98
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee and requester. Student design and implementation review is pending.
+- Artifact: `frontend/api-client.js`, the discovery and restaurant management frontend scripts and HTML entry points, `tests/browser/test_frontend_browser.py`, `tests/browser/test_api_client_browser.py`, `tests/test_frontend.py`, the M2.3 evidence in `docs/milestones/M2.md`, and the PR description.
+- Label: `AI-GENERATED`.
+- AI tool: Codex.
+- Purpose: Identify and improve a concrete frontend integration boundary for M2 §5.
+- Influence: Codex compared page-local, transport-only, and endpoint-specific client designs. It extracted shared JSON request handling while keeping status feedback, field validation and retry decisions with the pages. Codex wrote the characterization checks, adapted the static asset checks, and drafted the decision and verification evidence. Following [Thomas Chen's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/112#pullrequestreview-5985511805), Codex added caller-supplied header forwarding and a browser regression test. It also integrated `main`, preserved the checkout provenance, and renumbered the entry to avoid duplicating PR #110's Entry 56.
+- Validation: With Python 3.12, `REQUIRE_BROWSER_TESTS=1` and Chromium headless shell 153, 42 focused tests passed against the original frontend with the characterization cases. The original refactor passed 428 tests with no skips. A Node probe checked propagation of an abort during response-body reading without a retry. The review follow-up test failed because Chromium sent no `Authorization` header before the fix and passed after it. The updated branch passed all 466 tests, application compilation, a JavaScript syntax check, the committed-data guard and whitespace checks.
+- PR or commit: [PR #112](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/112) for [issue #98](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/98).
+- Student review status: Gwantana's confirmation is pending. Thomas's initial review is linked above. Re-review and merge evidence are pending.
+
+### Entry 59: PR #110 merge-conflict and isolation review follow-up
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), PR #110 author and requester; Thomas Chen (`Tc2006415`) supplied the review findings.
+- Artifact: `tests/conftest.py`, `tests/test_test_isolation.py`, `docs/TESTING.md`, `docs/FIRST_TIME_SETUP.md`, `docs/milestones/M2.md`, `tests/browser/test_frontend_browser.py`, this file and integration of PR #110 with current `main`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Resolve Thomas's PR #110 review conflicts with #111 and preserve the later merged frontend integration changes.
+- Influence: Combined the branches without discarding either set of changes. Isolated all M2 paths automatically while retaining the order repository's missing-file semantics: only the opt-in `m2_store_paths` fixture creates `orders.json`. Preserved the checkout tests/commands, provenance from both branches, and browser and milestone additions.
+- Validation: Inspected current PR #110 and main sources and the review requirements. Automated tests and GitHub Actions must be checked on this combined revision; no passing test result is claimed here.
+- PR or commit: [PR #110](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110); [Thomas's latest review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985546961).
+- Student review status: Pending. Owner should review the integration and re-request peer approval.
+
+### Entry 60: Cart storage, create/retrieve cart and add item to cart
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #85 and #86.
+- Artifact: `app/schemas/cart.py`, `app/repositories/cart.py`, `app/services/cart.py`, `app/services/catalog.py`, `app/core/config.py` (`get_carts_data_path`), `data/carts.json`, `tests/test_cart_repository.py`, `tests/test_cart_service.py`, and cart lines in `docs/FIRST_TIME_SETUP.md` and `docs/DATA_MODEL.md`. `app/core/storage.py` and `app/core/workflow.py` are byte-identical copies of the files in Thomas Chen's PR #111 so both PRs share one workflow lock and storage-failure type.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Implement the backend of #85 (create or retrieve the active cart) and #86 (add a menu item) against the M2 contract, and give checkout (#91) a real `CartAccess` with `get_cart` and `reset_after_order`.
+- Influence: Claude wrote the tests first and then the cart record/request/view models, the JSON repository (one cart per customer, collision-checked UUIDs, validation, atomic save), a read-only catalog adapter over the restaurant repository, and the service rules: active customer required for create/add, cart must exist, recovery-pending carts cannot be edited, restaurant and item must exist with the item under that restaurant and available, one restaurant per cart, repeated adds increment the line, revision increases once per change, prices and totals come from current menu data in integer cents. Sreeram chose to build #85 and #86 at the service/repository level before the customer sign-in work.
+- Validation: Both new test modules first failed collection because the cart modules did not exist; after implementation the 32 cart tests passed. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 457 tests with the committed-data guard. HTTP routes, real customer records and authentication are not implemented, so no API test exists yet; tests use the M2 contract's fake customers and a receipt double.
+- PR or commit: [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113); branch `feature/85-86-cart`.
+- Review follow-up: Thomas Chen (`Tc2006415`) requested three changes on PR #113. Claude wrote failing regression tests for each, then: built the priced response before saving, so a failed catalog or receipt read leaves `carts.json` byte-for-byte unchanged (add and create); moved the mixed-restaurant check before restaurant/item existence, as the contract's precedence requires; and replaced the cart's money formatter with checkout's exact `cents`/`money`, so totals longer than Python's integer-text limit match checkout. A concurrent-create test checks that eight simultaneous creates give one cart. Five new tests failed before the changes; all 38 cart tests passed after. The merge of `main` (#111) kept both data-path accessors, both store rows and both provenance contributions. Second review round: Thomas found that a receipt owned by another customer could expose its order ID or block an edit, and that a repeated add crossing Python's 4300-digit integer-text limit failed to save and left a temporary file. Claude added four failing regression tests, then made the service check that a receipt belongs to the cart's customer (a mismatch is a `CartDataError`, revealing no order ID and writing nothing), wrote carts with Pydantic's serializer, read integers through `Decimal` so quantities of any length reload exactly, and broadened save cleanup so every failed save removes its temporary file. All 42 cart tests passed after the change; `main` (#112) was merged again, keeping both provenance entries. Third review round: Thomas showed that checkout could save an order with such a quantity and empty the cart, but a fresh order repository could not read it back, so a retry failed. Claude added an integration test with the real cart and order repositories (it failed with "number out of range"), then changed Thomas's order reader in `app/repositories/order.py` to parse integers through `Decimal` before the same strict `Order` validation. The test now confirms the exact quantity reloads, the cart is empty, and a retry returns the original order ID; Thomas's checkout and order tests still pass.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 61: Customer registration, sign-in, profile read and update
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #79, #80, #81 and #82.
+- Artifact: `app/schemas/customer.py`, `app/repositories/customer.py`, `app/services/customer.py`, `app/services/auth.py`, `app/api/auth.py`, `app/api/routes/customers.py`, `app/core/security.py`, `app/core/json_file.py`, data-path accessors in `app/core/config.py`, the router registration in `app/main.py`, `data/customers.json`, `data/sessions.json`, `tests/test_customer_accounts_api.py`, `tests/test_customer_repository.py`, and account lines in `README.md`, `docs/FIRST_TIME_SETUP.md` and `docs/DATA_MODEL.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Implement #79–#82 as designed in `docs/AUTH_DESIGN.md` (#78), including the bearer-token identity that the profile routes and later #84 protection need.
+- Influence: Claude wrote the code and tests: strict registration and profile models (trimmed text, email check, 8–128 character passwords, no role/status/ID fields), a customer repository with case-insensitive unique emails rechecked under its lock, Argon2id hashing via pwdlib, random tokens stored as SHA-256 digests with a 24-hour expiry, `POST /auth/login` with identical errors for unknown email and wrong password, `get_current_principal` (401) plus customer-role and active-customer pre-checks (403) that run before body validation, and profile updates limited to name and delivery address with the active check repeated under the workflow lock. Staff login through the same `POST /auth/login` was added in the first review follow-up below; creating staff accounts is #107.
+- Validation: `tests/test_customer_accounts_api.py` was written first and failed collection (`No module named 'app.api.auth'`); after implementation all 42 API tests passed. `tests/test_customer_repository.py` (6 tests) was added after implementation as repository-level evidence, so it did not fail first. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed with the committed-data guard; committed `data/` files other than the two new empty stores were unchanged.
+- PR or commit: [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114); branch `feature/79-82-customer-accounts`.
+- Review follow-up: Thomas Chen (`Tc2006415`) reviewed PR #114. Claude wrote 11 failing regression tests, then: reserved staff emails at registration, checked under the account-email lock that staff provisioning (#107) must also hold (`data/staff.json` added as `[]`); dropped raw request input from 422 responses on `/customers` and `/auth/login`, so text or form bodies cannot echo a password; made `POST /auth/login` sign in restaurant users and administrators from the staff store with a `staff` session; required timezone-aware session times with expiry after issue; turned unusable stored password hashes into the documented JSON 500; restricted staff roles to `restaurant_user` and `administrator`; and pointed both setup guides' manual-test commands at disposable copies of every store. The shell loop was run; the PowerShell loop was checked by reading only. All account, redaction and validation-error tests passed after the changes.
+- Second review follow-up: Gwantana Kiboigo (`gwan-kib`) reviewed revision `75d53df`. Claude wrote 3 failing regressions, then dropped raw request input from 422 responses for every `/customers…` and `/auth…` path (so a text or form body sent to `PATCH /customers/me` cannot echo a password), and made the staff store reject two records whose emails match case-insensitively (login returns the JSON 500 and writes no session). #82's cross-service regression is in PR #115, so #82 closes with #115 rather than with this PR.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 62: Resolve PR #114 merge conflicts after cart foundation #113
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), who requested the integration; the customer implementation remains owned by Sreeram Nara (`SreeramNara`).
+- Artifact: `app/core/config.py`, `docs/DATA_MODEL.md`, `docs/FIRST_TIME_SETUP.md`, `docs/PROVENANCE.md`, and the integration commit on `feature/79-82-customer-accounts`.
+- Label: AI-GENERATED
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Resolve overlapping changes after PR #113 merged into `main` while retaining cart and customer account functionality.
+- Influence: ChatGPT assembled a merged tree preserving cart, customer, session and staff configuration accessors, both sets of implemented-store descriptions, disposable data setup instructions and both provenance entries. No application business rules were rewritten.
+- Validation: Compared the overlapping files and unchanged feature paths against both PR heads. Integrated CI and final merge are checked separately; this entry does not claim student understanding.
+- PR or commit: [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114), following merged [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113).
+- Student review status: Pending confirmation by the responsible students.
+
+### Entry 63: Deactivate account and protected cart routes
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #83, #84, #85, #86 and #90.
+- Artifact: `app/api/routes/carts.py`, the deactivate route in `app/api/routes/customers.py`, `CustomerService.deactivate` in `app/services/customer.py`, router registration in `app/main.py`, `tests/test_cart_api.py`, and cart/deactivate lines in `README.md` and `docs/FIRST_TIME_SETUP.md`. The branch combines PRs #113 and #114, which it builds on.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Connect the cart service (#113) to customer sign-in (#114) so the cart works through the API, and add account deactivation, for the M2 customer-to-cart workflow.
+- Influence: Claude wrote the API tests first, then: `POST /customers/me/deactivate` (sets inactive under the workflow lock, keeps ID/cart/orders, repeat is 200); `PUT /customers/me/cart` (201 new / 200 existing), `GET /customers/me/cart` (never creates; inactive customers may read) and `POST /customers/me/cart/items`, wired to the real customer, cart, restaurant-catalog and order-receipt stores; customer-role checks on all of them and active-customer pre-checks on writes, so an old token cannot change the cart after deactivation, even with an invalid body; and one mapping from cart-service outcomes to the contract's 401/403/404/409/500 messages.
+- Validation: The 25 tests in `tests/test_cart_api.py` failed before the routes existed and passed after. The unavailable-item case overrides the catalog dependency because menu availability (#94) is not on `main` yet. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 581 tests with the committed-data guard.
+- PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115); branch `feature/83-84-cart-routes`.
+- Review follow-up: Thomas Chen (`Tc2006415`) requested changes on PR #115. Claude added failing regression tests and then: priced every cart line, and validated added items, from one restaurant menu snapshot (`get_menu`, also added to the contract's `FakeCatalog`), so concurrent menu updates cannot mix prices in one response; declared `CartView` as the 201 body of `PUT /customers/me/cart`; and merged the #113 and #114 review fixes (order reader, staff roles, staff login, setup guides). A cross-service test keeps customer and cart IDs and the saved order snapshot unchanged after a profile update, and a staff record claiming the customer role cannot reach the cart (it already passed with the #114 fix). #83, #86 and #90 stay open: checkout-route denial needs Thomas's checkout route, and real-store unavailable-item tests need #109. Gwantana's PR #110 had used entries 55–57, so these entries were renumbered 60–62.
+- Second review follow-up: Gwantana Kiboigo (`gwan-kib`) reviewed revision `cadef88`. Claude wrote failing regressions, then added `CustomerService.active_customer_for`, the resolver the checkout route must pass to `CheckoutService`: it returns the stored customer (with `id` and `delivery_address`) and raises `CustomerInactiveError` for an inactive account, inside checkout's workflow lock. A test signs in, fills the cart, deactivates, and checks that checkout with the old principal is refused with customer, cart and order files unchanged; the cross-service test now uses the same resolver. Checkout now prices every order line from one `get_menu` snapshot (contract text and `CatalogAccess` updated), with a changing-menu regression showing one menu read and one consistent total. The HTTP 403 from a real checkout request still needs Thomas's checkout route, so #83 stays open.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 64: Integrate PR #115 with merged account and cart foundation
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and integrator; original PR #115 implementation and its validation remain credited to Sreeram Nara (`SreeramNara`).
+- Artifact: Integration of PR #115 on `feature/83-84-cart-routes`, `docs/DATA_MODEL.md`, and `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Combine the reviewed account-deactivation and protected-cart features with already merged PRs #113 and #114 without undoing either implementation.
+- Influence: ChatGPT constructed a merge tree retaining the current `main` store configuration and account documentation while adding the cart HTTP routes, checkout customer resolver, menu snapshot fixes, regression tests and feature documentation from PR #115. The two different provenance entry 62s were preserved by renumbering this PR's entry to 63; this entry records the integration.
+- Validation: The file differences and preserved tree paths were inspected prior to integration. Passing CI and merge outcome are verified separately; no student understanding or manual testing is claimed.
+- PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
+- Student review status: Pending confirmation by responsible students.
+
+### Entry 65: Menu availability and legacy compatibility (#94)
 
 - Student(s): Thomas Chen (`Tc2006415`), issue owner.
 - Artifact: Menu schemas, restaurant service and routes, availability and regression tests, API/data contract and setup guides on the #94 branch.

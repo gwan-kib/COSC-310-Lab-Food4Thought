@@ -8,6 +8,8 @@ from typing import Annotated, Literal, Protocol, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
+from app.core.storage import StorageFailure
+from app.schemas.order import cents
 from app.schemas.restaurant import Restaurant
 
 
@@ -15,11 +17,6 @@ Identifier = Annotated[str, StringConstraints(min_length=1)]
 Money = Annotated[str, StringConstraints(pattern=r"^(0|[1-9][0-9]*)\.[0-9]{2}$")]
 Quantity = Annotated[int, Field(strict=True, gt=0)]
 Revision = Annotated[int, Field(strict=True, ge=0)]
-
-
-def cents(value: str) -> int:
-    """Use integer cents so quantity multiplication never uses float rounding."""
-    return int(value.replace(".", ""))
 
 
 class ContractModel(BaseModel):
@@ -152,6 +149,7 @@ class CustomerAccess(Protocol):
 class CatalogAccess(Protocol):
     def get_restaurant(self, restaurant_id: str) -> Restaurant | None: ...
     def get_item(self, restaurant_id: str, item_id: str) -> CatalogItem | None: ...
+    def get_menu(self, restaurant_id: str) -> dict[str, CatalogItem] | None: ...
 
 
 class CartAccess(Protocol):
@@ -166,10 +164,6 @@ class OrderAccess(Protocol):
     def save_order(self, order: Order) -> None: ...
     def get_order(self, order_id: str) -> Order | None: ...
     def list_for_customer(self, customer_id: str) -> list[Order]: ...
-
-
-class StorageFailure(Exception):
-    """Test-only injected storage failure; application owners map their errors."""
 
 
 class FakeCustomers:
@@ -200,6 +194,13 @@ class FakeCatalog:
 
     def get_item(self, restaurant_id: str, item_id: str) -> CatalogItem | None:
         return deepcopy(self.items.get((restaurant_id, item_id)))
+
+    def get_menu(self, restaurant_id: str) -> dict[str, CatalogItem] | None:
+        """All of one restaurant's items from a single read (carts price from one snapshot)."""
+        if restaurant_id not in self.restaurants:
+            return None
+        return {item_id: deepcopy(item) for (owner, item_id), item in self.items.items()
+                if owner == restaurant_id}
 
 
 class FakeCartAccess:

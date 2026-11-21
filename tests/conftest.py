@@ -1,7 +1,7 @@
-"""Isolate Food4Thought tests with a fresh temporary data copy selected through
-RESTAURANTS_DATA_PATH for each test. A session-level hash comparison also detects
-changes to committed data, guarding against code that bypasses the configured test
-path.
+"""Isolate restaurant and all M2 store paths for every test.
+Customer, cart, staff and session stores start empty; order storage stays absent
+until a test explicitly requests initialized M2 stores. The session guard
+detects unexpected writes to committed application data.
 """
 
 import hashlib
@@ -9,6 +9,9 @@ import shutil
 from pathlib import Path
 
 import pytest
+
+# tests/ has no __init__.py, so pytest puts it on sys.path for this conftest.
+from contracts.auth import AuthFixture, build_auth_fixture
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
@@ -26,7 +29,7 @@ def committed_data_is_unchanged():
     before = _snapshot_data_files()
     yield
     after = _snapshot_data_files()
-    assert after == before, "Tests modified committed files under data/"
+    assert after == before, "Tests changed files under data/"
 
 
 @pytest.fixture(autouse=True)
@@ -36,3 +39,41 @@ def isolated_restaurants_path(tmp_path, monkeypatch) -> Path:
     shutil.copyfile(DATA_DIR / "restaurants.json", path)
     monkeypatch.setenv("RESTAURANTS_DATA_PATH", str(path))
     return path
+
+
+# Select a disposable path even in tests that do not initialize order storage.
+@pytest.fixture(autouse=True)
+def isolated_orders_path(tmp_path, monkeypatch) -> Path:
+    path = tmp_path / "orders.json"
+    monkeypatch.setenv("ORDERS_DATA_PATH", str(path))
+    return path
+
+
+# Additional stores proposed by the M2 and authentication contracts.
+ADDITIONAL_M2_STORES = ("customers", "carts", "staff", "sessions")
+
+
+@pytest.fixture(autouse=True)
+def isolated_additional_m2_stores(tmp_path, monkeypatch, isolated_orders_path) -> dict[str, Path]:
+    """Set up the other M2 stores for every test, but leave orders.json absent."""
+    paths = {"orders": isolated_orders_path}
+    for store in ADDITIONAL_M2_STORES:
+        path = tmp_path / f"{store}.json"
+        path.write_text("[]\n", encoding="utf-8")
+        monkeypatch.setenv(f"{store.upper()}_DATA_PATH", str(path))
+        paths[store] = path
+    return paths
+
+
+@pytest.fixture
+def m2_store_paths(isolated_restaurants_path, isolated_additional_m2_stores) -> dict[str, Path]:
+    """Return all temporary paths and initialize orders only when requested."""
+    paths = {"restaurants": isolated_restaurants_path, **isolated_additional_m2_stores}
+    paths["orders"].write_text("[]\n", encoding="utf-8")
+    return paths
+
+
+@pytest.fixture
+def auth_accounts(m2_store_paths) -> AuthFixture:
+    """Two active customers, a restaurant user, an administrator and their sessions."""
+    return build_auth_fixture(m2_store_paths)

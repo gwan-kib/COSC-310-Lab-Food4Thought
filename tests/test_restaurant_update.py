@@ -177,6 +177,7 @@ def test_update_save_failure_preserves_file_and_allows_retry(
     isolated_restaurants_path, monkeypatch
 ):
     original = isolated_restaurants_path.read_bytes()
+    files_before = set(isolated_restaurants_path.parent.iterdir())
 
     def fail_replace(source, destination):
         raise OSError("private filesystem detail")
@@ -190,7 +191,7 @@ def test_update_save_failure_preserves_file_and_allows_retry(
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
     assert isolated_restaurants_path.read_bytes() == original
-    assert list(isolated_restaurants_path.parent.iterdir()) == [isolated_restaurants_path]
+    assert set(isolated_restaurants_path.parent.iterdir()) == files_before
     assert TestClient(app).patch(
         "/restaurants/restaurant-001", json={"name": "Retry"}
     ).status_code == 200

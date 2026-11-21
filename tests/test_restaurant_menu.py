@@ -92,11 +92,18 @@ def test_menu_is_empty_for_legacy_record_without_menu_items(isolated_restaurants
 
 
 def test_menu_serializes_prices_with_two_decimals(isolated_restaurants_path):
-    _write(isolated_restaurants_path, [_restaurant("r", [_item("i", price="9.5")])])
+    items = [_item("fraction", price="9.5"), _item("maximum", price="999")]
+    _write(isolated_restaurants_path, [_restaurant("r", items)])
+    before = isolated_restaurants_path.read_bytes()
 
     response = TestClient(app).get("/restaurants/r/menu")
 
-    assert response.json()["items"][0]["price"] == "9.50"
+    assert response.status_code == 200
+    assert {item["id"]: item["price"] for item in response.json()["items"]} == {
+        "fraction": "9.50",
+        "maximum": "999.00",
+    }
+    assert isolated_restaurants_path.read_bytes() == before
 
 
 def test_menu_returns_404_for_unknown_restaurant():
