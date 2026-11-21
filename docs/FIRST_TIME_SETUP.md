@@ -138,6 +138,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | `GET /app/create-restaurant.html` | Management frontend: create a restaurant through the API, with validation/error feedback and a link to the saved restaurant. |
 | `GET /app/edit-restaurant.html?id=restaurant-001` | Management frontend: edit an existing restaurant's name, cuisine, or description through GET and PATCH. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
+| `GET /customers/me/orders/{order_id}` | Bearer-authenticated owner reads the saved transaction, including original prices and address. Active and inactive owners are allowed. |
 
 A simple browser check is enough for the GET operations. To try `POST /restaurants`, use the interactive form at `/docs` with a body such as `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. It writes to the configured JSON file, so use a disposable copy through `RESTAURANTS_DATA_PATH` when experimenting.
 
@@ -176,6 +177,15 @@ set `ORDERS_DATA_PATH` to the copy. A configured missing or invalid file is a
 storage error. The focused checkout tests select their own disposable files:
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`.
 Checkout is currently available at the service layer only.
+
+Order details are available through HTTP. In `/docs`, sign in with `POST /auth/login`,
+click **Authorize** and paste the returned token, then call
+`GET /customers/me/orders/{order_id}` with an owned persisted ID. Unknown and foreign
+IDs both return `404 Order not found`; staff receive 403 and absent/invalid tokens
+receive 401. No fixture order or customer is seeded into committed data. Use
+`python -m pytest -q tests/test_order_details.py` for the isolated, reproducible
+registration/login/cart/checkout-service/detail example. It verifies saved prices
+and address after live changes; it does not imply the checkout HTTP route exists.
 
 Customer accounts, sign-in sessions and provisioned staff accounts use `data/customers.json`
 (`CUSTOMERS_DATA_PATH`), `data/sessions.json` (`SESSIONS_DATA_PATH`) and `data/staff.json`

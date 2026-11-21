@@ -837,3 +837,16 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The file differences and preserved tree paths were inspected prior to integration. Passing CI and merge outcome are verified separately; no student understanding or manual testing is claimed.
 - PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
 - Student review status: Pending confirmation by responsible students.
+
+### Issue 93: owner-scoped order details
+
+- Student(s): Thomas Chen (`Tc2006415`), issue #93 implementation owner and requester.
+- Artifact: `app/services/order_details.py`, `app/api/routes/order_details.py`, router/OpenAPI registration, `tests/test_order_details.py`, README, both setup guides, M2 API/data/testing/milestone documentation and the implementation plan.
+- Label: `AI-GENERATED`
+- AI tool: OpenAI Codex.
+- Purpose: Implement authenticated retrieval of an owned historical order without duplicating #91 storage or modifying #92's separate work.
+- Influence: Codex inspected refreshed main `95c7c8e`, the issue and adopted contracts; wrote tests before the route/service; implemented current-customer and ownership checks under the shared lock; and documented the result. Thomas authorized implementation and PR creation after the dependency review. Order reads allow inactive customers and use the existing immutable snapshot rather than live menu/address values.
+- Validation: Python 3.12.10, pinned dependencies. Baseline `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed 617 tests with two pre-existing Playwright coroutine-cleanup warnings. Before implementation, `python -m pytest -q tests/test_order_details.py` failed all 28 initial cases because the route/service/OpenAPI operation were missing; after implementation all 28 passed. Three additional boundary checks (post-auth account changes and large quantities) passed against the implemented feature. Final focused run: 31 passed. `python -m compileall app` succeeded; required-browser `python -m pytest -q` passed 648 tests with no skips or warnings. Final diff/data checks and hosted CI are recorded in the PR.
+- Limits: Real checkout-created detail integration uses the production checkout service and real stores. The checkout HTTP endpoint is still absent; full HTTP checkout/detail integration remains pending #91/#101. No frontend was added. This evidence does not certify individual architectural credit or peer review.
+- PR or commit: Branch `feature/93-order-details`, referencing [#93](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/93); the PR links this entry.
+- Student review status: Implementation review, individual understanding and human peer review remain pending. Agent verification is not student approval.

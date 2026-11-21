@@ -79,8 +79,14 @@ Follow **Create restaurant**, enter name, cuisine, and description, then submit.
 | `PUT /customers/me/cart` | Create the cart (201) or return the existing one (200) |
 | `GET /customers/me/cart` | Cart items with backend-calculated subtotal and total |
 | `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
+| `GET /customers/me/orders/{order_id}` | Read an owned saved order, including original items, prices and address; inactive owners retain access |
 
 In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors.
+
+Order details return the same `404 Order not found` for missing and foreign IDs.
+The empty order seed contains no demo orders. Checkout-created orders can currently
+be produced through the service; the checkout HTTP endpoint remains pending (#91).
+See the [implemented detail contract](docs/M2_API_CONTRACT.md#implemented-order-details-93).
 
 Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRACT.md) maintains request/response models, cuisine matching, validation, decimal-string prices, partial updates, error precedence, and persistence decisions. `/docs` shows interactive forms and generated schemas.
 

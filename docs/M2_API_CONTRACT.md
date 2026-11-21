@@ -218,6 +218,34 @@ revision 2, return `cart_reset_pending: true` so the client can retry that
 revision. If the read confirms the purchased revision is gone, return
 `cart_reset_pending: false`. If the cart cannot be read, return `true`.
 
+## Implemented order details (#93)
+
+`GET /customers/me/orders/{order_id}` returns the existing `Order` snapshot with
+200. The opaque ID may be a seed ID such as `order-001`; it is not UUID-only. The
+route accepts no request body and documents bearer security and 200/401/403/404/500
+in generated OpenAPI. No new fields or persistence format are introduced.
+
+The route uses `CurrentCustomer` from `app/api/auth.py`. `OrderDetailsService`
+independently rejects noncustomer principals, then reloads the current customer
+and reads the order under `workflow_lock`. Active and inactive owners are allowed.
+The proposed `app/services/access.py` helper is not present in this implementation;
+the checkout-only `active_customer_for` cannot be used for read-only order access.
+
+Missing/invalid/expired identity or a vanished account returns 401
+`Authentication required` with `WWW-Authenticate: Bearer`. Staff get 403
+`Operation not permitted`. Missing and foreign orders both return 404
+`Order not found`. Authentication storage failures return 500
+`Authentication data is unavailable`; a customer-store failure during the service's
+recheck returns 500 `Customer data is unavailable`; an invalid/unreadable order
+store returns 500 `Order data is unavailable`, even for an unknown order ID.
+Denied identity/role checks precede private order reads, and GET writes nothing.
+
+Details use only the saved transaction: current catalog/cart contents are not
+looked up or used to reconstruct names, amounts, address or relationships.
+`tests/test_order_details.py` covers independent fixture orders and real
+registration/login/cart plus checkout-service-created orders. The complete HTTP
+checkout-to-detail workflow still awaits #91's checkout endpoint; history remains #92.
+
 ## Checkout ordering, failures, and retry contract
 
 The [checkout service](../app/services/checkout.py) and [JSON order store](../app/repositories/order.py)
