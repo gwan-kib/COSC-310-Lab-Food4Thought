@@ -9,14 +9,12 @@ from threading import Lock
 
 from pydantic import ValidationError
 
+from app.core.account_lock import account_email_lock
 from app.core.config import get_customers_data_path, get_sessions_data_path
 from app.core.json_file import read_json_array, write_json_array
 from app.core.storage import StorageFailure
 from app.schemas.customer import SessionRecord, StoredCustomer
 
-# Held for every write that can add an account email. Staff provisioning (#107) must
-# hold it too, so a customer and a staff account cannot claim the same email at once.
-ACCOUNT_EMAIL_LOCK = Lock()
 _session_lock = Lock()
 
 
@@ -69,7 +67,9 @@ class CustomerRepository:
         self._mutate(replace)
 
     def _mutate(self, change: Callable[[list[StoredCustomer]], None]) -> None:
-        with ACCOUNT_EMAIL_LOCK:
+        # Every customer write holds the cross-process account lock, which staff
+        # provisioning (#107) also holds, so no two accounts can claim one email.
+        with account_email_lock(CustomerDataError):
             customers = self.load_customers()
             change(customers)
             validated = self._validate([c.model_dump() for c in customers])

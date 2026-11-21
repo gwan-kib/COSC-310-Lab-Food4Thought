@@ -897,3 +897,28 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: Inspected the compared file lists and overlapping documentation changes; CI and final merge outcome are checked separately, and no student code-understanding claim is made.
 - PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116).
 - Student review status: Pending responsible-student confirmation.
+
+### Entry 70: Staff account provisioning command
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #107.
+- Artifact: `app/scripts/create_staff_account.py`, `app/scripts/__init__.py`, `app/services/staff.py`, the write methods in `app/repositories/staff.py`, `tests/test_staff_provisioning.py`, and staff-account instructions in `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md` and `README.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Let the team create restaurant users and administrators, which have no public sign-up, so staff can sign in for the M2 demo and menu-availability work (#94).
+- Influence: Claude wrote the tests first, then a provisioning service and an argparse command (`create`, `assign`) that reads the password twice with a hidden prompt, applies the customer password and email rules, stores only an Argon2id hash, rejects unknown restaurants and administrators with restaurants, keeps emails unique across customers and staff under the shared account-email lock, and never prints the password.
+- Validation: `tests/test_staff_provisioning.py` first failed with `No module named 'app.scripts'`; after implementation its 13 tests passed. The real command was also run through `python -m` on disposable copies of the data files: it created a manager for `restaurant-001`, `POST /auth/login` returned 200 with role `restaurant_user`, and `data/` was unchanged. The PowerShell form of the commands was not run.
+- PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117), branch `feature/107-staff-provisioning`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #117. Claude wrote two regressions that run a second process holding the account lock (`tests/account_lock_holder.py`); with a thread-only lock both failed (a duplicate email was accepted, and a concurrent assignment was lost). Claude then replaced the in-process `ACCOUNT_EMAIL_LOCK` with `app/core/account_lock.py`, a thread lock plus a `filelock` lock file beside the customer store (new pinned dependency `filelock==3.20.0`), held by every customer write and every staff write; made `assign` read, check and update the latest stored record in one locked step (`StaffRepository.update_by_email`); and reordered the first-time setup guide so staff accounts are created while the disposable overrides are set, before starting the server, with the overrides cleared last. The reordered shell commands were run on disposable copies (manager login 200 `restaurant_user`, a customer registration with the administrator's email 409, `data/` unchanged); the PowerShell commands were checked by reading only.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 71: Integrate staff provisioning with merged JSON helper
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and integrator; Sreeram Nara (`SreeramNara`) remains responsible for the #107 implementation.
+- Artifact: Conflict resolution for [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117) on `feature/107-staff-provisioning`, including `docs/DATA_MODEL.md`, `docs/PROVENANCE.md` and the merge of shared JSON helper changes from `main`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Integrate reviewed staff account provisioning with the merged shared JSON-array helper (#96) and menu authorization (#94), without dropping either team's work.
+- Influence: ChatGPT constructed a merge tree retaining PR #117's implementation and the latest `main` source changes, combined non-overlapping data-model edits, preserved the existing provenance entries 65–69, retained Sreeram's entry 70, and added this integration entry. No application business logic was rewritten as part of conflict resolution.
+- Validation: Compared both branches against their common ancestor and verified the overlapping documentation edits; subsequent CI and merge outcome are verified separately, and this does not claim student understanding.
+- PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117).
+- Student review status: Pending responsible-student confirmation.
