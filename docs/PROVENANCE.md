@@ -1151,3 +1151,14 @@ its pending-auth and local-only status.
 - PR or commit: [PR #131](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/131), branch `feature/83-84-protection-evidence`.
 - Review follow-up: Gwantana Kiboigo (`gwan-kib`) noted that the inactive-write list left out `PATCH /customers/me`. Claude added profile edits to the old-token scenario (403 `Customer is inactive`, no writes), checked that repeating deactivation is an allowed no-op, and linked this PR.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 84: Cross-subsystem persistence verification (#95)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #95 coordinator and requester; personal review and understanding are not inferred from automated checks.
+- Artifact: `tests/test_cross_subsystem_persistence.py`, `docs/CROSS_SUBSYSTEM_VERIFICATION.md`, the issue #95 milestone evidence in `docs/milestones/M2.md`, and this provenance entry.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT (OpenAI GPT-6).
+- Purpose and influence: Generated a consolidated cross-subsystem test suite and a traceability matrix for stable customer/restaurant/menu/cart/order identifiers, owner boundaries, fresh-instance persistence, malformed and unreadable stores, validation-before-write and checkout's saved-order/failed-cart-reset policy. Reused the existing implementation and isolated storage fixtures rather than duplicating subsystem repositories.
+- Validation: Existing source, API contracts, owner tests, fixture/CI guards and repository persistence boundaries were inspected. Actual execution is pending hosted PR CI; no passing or failing run is asserted by this entry. Verification commands are listed in `docs/CROSS_SUBSYSTEM_VERIFICATION.md`; results must be added after they are observed.
+- PR or commit: Branch `feature/95-cross-subsystem-verification`; linked PR to be added after creation. Issue #95 is referenced without an auto-close keyword.
+- Student review status: Pending responsible-student walkthrough and teammate review. No review, merge or acceptance is asserted.
