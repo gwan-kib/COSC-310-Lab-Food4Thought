@@ -5,7 +5,7 @@
 The [M1 contract](M1_API_CONTRACT.md#persistence-and-layer-boundaries) describes
 implemented restaurant/menu storage. The [M2 contract](M2_API_CONTRACT.md) proposes
 the additions below for #77. The [order repository](../app/repositories/order.py)
-implements order storage for #91–#93. Customer and cart storage are still design targets.
+implements order storage for #91–#93. Customer, cart and session repositories are implemented; staff-account provisioning remains in #107.
 Course traceability and unresolved
 source/role questions are recorded in that contract and [M2 evidence](milestones/M2.md).
 
@@ -15,17 +15,17 @@ source/role questions are recorded in that contract and [M2 evidence](milestones
 | --- | --- | --- |
 | Restaurant/menu | Implemented `data/restaurants.json`, `RESTAURANTS_DATA_PATH` | Existing repository; Thomas owns #94 availability extension; JSON array of complete restaurant records |
 | Customer | Implemented `data/customers.json`, `CUSTOMERS_DATA_PATH` (`app/repositories/customer.py`, #79–#82) | Sreeram; JSON array of public profile fields plus private password hash and server-owned customer role |
-| Cart | Proposed `data/carts.json`, `CARTS_DATA_PATH` | Sreeram; JSON array of `CartRecord` objects |
+| Cart | Implemented `data/carts.json`, `CARTS_DATA_PATH` (`app/repositories/cart.py`, #85/#86) | Sreeram; JSON array of `CartRecord` objects |
 | Order | Implemented `data/orders.json`, `ORDERS_DATA_PATH` | Thomas; append-only JSON array of order snapshots |
 | Staff account | Proposed `data/staff.json`, `STAFF_DATA_PATH` | Sreeram (#78); provisioned restaurant users and administrators: `id`, `name`, `email`, `role`, `restaurant_ids`, Argon2id `password_hash` |
 | Session | Implemented `data/sessions.json`, `SESSIONS_DATA_PATH` (#80) | Sreeram (#78); `token_sha256`, `account_id`, `account_type`, `issued_at`, `expires_at`; never the token itself |
 
 New repositories should match M1's explicit `path: Path | str | None` injection,
 resolve overrides at construction rather than import time, and keep file I/O out
-of routes/services. The staff and session stores, Argon2id password hashing and the token design
-are proposed in [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78). They are not configured
-at runtime yet; the [shared fixtures](../tests/conftest.py) already
-isolate both stores in tests.
+of routes/services. The staff repository validates and reads provisioned accounts; provisioning itself
+remains in #107. Session storage, Argon2id password hashing and bearer-token
+identity are implemented as agreed in [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78).
+The [shared fixtures](../tests/conftest.py) isolate both stores in tests.
 
 Feature PRs must initialize deliberately empty new stores and explain first-run
 configuration in both setup guides when implemented. Once configured, a missing,
@@ -56,7 +56,7 @@ workflow lock; repositories do not import each other to own business rules.
 
 ## Records and projections
 
-`Customer`: proposed `id`, `name`, `email`, `delivery_address`, `status`.
+`Customer`: implemented `id`, `name`, `email`, `delivery_address`, `status`.
 The complete stored record additionally holds a library-produced `password_hash`
 and server-assigned customer role. Never serialize the complete record through a
 public response model. Proposed deactivation sets `inactive`, preserves the ID,
@@ -108,7 +108,8 @@ writer coordination, power-loss durability, or complete M3 recovery is made.
 
 Checkout acquires [the workflow lock](../app/core/workflow.py). The other
 writers must acquire that same lock for cross-store serialization to hold in the
-integrated app. Customer/cart/auth adapters and the HTTP route are pending.
+integrated app. Customer authentication and repository adapters are implemented; cart HTTP
+routes and checkout integration remain separate work (#115 and #84).
 
 ## Verification responsibilities
 
