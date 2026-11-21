@@ -12,16 +12,18 @@ export function customerRequest(path, options = {}) {
   const token = customerToken();
   const headers = { ...options.headers };
   if (token) headers.Authorization = `Bearer ${token}`;
-  return requestJson(path, { ...options, headers });
+  return requestJson(path, { ...options, headers, preserveQuantity: true });
 }
 
-export function customerError(status, body) {
+export function customerError(status, body, quantityRequest = false) {
   if (status === 401) {
     sessionStorage.removeItem(TOKEN_KEY);
     return "Your session is missing or expired. Sign in again from My account.";
   }
   if (status === 422) {
-    return "Invalid input. Use a positive whole-number quantity.";
+    return quantityRequest
+      ? "Invalid input. Use a positive whole-number quantity."
+      : "Invalid input. Review the submitted request.";
   }
   return typeof body?.detail === "string" && body.detail
     ? body.detail : `Request failed (HTTP ${status}).`;

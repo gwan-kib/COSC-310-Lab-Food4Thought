@@ -189,7 +189,6 @@ Record:
 
 Never fabricate output, report an unrun command as passing, weaken assertions to hide a defect, or treat API tests as proof that a frontend works. Documentation-only changes need appropriate link/template/content checks, not invented application test results.
 
-
 ## #101 full workflow integration checks
 
 The backend [complete-workflow tests](../tests/test_complete_workflow.py) run
@@ -198,7 +197,7 @@ cart, checkout and saved-order reads through a fresh API instance. They also
 check authorized/unauthorized paths, changed catalog values, rejected requests
 and both persistence failure stages. The associated
 [browser journey](../tests/browser/test_complete_workflow_browser.py) uses the
-real frontend from #100 and verifies a visible saved receipt and an owned
+real frontend merged through #100 / PR #133 and verifies a visible saved receipt and an owned
 order-detail read. These tests do not mock application services, repositories
 or HTTP responses; only the clock and deliberate filesystem failures are
 controlled. All six data paths are isolated by `tests/conftest.py`.
@@ -214,4 +213,4 @@ git status --porcelain --untracked-files=all --ignored -- data/
 ```
 
 These are verification commands, not claims that a particular execution passed.
-See the #101 PR for exact run results and the stacked dependency on #100.
+See PR #136 for hosted results; #100 / PR #133 is now merged.

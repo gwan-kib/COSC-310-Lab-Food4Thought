@@ -298,3 +298,121 @@ def test_pending_checkout_reset_requires_explicit_same_revision_replay(
     assert len(calls) == 2 and calls[0] == calls[1]
     assert len(json.loads(m2_store_paths["orders"].read_text())) == 1
     assert page.page_errors == []
+
+
+def test_lost_checkout_response_still_finds_receipt_when_cart_read_fails(
+    page, live_server, auth_accounts, m2_store_paths
+):
+    sign_in_customer(page, live_server, auth_accounts)
+    add_bowl(page, live_server)
+    posts = []
+    history_reads = []
+
+    def lost_response(route):
+        posts.append(route.request.post_data_json)
+        assert route.fetch().status == 201
+        route.abort()
+
+    def fail_cart_after_checkout(route):
+        if posts:
+            route.fulfill(status=500, json={"detail": "Cart data is unavailable"})
+        else:
+            route.continue_()
+
+    page.route("**/customers/me/checkout", lost_response)
+    page.route("**/customers/me/cart", fail_cart_after_checkout)
+    page.route("**/customers/me/orders", lambda route: (
+        history_reads.append(route.request.method), route.continue_()
+    ))
+    page.goto(f"{live_server}/app/cart.html")
+    expect(page.locator("#cart-total")).to_have_text("$12.50")
+    page.get_by_role("button", name="Place order").click()
+    expect(page.locator("#order-confirmation")).to_be_visible()
+    saved = json.loads(m2_store_paths["orders"].read_text())
+    assert len(saved) == 1
+    expect(page.locator("#order-id")).to_have_text(saved[0]["id"])
+    expect(page.locator("#checkout-status")).to_contain_text("cannot confirm")
+    expect(page.get_by_role("button", name="Retry original checkout")).to_be_hidden()
+    assert history_reads == ["GET"]
+    assert len(posts) == 1
+
+    page.unroute("**/customers/me/cart", fail_cart_after_checkout)
+    page.get_by_role("button", name="Refresh cart").click()
+    expect(page.locator("#cart-total")).to_have_text("$0.00")
+    expect(page.locator("#checkout-status")).to_contain_text("No checkout retry is needed")
+    assert len(posts) == 1
+    assert len(json.loads(m2_store_paths["orders"].read_text())) == 1
+    assert page.page_errors == []
+
+
+def test_checkout_revision_conflict_refreshes_changed_total_before_resubmission(
+    page, live_server, auth_accounts, m2_store_paths
+):
+    sign_in_customer(page, live_server, auth_accounts)
+    add_bowl(page, live_server)
+    page.goto(f"{live_server}/app/cart.html")
+    expect(page.locator("#cart-total")).to_have_text("$12.50")
+    token = page.evaluate("sessionStorage.getItem('food4thought.customer.token')")
+    edited = page.request.patch(
+        f"{live_server}/customers/me/cart/items/item-001",
+        data={"quantity": 2}, headers={"Authorization": f"Bearer {token}"},
+    )
+    assert edited.status == 200
+    assert edited.json()["total"] == "25.00"
+
+    with page.expect_response("**/customers/me/checkout") as first:
+        page.get_by_role("button", name="Place order").click()
+    assert first.value.status == 409
+    expect(page.locator("#cart-total")).to_have_text("$25.00")
+    expect(page.get_by_role("spinbutton", name="Quantity for Vegetable bowl")).to_have_value("2")
+    expect(page.locator("#cart-status")).to_contain_text("Review the updated cart")
+    expect(page.get_by_role("button", name="Place order")).to_be_enabled()
+    assert json.loads(m2_store_paths["orders"].read_text()) == []
+
+    with page.expect_response("**/customers/me/checkout") as second:
+        page.get_by_role("button", name="Place order").click()
+    assert second.value.status == 201
+    expect(page.locator("#order-total")).to_have_text("$25.00")
+    assert len(json.loads(m2_store_paths["orders"].read_text())) == 1
+    assert page.page_errors == []
+
+
+def test_cart_and_receipt_display_large_integer_quantity_without_rounding(
+    page, live_server, auth_accounts, m2_store_paths
+):
+    sign_in_customer(page, live_server, auth_accounts)
+    token = page.evaluate("sessionStorage.getItem('food4thought.customer.token')")
+    headers = {"Authorization": f"Bearer {token}"}
+    assert page.request.put(f"{live_server}/customers/me/cart", headers=headers).status == 201
+    big = 9007199254740993
+    added = page.request.post(
+        f"{live_server}/customers/me/cart/items",
+        data='{"restaurant_id":"restaurant-001","item_id":"item-001","quantity":9007199254740993}',
+        headers={**headers, "Content-Type": "application/json"},
+    )
+    assert added.status == 200
+    assert json.loads(m2_store_paths["carts"].read_text())[0]["items"][0]["quantity"] == big
+
+    page.goto(f"{live_server}/app/cart.html")
+    expect(page.get_by_role("spinbutton", name="Quantity for Vegetable bowl")).to_have_value(str(big))
+    page.get_by_role("button", name="Place order").click()
+    expect(page.locator("#order-confirmation")).to_be_visible()
+    expect(page.locator("#order-items")).to_contain_text(str(big))
+    order = json.loads(m2_store_paths["orders"].read_text())[0]
+    assert order["items"][0]["quantity"] == big
+    assert page.locator("#order-items").inner_text().count(str(big)) == 1
+    assert page.page_errors == []
+
+
+def test_checkout_validation_does_not_report_quantity_error(page, live_server, auth_accounts):
+    sign_in_customer(page, live_server, auth_accounts)
+    add_bowl(page, live_server)
+    page.route("**/customers/me/checkout", lambda route: route.fulfill(
+        status=422, json={"detail": [{"loc": ["body", "cart_id"],
+                                       "msg": "Invalid cart ID"}]}
+    ))
+    page.goto(f"{live_server}/app/cart.html")
+    page.get_by_role("button", name="Place order").click()
+    expect(page.locator("#cart-error")).to_contain_text("Invalid input")
+    expect(page.locator("#cart-error")).not_to_contain_text("quantity")
+    assert page.page_errors == []
