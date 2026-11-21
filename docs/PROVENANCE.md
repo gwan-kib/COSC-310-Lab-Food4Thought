@@ -934,3 +934,13 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #121](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/121) for [issue #97](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/97).
 - Review follow-up: In response to [Gwantana’s review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/121#pullrequestreview-6002501869), Codex integrated main at `aaca156`, preserved entries through 71, and scoped the receipt wording to #97. The pricing characterization initially failed with `AuthenticationRequired` after integration. Codex switched its menu edits to authenticated restaurant-manager PATCH requests. The focused scenario then passed, `python -m compileall -q app` succeeded, and `python -m pytest -q` passed all 685 tests with Chromium required.
 - Student review status: Thomas confirmed the design and test scenario. Review of the implementation and student understanding are pending.
+
+### Issue 87: Update a cart line's quantity
+
+- Student: Thomas Chen (`Tc2006415`), assigned to [#87](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/87).
+- Artifact: Quantity PATCH route, service, request schema, API tests, README, setup guides and M2 contract clarification on branch `feature/87-update-cart-quantity`.
+- Label: `AI-GENERATED`
+- AI tool: Codex (OpenAI).
+- Purpose and influence: Codex implemented the endpoint and tests using the shared cart, catalog, pricing, authorization and order-receipt interfaces. Codex chose to reject an unavailable target even when the submitted quantity is the same.
+- Validation: `python -m pytest -q tests/test_cart_api.py -k quantity_patch --tb=line` failed all 16 selected cases on the missing route, then passed all 16. `python -m compileall -q app` succeeded. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q --tb=line` passed all 701 tests.
+- Student review status: Responsible-student walkthrough and human peer review pending.
