@@ -6,10 +6,10 @@ build the response before saving so a failed read never leaves a half-finished c
 
 from typing import Protocol
 
+from app.core.pricing import line_total, sum_line_totals
 from app.core.workflow import workflow_lock
 from app.repositories.cart import CartDataError, CartRepository
 from app.schemas.cart import AddCartItemRequest, CartItem, CartRecord, CartView, CartViewItem
-from app.schemas.order import cents, money
 from app.services.catalog import CatalogItem
 from app.services.restaurant import MenuItemNotFoundError, RestaurantNotFoundError
 
@@ -143,12 +143,11 @@ class CartService:
             if item is None:
                 # A stored reference to a missing item is corrupt data, not a free item.
                 raise CartDataError(f"Cart {cart.id} references missing item {line.item_id}")
-            # Checkout's exact conversion handles totals longer than int's text limit.
             lines.append(CartViewItem(item_id=item.id, name=item.name, quantity=line.quantity,
                                       unit_price=item.price,
-                                      line_total=money(cents(item.price) * line.quantity),
+                                      line_total=line_total(item.price, line.quantity),
                                       available=item.available))
-        subtotal = money(sum(cents(line.line_total) for line in lines))
+        subtotal = sum_line_totals(line.line_total for line in lines)
         receipt = self._receipt_for(cart)
         return CartView(id=cart.id, customer_id=cart.customer_id, revision=cart.revision,
                         restaurant_id=cart.restaurant_id, items=lines, subtotal=subtotal,

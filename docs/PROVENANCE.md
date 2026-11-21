@@ -923,7 +923,35 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117).
 - Student review status: Pending responsible-student confirmation.
 
-### Entry 72: Staff management sign-in and authorization browser coverage (#108)
+### Entry 72: Share exact pricing across cart views and checkout (#97)
+
+- Student: Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: `app/core/pricing.py`, cart and order schemas, cart and checkout services, test imports, the pricing characterization in `tests/test_cart_api.py`, and [M2.1 receipt evidence](milestones/M2.md#decision-receipt-m21--shared-cart-and-checkout-pricing-97).
+- Label: `AI-GENERATED`
+- AI tool: Codex (OpenAI).
+- Purpose and influence: Codex inspected the implementation and alternatives. Thomas chose the behavior-preserving arithmetic extraction and the cart repricing and receipt replay scenario. Codex wrote the test, extracted the shared type and calculations, updated consumers, and drafted the decision evidence.
+- Validation: On Python 3.12, `python -m pytest -q tests/test_cart_api.py::test_cart_and_checkout_reprice_but_retry_keeps_the_saved_order tests/test_cart_service.py tests/test_cart_checkout_integration.py tests/test_checkout_service.py tests/test_order_repository.py` passed 73 tests before and after extraction. `python -m compileall app` succeeded. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed all 618 tests. `git status --porcelain --untracked-files=all --ignored -- data/` returned no entries. The sorted generated OpenAPI JSON had the same SHA-256 before and after.
+- PR or commit: [PR #121](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/121) for [issue #97](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/97).
+- Review follow-up: In response to [Gwantana’s review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/121#pullrequestreview-6002501869), Codex integrated main at `aaca156`, preserved entries through 71, and scoped the receipt wording to #97. The pricing characterization initially failed with `AuthenticationRequired` after integration. Codex switched its menu edits to authenticated restaurant-manager PATCH requests. The focused scenario then passed, `python -m compileall -q app` succeeded, and `python -m pytest -q` passed all 685 tests with Chromium required.
+- Student review status: Thomas confirmed the design and test scenario. Review of the implementation and student understanding are pending.
+
+### Entry 73: Customer authentication and account frontend (#99)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), implementation requester and responsible student; student review/understanding not yet confirmed.
+- Artifact: `frontend/account.html`, `frontend/account.js`, `frontend/index.html`, `frontend/styles.css`, `tests/browser/test_account_browser.py`, `README.md`, `docs/QUICK_SETUP.md`, and `docs/FIRST_TIME_SETUP.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Build the M2 customer-account browser workflow required by #99 against the existing REST API without duplicating backend authorization.
+- Influence: ChatGPT generated the account page, form submission and token handling, validation/access feedback, read-only/deactivation interactions, browser test cases with mock and real API expectations, navigation and setup documentation. The interface stores the bearer token in per-tab session storage, avoids automatic retry of ambiguous writes, and keeps saved-profile checks separate from unsaved edit values.
+- Validation: The existing M2 customer/auth contracts and code were inspected, and a form-disabled/data-capture bug was corrected during source review. A timing-dependent browser test failure on [run 44856849701](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44856849701) led to an explicit wait for confirmed registration before sign-in. Final behavior was verified by [GitHub Actions run 44857016144](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44857016144): Python application compilation succeeded, 629 pytest tests passed (2 unrelated Playwright warnings), and the committed application-data guard passed. Includes real isolated-data browser tests and mocked contract checks. No manual student review or student understanding is claimed.
+- PR or commit: [PR #118](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/118); branch `feature/99-customer-account-frontend`.
+- Review follow-up (Thomas Chen, [PR #118 change requests](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/118#pullrequestreview-6002369682)): ChatGPT added `tests/browser/test_account_review_regressions.py` and corrected `frontend/account.html` and `frontend/account.js` so password-bearing forms cannot submit before handlers load, sign-out/401 and account switches clear stale profile data and consent, profile refresh merges server changes into untouched controls, PATCH sends only locally edited fields, reads predating a write are ignored, and a first successful GET after failure populates the form. Setup documentation was adjusted accordingly.
+- Review validation: The new seven regression tests **all failed** before fixes ([CI run 44858111935](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44858111935): 7 failed, 629 passed). After code fixes, six passed and the seventh revealed a Playwright assertion error about a disabled `fieldset`; the assertion was corrected to check its native `disabled` attribute (the nested controls were already correctly disabled). [CI run 44858283128](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44858283128) passed **636 tests**, Python compilation and committed-data integrity checks. This is automated evidence, not a student or peer approval.
+- Student review status: Pending. The responsible student must inspect the diff, execute and explain the workflow, and obtain a teammate review before merge.
+
+- Merge-conflict follow-up: ChatGPT reconciled this branch against `main` at commit `572368d`, retained provenance entries 65–72 from other teammates, renumbered this account record to Entry 73, and kept the updated staff-account setup and shared pricing changes. The frontend also clears a superseded profile-refresh status during writes, covered by a regression test. Passing CI and peer approval must be checked after integration.
+
+### Entry 74: Staff management sign-in and authorization browser coverage (#108)
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee; personal review and understanding still to be confirmed.
 - Artifact: `frontend/staff-session.js`, `frontend/staff-sign-in.html`, `frontend/staff-sign-in.js`, `tests/browser/test_staff_sign_in_browser.py`.
@@ -935,7 +963,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [Issue #108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108), [feature branch](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/tree/feature/108-staff-sign-in).
 - Student review status: Pending.
 
-### Entry 73: Integrate staff authentication into existing frontend (#108)
+### Entry 75: Integrate staff authentication into existing frontend (#108)
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee; personal review and understanding still to be confirmed.
 - Artifact: `frontend/app.js`, `frontend/create-restaurant.js`, `frontend/edit-restaurant.js`, `frontend/create-restaurant.html`, `frontend/edit-restaurant.html`, `frontend/styles.css`, `tests/browser/conftest.py`, `README.md`, `docs/QUICK_SETUP.md`, `docs/FIRST_TIME_SETUP.md`.

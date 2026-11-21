@@ -69,6 +69,7 @@ http://127.0.0.1:8000
 | Check | URL |
 | --- | --- |
 | Customer frontend | `http://127.0.0.1:8000/app/` |
+| Customer account (registration, sign-in, profile, deactivation) | `http://127.0.0.1:8000/app/account.html` |
 | Staff sign-in | `http://127.0.0.1:8000/app/staff-sign-in.html` |
 | Create restaurant frontend | `http://127.0.0.1:8000/app/create-restaurant.html` |
 | Edit restaurant frontend | Select a restaurant at `http://127.0.0.1:8000/app/` and follow **Edit restaurant** |

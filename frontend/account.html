@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Food4Thought – Customer account</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Food4Thought</h1>
+      <p>Customer account</p>
+      <nav aria-label="Main navigation"><a href="./">Browse restaurants</a></nav>
+    </header>
+
+    <main class="management-layout account-layout">
+      <h2>My account</h2>
+      <p id="session-status" class="status" role="status"></p>
+
+      <div id="signed-out" class="account-sections">
+        <section class="panel" aria-labelledby="signin-heading">
+          <h3 id="signin-heading">Sign in</h3>
+          <form id="signin-form" method="post">
+            <fieldset class="create-fields" disabled>
+              <legend class="visually-hidden">Sign-in details</legend>
+              <label for="signin-email">Email</label>
+              <input id="signin-email" name="email" type="email" autocomplete="username" required />
+              <label for="signin-password">Password</label>
+              <input id="signin-password" name="password" type="password" autocomplete="current-password" required />
+              <button type="submit">Sign in</button>
+            </fieldset>
+          </form>
+          <p id="signin-status" class="status" role="status"></p>
+          <div id="signin-errors" class="status error" role="alert"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="register-heading">
+          <h3 id="register-heading">Create a customer account</h3>
+          <form id="register-form" method="post">
+            <fieldset class="create-fields" disabled>
+              <legend class="visually-hidden">Registration details</legend>
+              <label for="register-name">Name</label>
+              <input id="register-name" name="name" type="text" autocomplete="name" required />
+              <label for="register-email">Email</label>
+              <input id="register-email" name="email" type="email" autocomplete="email" required />
+              <label for="register-address">Delivery address</label>
+              <textarea id="register-address" name="delivery_address" autocomplete="street-address" rows="2" required></textarea>
+              <label for="register-password">Password (8–128 characters)</label>
+              <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required />
+              <button type="submit">Register</button>
+            </fieldset>
+          </form>
+          <p id="register-status" class="status" role="status"></p>
+          <div id="register-errors" class="status error" role="alert"></div>
+        </section>
+      </div>
+
+      <section id="signed-in" class="panel" aria-labelledby="profile-heading" hidden>
+        <div class="account-heading">
+          <h3 id="profile-heading">Profile</h3>
+          <button id="signout-button" type="button">Sign out of this tab</button>
+        </div>
+        <p id="account-state" class="status" role="status"></p>
+        <dl id="profile-details" class="account-details" hidden>
+          <dt>Email</dt><dd id="profile-email"></dd>
+          <dt>Saved name</dt><dd id="saved-name"></dd>
+          <dt>Saved delivery address</dt><dd id="saved-address"></dd>
+        </dl>
+        <button type="button" id="refresh-profile">Check saved profile</button>
+        <p id="refresh-status" class="status" role="status"></p>
+        <div id="refresh-errors" class="status error" role="alert"></div>
+
+        <form id="profile-form" method="post">
+          <fieldset class="create-fields">
+            <legend>Update profile</legend>
+            <label for="profile-name">Name</label>
+            <input id="profile-name" name="name" required />
+            <label for="profile-address">Delivery address</label>
+            <textarea id="profile-address" name="delivery_address" rows="2" required></textarea>
+            <button type="submit">Save changes</button>
+          </fieldset>
+        </form>
+        <p id="profile-status" class="status" role="status"></p>
+        <div id="profile-errors" class="status error" role="alert"></div>
+
+        <form id="deactivate-form" class="deactivate-form" method="post">
+          <fieldset class="create-fields">
+            <legend>Deactivate account</legend>
+            <p>Deactivation cannot be undone here. Your profile stays readable, but you cannot change your cart or check out.</p>
+            <label class="checkbox-row" for="confirm-deactivate">
+              <input id="confirm-deactivate" name="confirm" type="checkbox" required />
+              I understand that this account will become inactive.
+            </label>
+            <button type="submit">Deactivate my account</button>
+          </fieldset>
+        </form>
+        <p id="deactivate-status" class="status" role="status"></p>
+        <div id="deactivate-errors" class="status error" role="alert"></div>
+      </section>
+
+      <p class="account-note">Sign-in tokens are stored only in this browser tab. Signing out clears this tab's token; it does not revoke the server session, which expires after 24 hours.</p>
+    </main>
+    <script type="module" src="account.js"></script>
+  </body>
+</html>
