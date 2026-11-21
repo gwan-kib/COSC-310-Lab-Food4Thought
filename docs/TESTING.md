@@ -68,7 +68,33 @@ integration tests must use the real implementations, not these doubles.
 Run `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
 for #91. These tests use a temporary order file, reopen the repository for retry,
 and check current pricing, authorization timing and conditional reset failures.
-Customer, cart and menu inputs in that focused suite are doubles.
+Customer, cart and menu inputs in that focused suite are doubles. Real-store
+purchase-to-history and purchase-to-detail coverage is provided by the #92 and
+#93 API tests below; checkout HTTP remains separate work.
+
+Run `python -m pytest -q tests/test_order_history_service.py` for the #92 service.
+Independent A1/B1/A2 JSON fixtures verify customer scoping, persisted insertion
+order, empty history, unchanged files, stable snapshots after reload, and errors
+for missing/unreadable/corrupt stores even when a customer has no orders. The
+authorization-boundary tests verify delegation under the workflow lock and
+denial before private order reads; they do not implement or prove real auth.
+One test connects the real checkout service and order repository to history,
+including a second read through a fresh repository. Customer/cart/catalog/auth
+remain doubles in that service-only module.
+The default full-suite command above includes these tests.
+
+Run `python -m pytest -q tests/test_order_history_api.py` for #92's real-auth
+HTTP tests. Independent stored orders verify customer filtering, insertion order,
+empty results, inactive access with old/new tokens, invalid/expired/removed
+identities, staff denial, corrupt stores and the generated bearer/response schema.
+A customer disappearing or becoming unreadable after token resolution is checked
+again under the service's workflow lock. Read/denial tests compare every store's
+bytes. The integration case registers and signs in through HTTP, adds to the real
+cart through HTTP, purchases through the real checkout service, then retrieves
+the snapshot through history HTTP and a fresh application. Customer, cart,
+catalog, auth and persistence are real; only the clock is fixed. Later address
+and menu-price changes do not rewrite historical orders. Checkout's HTTP route
+is not part of this test or issue.
 
 Run `python -m pytest -q tests/test_order_details.py` for #93. Independent fixture
 orders cover owner/inactive access, missing/foreign 404 equivalence, identity/role

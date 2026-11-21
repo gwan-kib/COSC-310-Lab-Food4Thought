@@ -106,13 +106,19 @@ of the empty `data/orders.json` before constructing the repository. Run
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
 to exercise checkout with isolated storage. The checkout HTTP route is pending.
 
+After signing in through `/docs`, use **Authorize** with the returned token and
+call `GET /customers/me/orders`: it returns your saved snapshots, or `[]` when
+you have no orders. Inactive customers retain read access. Run
+`python -m pytest -q tests/test_order_history_api.py` for isolated real-auth and
+purchase-to-history checks; no manual seed edits are required.
+
 `GET /customers/me/orders/{order_id}` is implemented. In `/docs`, sign in and
 use **Authorize** with the returned token, then supply an owned ID already saved
 in the disposable order store. The empty seed has no orders; an unknown ID returns
 404. Active and inactive owners can read snapshots. Run
 `python -m pytest -q tests/test_order_details.py` for fixture-based API checks and
-the real account/cart/checkout-service/detail integration; checkout HTTP and the
-order-history endpoint are separate work.
+the real account/cart/checkout-service/detail integration; checkout HTTP remains
+separate work.
 
 To sign in as a restaurant user or administrator, create the account after setting the disposable data paths and **before** clearing them, in the same terminal with the server stopped: `python -m app.scripts.create_staff_account create --name "Cedar Bowl Manager" --email manager@cedarbowl.invalid --role restaurant_user --restaurant restaurant-001`, then start the server again. The [disposable-data steps](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) show the full order, administrators and assigning restaurants.
 
