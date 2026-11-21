@@ -171,3 +171,67 @@ def test_inactive_customer_cannot_change_cart_and_session_errors_are_clear(
     expect(page.locator("#cart-error")).to_contain_text("inactive")
     expect(page.locator("#cart-items li")).to_have_count(1)
     assert page.page_errors == []
+
+
+def test_mixed_restaurants_show_backend_conflict_without_replacing_cart(
+    page, live_server, auth_accounts, m2_store_paths
+):
+    sign_in_customer(page, live_server, auth_accounts)
+    add_bowl(page, live_server)
+    page.goto(f"{live_server}/app/#/restaurants/restaurant-002")
+    expect(page.locator("#menu-list li")).to_have_count(2)
+    page.get_by_role("button", name="Add Margherita pizza to cart").click()
+    expect(page.locator("#menu-status")).to_contain_text("Cart belongs to another restaurant")
+    saved = json.loads(m2_store_paths["carts"].read_text())[0]
+    assert saved["restaurant_id"] == "restaurant-001"
+    assert saved["items"] == [{"item_id": "item-001", "quantity": 1}]
+    assert page.page_errors == []
+
+
+def test_invalid_cart_quantity_and_api_validation_keep_stored_cart_unchanged(
+    page, live_server, auth_accounts, m2_store_paths
+):
+    sign_in_customer(page, live_server, auth_accounts)
+    add_bowl(page, live_server)
+    page.goto(f"{live_server}/app/cart.html")
+    expect(page.locator("#cart-items li")).to_have_count(1)
+    original = m2_store_paths["carts"].read_bytes()
+    page.get_by_label("Quantity for Vegetable bowl").fill("0")
+    page.locator(".cart-line-controls").evaluate(
+        "form => form.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}))"
+    )
+    expect(page.locator("#cart-error")).to_contain_text("positive whole number")
+    assert m2_store_paths["carts"].read_bytes() == original
+
+    page.route("**/customers/me/cart/items/item-001", lambda route: route.fulfill(
+        status=422, json={"detail": [{"loc": ["body", "quantity"], "msg": "Invalid value"}]}
+    ))
+    page.get_by_label("Quantity for Vegetable bowl").fill("2")
+    page.get_by_role("button", name="Update quantity for Vegetable bowl").click()
+    expect(page.locator("#cart-error")).to_contain_text("Invalid input")
+    expect(page.locator("#cart-total")).to_have_text("$12.50")
+    assert m2_store_paths["carts"].read_bytes() == original
+    assert page.page_errors == []
+
+
+def test_menu_and_receipt_render_server_text_safely_on_narrow_screen(
+    page, live_server, auth_accounts, m2_store_paths
+):
+    dangerous_name = '<img src=x onerror="window.injected=true"> Bowl'
+    records = json.loads(m2_store_paths["restaurants"].read_text())
+    records[0]["menu_items"][0]["name"] = dangerous_name
+    m2_store_paths["restaurants"].write_text(json.dumps(records), encoding="utf-8")
+    page.set_viewport_size({"width": 390, "height": 844})
+    sign_in_customer(page, live_server, auth_accounts)
+    page.goto(f"{live_server}/app/#/restaurants/restaurant-001")
+    expect(page.locator("#menu-list li").first).to_contain_text(dangerous_name)
+    page.get_by_role("button", name=f"Add {dangerous_name} to cart").click()
+    expect(page.locator("#menu-status")).to_contain_text("Added")
+    page.goto(f"{live_server}/app/cart.html")
+    expect(page.locator("#cart-items")).to_contain_text(dangerous_name)
+    page.locator("#checkout-button").click()
+    expect(page.locator("#order-confirmation")).to_contain_text(dangerous_name)
+    assert page.locator("#cart-items img, #order-items img").count() == 0
+    assert page.evaluate("window.injected") is None
+    assert page.evaluate("document.documentElement.scrollWidth") <= 390
+    assert page.page_errors == []
