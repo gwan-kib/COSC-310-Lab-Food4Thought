@@ -1130,3 +1130,15 @@ its pending-auth and local-only status.
 - Review follow-up for [PR #120](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120#pullrequestreview-6003126115): At Thomas's request, OpenAI Codex merged main `8705f16` to address the integration blocker raised by `gwan-kib`. Codex combined README rows for history and cart removal/clear, preserved main's provenance, moved the four history entries to 77–80, and updated the milestone link and PR verification notes. This work uses the entry's AI-GENERATED label. The history/detail and cart implementations and their regression tests were retained from their respective branches.
 - Verification for this merge: 228 focused history, detail and cart tests passed. With Chromium required (`REQUIRE_BROWSER_TESTS=1`), `python -m pytest -q` passed all 862 tests. Compilation, whitespace and provenance numbering checks passed. Git reported no changes under `data/`. Hosted checks and re-review are tracked on the PR.
 - Current-main verification: Main advanced to `6bc8e8c` during validation. Codex retained #127's cart regression and provenance, renumbered the history entries 78–81, and updated the milestone and PR links. The same focused suite passed 229 tests. The full Chromium-required suite passed all 863 tests.
+
+### Entry 82: Team Receipt M2.3 evidence for #96
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #96.
+- Artifact: The "Team Receipt M2.3 evidence for issue #96" section and the responsibility-map link in `docs/milestones/M2.md`, and this record.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Record Sreeram's architectural improvement (#96, PR #116) in the team's M2.3 receipt, following the structure of the existing #98 entry.
+- Influence: Claude drafted the section from the merged code, the pre-change source at `95c7c8e`, the PR #113 and #116 reviews, and the recorded test results. It covers the observed weakness, the alternatives considered, the decision, the result and trade-off, and the verification and review evidence.
+- Validation: Every link points to the pre-change commit, a merged file or a recorded review. The figures (120 characterization tests, 5,001-digit regression, 57 removed and 32 added lines) come from the PR #116 record. This is documentation only, so there are no application tests to add; `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed unchanged.
+- PR or commit: Branch `docs/96-team-receipt`; PR not yet opened.
+- Student review status: Pending. Sreeram has not yet confirmed that the wording reflects his understanding.
