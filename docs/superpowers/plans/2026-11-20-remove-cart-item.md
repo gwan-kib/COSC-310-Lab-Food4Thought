@@ -64,3 +64,16 @@ One local Windows run stalled and was terminated; a diagnostic rerun with
 715 tests in 34.35 seconds. The nearby 50-test group also passed independently.
 No application change was made for the unreproduced stall. Final compilation,
 dependency, whitespace and committed-data checks passed.
+
+## Review check and current-main refresh
+
+On Thomas's follow-up, PR #123 had no submitted reviews, inline review comments or
+conversation comments. There were no reviewer requests to implement. The PR conflicted
+with newer main, so `9474129` (shared pricing/account frontend) and then `c2d4aa8`
+(order details) were integrated. Provenance and README conflicts retained both features;
+the #88 record moved before the later appended records to reduce repeated append conflicts.
+Removal behavior and tests are unchanged. The focused cart/checkout suite passed 130
+tests; the intermediate full suite passed 735. Final compileall and required-browser
+`python -m pytest -vv -o faulthandler_timeout=30` passed 766 tests in 44.88 seconds,
+without skips. Diff, dependency and committed-data checks passed. CI is verified on
+the pushed head separately; a reviewer has not approved this work.

@@ -83,6 +83,9 @@ silently omit items. A valid unavailable item stays visible with its current pri
 `items: [{item_id, name, quantity, unit_price, line_total}]`, `subtotal`, `total`.
 The order stores copied transaction values, not references to mutable display
 values. Later profile/menu/restaurant changes never alter saved order responses.
+The implemented #93 detail service reloads current customer identity and checks
+ownership, then returns this validated snapshot without live catalog/cart joins.
+It reuses `OrderRepository.get_order`; no schema migration or duplicate store is needed.
 No payment, driver, delivery, reporting, timestamp ordering or full lifecycle
 fields are introduced without a source-grounded later contract change.
 
