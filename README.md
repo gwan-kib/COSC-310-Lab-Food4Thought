@@ -2,9 +2,9 @@
 
 **Team:** Agents Anonymous
 
-Food4Thought is the COSC 310 team's JSON-backed food-delivery application. Restaurant discovery, menus and staff-authorized restaurant management extend the M1 vertical slice. The integrated M2 backend supports customer registration, authentication, profiles, account deactivation, carts, checkout with saved order receipts, and owner-scoped order history/details. Customer account and staff sign-in pages are available; the separate cart/checkout/order frontend is tracked in [issue #100](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/100) and must not be assumed merged.
+Food4Thought is the COSC 310 team's JSON-backed food-delivery application. Restaurant discovery, menus and staff-authorized management extend the M1 vertical slice. The integrated M2 backend supports customer registration, authentication, profiles, account deactivation, carts, checkout with saved order receipts, and owner-scoped order history/details. The customer account, staff sign-in and cart/checkout browser pages are implemented; [PR #133](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/133) added the connected customer-to-order UI, including receipt recovery.
 
-See the [M2 integration evidence and handoff gate](docs/milestones/M2.md#m2-submission-readiness-audit-issue-104) for implemented features, open integration/review work and the exact assessed-revision checklist. Historical M1 decisions remain in the [M1 checkpoint](docs/milestones/M1.md).
+See the [M2 handoff audit and outstanding release gates](docs/milestones/M2.md#m2-submission-readiness-audit-issue-104). Historical M1 decisions remain in the [M1 checkpoint](docs/milestones/M1.md).
 
 ## Requirements
 
@@ -51,6 +51,7 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 | --- | --- |
 | Customer: list, cuisine filter, details, menu | [Customer frontend](http://127.0.0.1:8000/app/) |
 | Customer: register, sign in, edit profile/address, deactivate | [Customer account](http://127.0.0.1:8000/app/account.html) |
+| Customer: add menu items, edit/clear cart, checkout, view order confirmation | [My cart](http://127.0.0.1:8000/app/cart.html) |
 | Management: Staff sign-in | [Staff sign-in](http://127.0.0.1:8000/app/staff-sign-in.html) |
 | Management: Create restaurant | [Create restaurant](http://127.0.0.1:8000/app/create-restaurant.html) |
 | Management: Edit restaurant | Select a restaurant in the [customer frontend](http://127.0.0.1:8000/app/) and follow **Edit restaurant** |
@@ -59,7 +60,9 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 
 The root URL redirects to the customer page. Select a restaurant to view its details and menu; selection is retained in the URL. A menu-loading failure leaves successfully loaded details visible; selecting the restaurant again retries.
 
-Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. To edit an existing restaurant, select it on the customer page and follow **Edit restaurant**. The form loads the current name, cuisine, and description, sends only changed fields with `PATCH /restaurants/{restaurant_id}`, and links back to the updated details. Validation errors preserve input. If the response is lost, check the details page before retrying. The M1 restaurant-management workflow now requires the staff authorization described below.
+For the customer-to-order flow, sign in through **My account**, return to a restaurant menu, and choose **Add to cart** on an available item. Open **My cart** to inspect current backend prices and totals, set a positive whole-number quantity, remove a line or clear the cart. **Place order** sends the current cart ID and revision to checkout, then displays the saved receipt and order ID. Unavailable items remain visible and removable; checkout rejects them. The UI never silently clears a cart from another restaurant or retries an uncertain checkout POST. If a response is lost, it reads your saved order history for the same cart/revision and offers explicit replay of that original attempt when needed. A saved order awaiting reset can be recovered using **Complete cart reset**. All experiments require disposable copies of the six JSON stores before starting the server.
+
+Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. To edit an existing restaurant, select it on the customer page and follow **Edit restaurant**. The form loads the current name, cuisine, and description, sends only changed fields with `PATCH /restaurants/{restaurant_id}`, and links back to the updated details. Validation errors preserve input. If the response is lost, check the details page before retrying. The historical M1 form workflow now requires the staff authorization described below.
 
 Management forms now use a staff sign-in page. First provision a staff account using the documented command and disposable data paths. Open **Staff sign-in**, enter the account credentials, then continue to Create or Edit restaurant. The returned bearer token stays in this browser tab (sessionStorage), not in a URL; it is sent on restaurant and menu-management writes. Administrators can create restaurants, while assigned restaurant users can edit their restaurants and toggle menu-item availability. The backend checks every request: a missing/expired token gives a sign-in-again message, and an unauthorized role or unassigned restaurant gives a not-permitted message. Signing in again replaces the tab's stored staff token. The token remains valid on the server until its 24-hour expiry even when browser storage is cleared. This does not change customer-account sign-in or public restaurant browsing.
 
@@ -104,7 +107,7 @@ Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRAC
 
 ## Data
 
-The application uses six JSON-array stores: `restaurants.json` (sample restaurants and menus), `customers.json`, `sessions.json`, `staff.json`, `carts.json`, and `orders.json` in `data/`. The five non-restaurant stores are committed empty. Each has its own `*_DATA_PATH` override (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, `CARTS_DATA_PATH`, `ORDERS_DATA_PATH`). Passwords are stored only as Argon2id hashes and tokens only as SHA-256 digests. No override is necessary for normal startup. **For any manual writes, redirect all six stores to disposable copies**, following [First-Time Setup](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments); using the committed files changes repository data.
+The application uses six JSON-array stores: `restaurants.json` (sample restaurants and menus), `customers.json`, `sessions.json`, `staff.json`, `carts.json`, and `orders.json` under `data/`. The five non-restaurant stores are committed empty. Each has its own `*_DATA_PATH` override (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, `CARTS_DATA_PATH`, `ORDERS_DATA_PATH`). Passwords are stored only as Argon2id hashes and tokens only as SHA-256 digests. No override is required for normal startup. **For manual writes, redirect all six stores to disposable copies**, following [First-Time Setup](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments); using the committed files changes repository data.
 
 Menu items are stored inside their restaurant record. Writes persist before returning success and use atomic replacement with a process-wide mutation lock. This supports a single application process; multiple workers and external writers are not coordinated. Invalid/unavailable data produces generic HTTP 500 errors. Stored menu prices above `999.00` are invalid and must be corrected before data operations can succeed; the sample data satisfies the limit.
 
@@ -136,7 +139,7 @@ app/repositories/       Per-store JSON loading, validation and persistence
 app/schemas/            Pydantic request, response and persistence models
 app/core/               Shared configuration, security, pricing, locks and JSON helpers
 app/scripts/            Local staff account provisioning (not a public endpoint)
-frontend/               Discovery, customer account, staff sign-in and restaurant management pages
+frontend/               Discovery, account, cart/checkout, staff sign-in and restaurant management pages
 data/                   Six JSON stores: restaurants, customers, sessions, staff, carts, orders
 tests/                  Backend/API tests; tests/browser/ for customer and management pages
 scrum/                  Signed team agreement and M1 sprint planning
@@ -150,7 +153,7 @@ requirements-dev.txt    Pinned browser-test dependencies
 
 - [Contributor workflow and AI/provenance policy](CONTRIBUTING.md)
 - [Testing conventions](docs/TESTING.md)
-- [M0 checkpoint](docs/milestones/M0.md), [M1 checkpoint](docs/milestones/M1.md) and [M2 submission readiness](docs/milestones/M2.md#m2-submission-readiness-audit-issue-104)
+- [M0 checkpoint](docs/milestones/M0.md), [M1 checkpoint](docs/milestones/M1.md), and [M2 submission readiness](docs/milestones/M2.md#m2-submission-readiness-audit-issue-104)
 - [M1 API/data contract](docs/M1_API_CONTRACT.md)
 - [M2 API/persistence contract](docs/M2_API_CONTRACT.md), [data model](docs/DATA_MODEL.md), and [M2 evidence/status](docs/milestones/M2.md).
 - [M1 Engineering Decision Receipt — menu-item price validation](docs/DECISION_RECEIPT.md)

@@ -2,7 +2,7 @@
 
 Use this guide when setting up Food4Thought on a machine for the first time.
 
-This document describes the application as it exists now. The repository contains a FastAPI backend serving customer discovery, account, staff sign-in, create-restaurant, and edit-restaurant pages; six JSON stores for restaurant, account, session, staff, cart, and order data; and a pytest test suite. A cart/checkout/order browser frontend remains tracked separately in [issue #100](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/100). It does not require a database, frontend build step, API keys, or other secrets.
+This guide describes the implemented FastAPI backend and customer discovery, account, cart/checkout, staff sign-in, create-restaurant and edit-restaurant pages. The backend uses six JSON stores (restaurants, customers, sessions, staff, carts and orders), and the repository includes pytest and real-browser tests. It does not require a database, frontend build step, API keys, or other secrets.
 
 For later sessions on a machine that is already configured, use [Quick Setup](QUICK_SETUP.md).
 
@@ -85,7 +85,7 @@ With the virtual environment active:
 python -m pip install -r requirements.txt
 ```
 
-The pinned application dependencies include FastAPI, Uvicorn, Pydantic, pwdlib with Argon2 (used for application password hashing), pytest, and httpx. For the Chromium browser tests, also install `requirements-dev.txt` and Playwright's Chromium browser as shown below.
+The pinned application dependencies include FastAPI, Uvicorn, Pydantic, pwdlib with Argon2 (used for application password hashing), pytest and httpx. For Chromium browser tests, also install `requirements-dev.txt` and Playwright's Chromium browser as shown below.
 
 ## 6. Verify the test suite
 
@@ -93,7 +93,7 @@ The pinned application dependencies include FastAPI, Uvicorn, Pydantic, pwdlib w
 python -m pytest
 ```
 
-The tests use isolated temporary data paths and the fixture-specific initial state for all six stores; tests requiring seeded records create them explicitly. See [test isolation](TESTING.md#one-default-for-file-isolation).
+The tests use isolated temporary paths for all six stores; each test initializes the records it needs (including optional order fixtures). See [test isolation](TESTING.md#one-default-for-file-isolation).
 
 The real-browser frontend tests in `tests/browser/` skip if Playwright or Chromium is unavailable locally. CI always runs them. To run them locally as well:
 
@@ -136,6 +136,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | `GET /docs` | FastAPI's interactive OpenAPI documentation. |
 | `GET /app/` | Customer frontend: restaurant list, cuisine filter, and the selected restaurant's details and menu. `GET /` redirects here. |
 | `GET /app/account.html` | Customer frontend: register, sign in, inspect/update the own profile/address, and deactivate using the existing account API. |
+| `GET /app/cart.html` | Customer frontend: read/create a cart, edit quantities, remove/clear items, place an order and show its saved receipt/recovery state. |
 | `GET /app/staff-sign-in.html` | Staff sign-in form: calls `POST /auth/login`, keeps the bearer token in the current tab and returns to the management page. |
 | `GET /app/create-restaurant.html` | Management frontend: create a restaurant through the API, with validation/error feedback and a link to the saved restaurant. |
 | `GET /app/edit-restaurant.html?id=restaurant-001` | Management frontend: edit an existing restaurant's name, cuisine, or description through GET and PATCH. |
@@ -147,6 +148,8 @@ Browse restaurant and menu GETs directly. For writes, use disposable stores and 
 An administrator can call `POST /restaurants` with `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. The 201 response contains its stable ID. Creating a restaurant does not assign a manager. For edits, sign in as a restaurant user assigned to the selected restaurant and switch tokens in Swagger. Anonymous writes return 401. A caller with the wrong role or an unassigned manager receives 403. A manager editing a missing restaurant with a valid body receives 404.
 
 To try accounts in the browser, first point **all six stores** at disposable copies using the commands below. Open `/app/account.html` (also linked as **My account** from restaurant browsing). Register, sign in, update the name or delivery address, and use **Check saved profile** to verify the server's current saved values. Refreshing keeps locally edited fields but updates untouched inputs to the newly saved server values; a profile save sends only fields you changed. Sign-out and expiry clear personal details and the confirmation checkbox. An interrupted registration should be checked by attempting sign-in before registering again; a lost profile update or deactivation response should be checked using **Check saved profile** before attempting another write. Deactivation requires a confirmation checkbox and leaves the account read-only. Tokens are kept in tab-scoped `sessionStorage` and sent only as bearer headers; signing out removes the browser copy, not the server session. A 401 prompts sign-in again. Browser-only controls do not replace backend 401/403 checks.
+
+After signing in as an active customer using the same browser tab, return to `/app/`, select a restaurant, and choose **Add to cart** on an available menu item. Open **My cart** to change positive integer quantities, remove items, clear the cart, or use **Place order**. The page displays backend subtotal/total and the saved order ID/total, not a locally calculated amount. On a checkout failure the cart remains visible; if the response might have been lost, **Check order status** reads saved orders without submitting another purchase. **Retry original checkout** (or **Complete cart reset**) explicitly replays the original cart ID/revision. To verify persistence, restart the server with the same disposable paths and read the order via `GET /customers/me/orders/{order_id}`. Browser tests for this flow are in `tests/browser/test_cart_checkout_browser.py`.
 
 The Create and Edit pages are usable with the staff sign-in form. Provision an administrator or assigned restaurant user in the disposable staff store first, open `/app/staff-sign-in.html`, and sign in. The browser keeps the bearer token only for its tab, sends it on protected restaurant/menu writes, and reports 401 as "sign in again" or 403 as "not permitted". The backend remains responsible for enforcing roles and assignments. Menu availability can also be toggled from the selected restaurant's menu; confirm the result before retrying an uncertain PATCH.
 
@@ -326,7 +329,7 @@ A first-time setup is complete when:
 - `python -m pytest` completes successfully.
 - `python -m uvicorn app.main:app --reload` starts the API.
 - `/health`, `/restaurants`, `/docs`, and `/openapi.json` respond successfully.
-- `/app/`, `/app/account.html`, `/app/staff-sign-in.html`, `/app/create-restaurant.html`, and an edit page for a known restaurant load.
+- `/app/`, `/app/account.html`, `/app/cart.html`, `/app/staff-sign-in.html`, `/app/create-restaurant.html`, and an edit page for a known restaurant load.
 - Browser tests run successfully when their optional dependencies are installed and required-browser mode is selected.
 
 For normal future sessions, continue with [Quick Setup](QUICK_SETUP.md).
