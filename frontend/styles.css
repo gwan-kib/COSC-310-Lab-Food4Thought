@@ -257,6 +257,6 @@ a {
 .checkbox-row { display: flex; gap: 0.5rem; align-items: flex-start; }
 .checkbox-row input { width: auto; margin: 0.25rem 0 0; }
 #deactivate-form button { color: var(--error); border-color: var(--error); background: var(--surface); }
-#signed-in [hidden], .account-sections [hidden] { display: none; }
+.account-layout [hidden] { display: none !important; }
 .site-header nav { display: flex; flex-wrap: wrap; gap: 1rem; }
 @media (max-width: 28rem) { .account-details { grid-template-columns: minmax(0, 1fr); } }
