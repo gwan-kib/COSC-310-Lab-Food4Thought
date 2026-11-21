@@ -4,7 +4,9 @@
 // of automatically retrying.
 
 import { requestJson } from "./api-client.js";
+import { managementError, staffRequest, staffSignInHref } from "./staff-session.js";
 
+document.getElementById("staff-signin-link").href = staffSignInHref();
 const editForm = document.getElementById("edit-form");
 const editFields = document.getElementById("edit-fields");
 const editStatus = document.getElementById("edit-status");
@@ -143,7 +145,7 @@ editForm.addEventListener("submit", async event => {
   let focusAfter = null;
 
   try {
-    const { ok, status, body } = await requestJson(
+    const { ok, status, body } = await staffRequest(
       `/restaurants/${encodeURIComponent(requestedId)}`,
       {
         method: "PATCH",
@@ -155,8 +157,7 @@ editForm.addEventListener("submit", async event => {
       if (status === 422 && Array.isArray(body?.detail) && body.detail.length) {
         focusAfter = showFieldErrors(body.detail);
       } else {
-        const detail = typeof body?.detail === "string" ? body.detail :
-          `Request failed (HTTP ${status}).`;
+        const detail = managementError(status, body);
         editErrors.textContent = `Could not save restaurant: ${detail}`;
       }
       return;

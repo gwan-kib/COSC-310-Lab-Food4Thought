@@ -1008,3 +1008,27 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Review follow-up: After [peer review on PR #125](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/125#pullrequestreview-6002737142), Codex merged `main` at `9474129`, retained the #99 and #87 provenance entries, and added two characterization cases in [commit d21e482](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/d21e482). Both passed against the existing implementation. A missing target or sibling menu reference returns a generic 500 and preserves the stored cart bytes.
 - Integration evidence: `python -m pytest -q tests/test_cart_api.py tests/test_cart_service.py tests/test_cart_repository.py --tb=line` passed 93 tests. In an isolated local merge with [PR #123](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/123) at `c95a8ae`, `python -m pytest -q tests/test_cart_api.py tests/test_cart_remove.py --tb=line` passed 80 tests. Both HTTP operations shared one missing-line exception and HTTP mapping in that merge.
 - Student review status: Peer changes requested and addressed on the feature branch. Responsible-student walkthrough and renewed peer approval pending.
+
+### Entry 74: Staff management sign-in and authorization browser coverage (#108)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee; personal review and understanding still to be confirmed.
+- Artifact: `frontend/staff-session.js`, `frontend/staff-sign-in.html`, `frontend/staff-sign-in.js`, `tests/browser/test_staff_sign_in_browser.py`.
+- Label: AI-GENERATED.
+- AI tool: ChatGPT.
+- Purpose: Implement the assigned staff sign-in flow and browser tests for protected restaurant/menu management.
+- Influence: Generated sessionStorage-based bearer transport, a sign-in page, and real-API Chromium tests for login, denial, and ownership.
+- Validation: Tests added. Branch CI results to be recorded in the PR; no local complete-repository browser test was performed because the runtime cannot clone GitHub.
+- PR or commit: [Issue #108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108), [feature branch](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/tree/feature/108-staff-sign-in).
+- Student review status: Pending.
+
+### Entry 75: Integrate staff authentication into existing frontend (#108)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee; personal review and understanding still to be confirmed.
+- Artifact: `frontend/app.js`, `frontend/create-restaurant.js`, `frontend/edit-restaurant.js`, `frontend/create-restaurant.html`, `frontend/edit-restaurant.html`, `frontend/styles.css`, `tests/browser/conftest.py`, `README.md`, `docs/QUICK_SETUP.md`, `docs/FIRST_TIME_SETUP.md`.
+- Label: AI-REVISED.
+- AI tool: ChatGPT.
+- Purpose: Route management writes through the staff token, show 401/403 feedback, offer menu availability controls, and document the browser workflow.
+- Influence: Updated existing browser forms, menu rendering and browser test fixtures without changing backend permission logic or persistence.
+- Validation: Branch CI results to be recorded in the PR; dedicated browser tests target success, denied writes and unchanged storage.
+- PR or commit: [Issue #108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108), [feature branch](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/tree/feature/108-staff-sign-in).
+- Student review status: Pending.

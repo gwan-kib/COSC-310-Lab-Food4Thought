@@ -1,0 +1,44 @@
+<!doctype html>
+<!--
+Present a shared staff sign-in form for Food4Thought's restaurant management.
+The browser keeps the returned bearer token for this tab and the API enforces
+the permissions for every subsequent management write.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Food4Thought – Staff sign-in</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Food4Thought</h1>
+      <p>Restaurant management</p>
+      <nav aria-label="Main navigation">
+        <a href="./">Browse restaurants</a>
+        <a href="create-restaurant.html">Create restaurant</a>
+      </nav>
+    </header>
+
+    <main class="management-layout">
+      <section class="panel" aria-labelledby="signin-heading">
+        <h2 id="signin-heading">Staff sign-in</h2>
+        <p>Use your provisioned restaurant or administrator account.</p>
+        <form id="staff-signin-form">
+          <fieldset id="staff-signin-fields" class="create-fields">
+            <legend class="visually-hidden">Staff credentials</legend>
+            <label for="staff-email">Email</label>
+            <input id="staff-email" name="email" type="email" autocomplete="username" required />
+            <label for="staff-password">Password</label>
+            <input id="staff-password" name="password" type="password" autocomplete="current-password" required />
+            <button type="submit">Sign in</button>
+          </fieldset>
+        </form>
+        <p id="staff-signin-status" class="status" role="status"></p>
+        <p id="staff-signin-errors" class="status error" role="alert"></p>
+      </section>
+    </main>
+    <script type="module" src="staff-sign-in.js"></script>
+  </body>
+</html>
