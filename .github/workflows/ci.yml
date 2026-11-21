@@ -30,13 +30,11 @@ jobs:
         run: |
           python -m pip install -r requirements-dev.txt
           python -m playwright install --with-deps chromium
-      - name: Diagnose issue 95 cross-subsystem suite
-        run: python -m pytest -q tests/test_cross_subsystem_persistence.py
       - name: Run tests
         env:
           # Fail, rather than skip, if the browser tests cannot run.
           REQUIRE_BROWSER_TESTS: "1"
-        run: timeout --signal=INT 120s python -m pytest -vv --tb=short
+        run: python -m pytest
       - name: Confirm tests left application data unchanged
         if: ${{ !cancelled() }}
         run: |
