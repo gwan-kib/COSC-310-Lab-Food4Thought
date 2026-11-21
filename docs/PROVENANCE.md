@@ -874,6 +874,30 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
 - Student review status: Responsible-student validation and teammate re-review of the fixes pending.
 
+### Entry 68: Shared JSON-array store helper (architectural improvement)
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #96.
+- Artifact: `app/core/json_file.py`, `app/repositories/cart.py`, the reader in `app/repositories/order.py`, `tests/test_json_file.py`, two monkeypatch targets in `tests/test_cart_repository.py` and `tests/test_cart_service.py`, and a convention sentence in `docs/DATA_MODEL.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Remove a design weakness exposed by Sreeram's M2 work and its reviews: each repository had its own copy of JSON reading and atomic saving, and defects found by Thomas Chen in PR #113 (a temporary file left after a serialization failure, and integers past Python's 4300-digit text limit) had to be fixed separately in the cart and order repositories while the shared helper used by customers, sessions and staff still had the integer defect.
+- Influence: Claude proposed consolidating on one helper rather than a generic repository base class (larger change across owners) or leaving per-repository copies (the cause of the repeated defects). It made `app/core/json_file.py` read with exact integers and write with Pydantic's serializer, cleaning up on any failure; moved the cart repository's read and save onto it; and made the order reader use the shared `loads_exact` instead of its own copy. The order write path and the restaurant repository were left to their owner.
+- Validation: Before the change, the existing cart, customer, order and checkout-integration tests passed (120, characterization) and the new helper test for a 5,001-digit integer failed. After the change, `tests/test_json_file.py` and the same suites passed (128). `pyflakes` reported no unused imports. The diff removes 57 lines and adds 32 in `app/`.
+- PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116), branch `feature/96-shared-json-store`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #116. Claude wrote failing regressions, then made `loads_exact` decode bytes strictly as UTF-8 (so a UTF-16 or UTF-32 store is the store's error instead of being silently accepted and later rewritten), and made `write_json_array` raise the store's error even when deleting its temporary file also fails, noting in the message that the temporary file may remain. The branch was first synced with `main` after #115 merged; the final merge later incorporated #109 and renumbered this disclosure to avoid overwriting the existing entry 66.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 69: Integrate shared JSON helper with merged menu availability
+- Student(s): Gwantana Kiboigo (`gwan-kib`), integration requester; Sreeram Nara remains the owner of the #96 implementation.
+- Artifact: Merge resolution of [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116) into the current `main` after [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109); `docs/DATA_MODEL.md` and `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Preserve PR #109's restaurant authorization/menu availability and provenance entries while integrating the reviewed JSON helper improvement.
+- Influence: ChatGPT reconciled the two documentation files, retained main's entries 65–67, numbered Sreeram's original #96 disclosure 68, and constructed the integration merge commit with the unchanged feature code and current main as parents.
+- Validation: Inspected the compared file lists and overlapping documentation changes; CI and final merge outcome are checked separately, and no student code-understanding claim is made.
+- PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116).
+- Student review status: Pending responsible-student confirmation.
+
 ### Entry 70: Staff account provisioning command
 
 - Student(s): Sreeram Nara (`SreeramNara`), assignee of #107.
@@ -886,3 +910,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117), branch `feature/107-staff-provisioning`.
 - Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #117. Claude wrote two regressions that run a second process holding the account lock (`tests/account_lock_holder.py`); with a thread-only lock both failed (a duplicate email was accepted, and a concurrent assignment was lost). Claude then replaced the in-process `ACCOUNT_EMAIL_LOCK` with `app/core/account_lock.py`, a thread lock plus a `filelock` lock file beside the customer store (new pinned dependency `filelock==3.20.0`), held by every customer write and every staff write; made `assign` read, check and update the latest stored record in one locked step (`StaffRepository.update_by_email`); and reordered the first-time setup guide so staff accounts are created while the disposable overrides are set, before starting the server, with the overrides cleared last. The reordered shell commands were run on disposable copies (manager login 200 `restaurant_user`, a customer registration with the administrator's email 409, `data/` unchanged); the PowerShell commands were checked by reading only.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 71: Integrate staff provisioning with merged JSON helper
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and integrator; Sreeram Nara (`SreeramNara`) remains responsible for the #107 implementation.
+- Artifact: Conflict resolution for [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117) on `feature/107-staff-provisioning`, including `docs/DATA_MODEL.md`, `docs/PROVENANCE.md` and the merge of shared JSON helper changes from `main`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Integrate reviewed staff account provisioning with the merged shared JSON-array helper (#96) and menu authorization (#94), without dropping either team's work.
+- Influence: ChatGPT constructed a merge tree retaining PR #117's implementation and the latest `main` source changes, combined non-overlapping data-model edits, preserved the existing provenance entries 65–69, retained Sreeram's entry 70, and added this integration entry. No application business logic was rewritten as part of conflict resolution.
+- Validation: Compared both branches against their common ancestor and verified the overlapping documentation edits; subsequent CI and merge outcome are verified separately, and this does not claim student understanding.
+- PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117).
+- Student review status: Pending responsible-student confirmation.

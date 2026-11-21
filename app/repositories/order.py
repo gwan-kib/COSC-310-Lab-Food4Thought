@@ -2,9 +2,7 @@
 Validate the complete store and replace it atomically only after a successful append.
 """
 
-import json
 import os
-from decimal import Decimal
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from threading import Lock
@@ -12,6 +10,7 @@ from threading import Lock
 from pydantic import TypeAdapter, ValidationError
 
 from app.core.config import get_orders_data_path
+from app.core.json_file import loads_exact
 from app.core.storage import StorageFailure
 from app.schemas.order import Order
 
@@ -23,10 +22,6 @@ class OrderDataError(StorageFailure):
 _orders = TypeAdapter(list[Order])
 
 
-def _exact_int(text: str) -> int:
-    # Quantities accumulated in a cart can exceed Python's 4300-digit int-to-text
-    # limit, which both json and Pydantic's JSON parser enforce; Decimal does not.
-    return int(Decimal(text))
 _mutation_lock = Lock()
 
 
@@ -37,7 +32,7 @@ class OrderRepository:
     def _read(self) -> list[Order]:
         try:
             # Parse with exact integers, then apply the same strict Order validation.
-            records = _orders.validate_python(json.loads(self.path.read_bytes(), parse_int=_exact_int))
+            records = _orders.validate_python(loads_exact(self.path.read_bytes()))
         except (OSError, ValueError, ValidationError) as exc:
             raise OrderDataError("Order data is unavailable") from exc
         ids = {order.id for order in records}
