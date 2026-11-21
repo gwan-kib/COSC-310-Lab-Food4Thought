@@ -1165,3 +1165,15 @@ its pending-auth and local-only status.
 - Review follow-up: Thomas Chen (`Tc2006415`) requested changes on PR #129. Claude corrected the baseline: customers and sessions already shared the helper, and there were four atomic-save implementations (shared helper, cart, order, restaurant). It also replaced the initial-commit line counts with the merged figures, said exactly which test edits happened (three monkeypatch targets) while the 120 cases' assertions stayed the same, and linked PR #129.
 - Second review follow-up: Thomas Chen (`Tc2006415`) asked for the #107 statement to be narrowed. The receipt now says the staff repository added its own provisioning writes and delegated atomic file replacement to `write_json_array`, rather than claiming no new persistence code.
 - Student review status: Sreeram Nara reported on 2026-11-20 that he has read this receipt and that it reflects his understanding of the #96 change. This is his own statement, not an agent check.
+
+### Entry 85: M2 OpenAPI reconciliation (#103)
+
+- Student(s): Gwantana Kiboigo (gwan-kib), issue owner and requester; responsible-student explanation and individual understanding are pending confirmation.
+- Artifact: tests/test_m2_openapi_contract.py, tests/test_openapi.py, app/api/openapi.py, docs/M2_API_CONTRACT.md, docs/examples/m2.json, docs/milestones/M2.md, and this record.
+- Label: AI-GENERATED.
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Audit and reconcile M2 generated OpenAPI descriptions, parameters, security, request/response models, statuses, examples and M1 compatibility without changing feature business logic.
+- Influence: ChatGPT reviewed the actual route/model source, authored a 23-operation API documentation/response audit and its TestClient tests, added the opaque-ID cart-item deletion to the existing selective OpenAPI 422 exclusion, corrected an outdated example-bundle status claim, and linked the evidence in the M2 contract and checkpoint. No service, repository, data format or actual endpoint behavior changed.
+- Validation: Static source/contract comparison and relative documentation-link checks (no unresolved local links) were completed. [Hosted PR #134 CI run 44877204814](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877204814) on a90f821 passed python -m compileall app, the required-browser python -m pytest suite (929 tests in 31.77s, no failures or skips), and the committed-data guard. This is actual hosted verification; the agent did not run Python locally. No live Canvas source recheck, teammate review, or student-run verification is asserted here.
+- PR or commit: [Issue #103](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/103), [PR #134](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/134), branch docs/103-m2-openapi-audit.
+- Student review status: Pending human review and Gwantana's confirmation of understanding; agent-authored verification cannot establish these.
