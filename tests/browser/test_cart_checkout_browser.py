@@ -235,3 +235,32 @@ def test_menu_and_receipt_render_server_text_safely_on_narrow_screen(
     assert page.evaluate("window.injected") is None
     assert page.evaluate("document.documentElement.scrollWidth") <= 390
     assert page.page_errors == []
+
+
+def test_switching_customer_does_not_trap_new_account_in_old_checkout_attempt(
+    page, live_server, auth_accounts, m2_store_paths
+):
+    sign_in_customer(page, live_server, auth_accounts)
+    add_bowl(page, live_server)
+    first_cart = json.loads(m2_store_paths["carts"].read_text())[0]
+    page.evaluate("(cart) => sessionStorage.setItem('food4thought.customer.checkout.attempt',"
+                  " JSON.stringify({customer_id: cart.customer_id, cart_id: cart.id,"
+                  " cart_revision: cart.revision}))", first_cart)
+
+    other = auth_accounts.accounts["customer_b"]
+    logged_in = page.request.post(f"{live_server}/auth/login", data={
+        "email": other.record.email, "password": other.password,
+    })
+    assert logged_in.status == 200
+    page.evaluate("(token) => sessionStorage.setItem('food4thought.customer.token', token)",
+                  logged_in.json()["access_token"])
+    page.goto(f"{live_server}/app/cart.html")
+    expect(page.get_by_role("button", name="Create cart")).to_be_visible()
+    assert page.evaluate("sessionStorage.getItem('food4thought.customer.checkout.attempt')") is None
+    page.get_by_role("button", name="Create cart").click()
+    expect(page.locator("#cart-total")).to_have_text("$0.00")
+    stored = json.loads(m2_store_paths["carts"].read_text())
+    assert len(stored) == 2
+    assert any(c["customer_id"] == other.record.id and c["items"] == [] for c in stored)
+    assert any(c["id"] == first_cart["id"] and c["items"] == first_cart["items"] for c in stored)
+    assert page.page_errors == []
