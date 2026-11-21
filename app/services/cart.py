@@ -1,6 +1,6 @@
-"""Apply Food4Thought cart rules for creation, reads, item additions, quantity edits
-and clearing. Changes check current customer status under the shared workflow lock
-and build backend-priced responses before saving.
+"""Apply Food4Thought cart rules for creation, reads, item additions, quantity edits,
+removal and clearing. Changes check current customer status under the shared workflow
+lock and build backend-priced responses before saving.
 """
 
 from typing import Protocol
@@ -146,6 +146,29 @@ class CartService:
             cart.revision += 1
             view = self._view(cart, menu)
             self.carts.save_cart(cart)
+            return view
+
+    def remove_item(self, customer_id: str, item_id: str) -> CartView:
+        """Remove one owned line, including an unavailable item, and persist its priced result."""
+        with workflow_lock:
+            self._require_active(customer_id)
+            cart = self.carts.get_cart(customer_id)
+            if cart is None:
+                raise CartNotFoundError(customer_id)
+            if not any(line.item_id == item_id for line in cart.items):
+                raise CartItemNotFoundError(item_id)
+            if self._receipt_for(cart) is not None:
+                raise CheckoutRecoveryRequiredError(cart.id)
+
+            # Unavailable items can be removed; missing stored references are still corruption.
+            menu = self.catalog.get_menu(cart.restaurant_id)
+            if menu is None or item_id not in menu:
+                raise CartDataError(f"Cart {cart.id} references a missing restaurant or item")
+            items = [line.model_copy() for line in cart.items if line.item_id != item_id]
+            updated = CartRecord(id=cart.id, customer_id=cart.customer_id, revision=cart.revision + 1,
+                                 restaurant_id=cart.restaurant_id if items else None, items=items)
+            view = self._view(updated, menu)  # validate remaining references before the write
+            self.carts.save_cart(updated)
             return view
 
     def clear_cart(self, customer_id: str) -> CartView:

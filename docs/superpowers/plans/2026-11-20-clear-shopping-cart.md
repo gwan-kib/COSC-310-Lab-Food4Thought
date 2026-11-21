@@ -157,3 +157,14 @@ for the pushed merge will be recorded in the PR description. The prior hosted ru
 on `59e9031` passed 763 tests, but does not verify this new integration. Review
 feedback is addressed by this merge; renewed review, student explanation and
 integration into main remain pending.
+
+
+PR #123 merged while the first review-fix push was being published. Merged the
+new main `c2ec1c5`, preserving quantity, remove-item and clear implementations,
+shared error mapping, both DELETE route shapes, all operation documentation and
+all provenance. The automatic M2 evidence merge was also inspected.
+
+`python -m pytest -q tests/test_clear_cart.py tests/test_cart_api.py tests/test_cart_remove.py tests/test_order_details.py`
+passed 139 tests in 11.54s. `python -m compileall -q app` succeeded; whitespace and
+committed-data guards passed. This supersedes the 108-test local integration
+result above. Fresh full hosted verification is recorded in PR #126.
