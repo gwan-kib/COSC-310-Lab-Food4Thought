@@ -15,7 +15,7 @@ in separate `order_details` modules; preserve that parallel work.
 - [x] Add a thin `app/api/routes/order_history.py` router using `CurrentCustomer`, register it in `app/main.py`, and map 401/403/500 without exposing store errors.
 - [x] Verify real registration/login → cart API → real checkout service → history HTTP, plus fresh application/repository reads and unchanged snapshots after current profile/menu changes. Checkout's HTTP route remains #91's scope; no doubles replace its service or participating stores.
 - [x] Update README, both setup guides, API/testing/milestone docs and provenance; run focused tests, compileall, required-browser full suite, data isolation and diff/link checks.
-- [ ] Obtain an independent agent review, commit, push, create and attach the PR, and check its CI. Human review and merge remain pending.
+- [x] Obtain an independent agent review, commit, push, create and attach [PR #120](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/120). Human review and merge remain pending; published-head CI is tracked in the PR checks.
 
 The production callback interface stays intact. Its new resolver adapts the
 merged customer repository and principal to read authorization; token parsing
