@@ -3,16 +3,9 @@
 ## Status
 
 Written for [#78](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/78)
-by Sreeram (`SreeramNara`) on 2026-11-05, and revised on 2026-11-19 after review on
-[PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106) by Thomas
-(`Tc2006415`) and Gwantana (`gwan-kib`). The [policy choices](#agreed-policy-decisions)
-were agreed by the team. **The design counts as adopted once PR #106 is approved.**
-It changes teammates' work: restaurant/menu management routes (#94) become protected,
-and the frontends (#39, #69, #99, [#108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108)) need sign-in.
+by Sreeram (`SreeramNara`) on 2026-11-05, and revised on 2026-11-19 following review by Thomas (`Tc2006415`) and Gwantana (`gwan-kib`). [PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106) is merged; the [policy choices](#agreed-policy-decisions) were recorded as agreed by the team. The customer-auth routes, protected carts, manager-restricted menu operations, staff provisioning, and browser sign-in have since been implemented under #79–#94, #107 and #108. Final integrated verification and contribution sign-off remain in [#104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), not in the design approval.
 
-This document decides **how** callers are identified and **who** may do what.
-Registration, login, profile, deactivation and route protection are implemented in
-#79–#84; menu availability protection is implemented in #94. This PR itself adds only:
+This document explains **how** callers are identified and **who** may do what. The *original design PR #106* introduced these supporting changes; they are listed to preserve the design-history boundary, not to describe the current total implementation:
 
 - password redaction in the shared 422 handler's `input`, `msg` and `ctx` (an actual
   finding, see [Credential handling](#credential-handling));
@@ -20,8 +13,7 @@ Registration, login, profile, deactivation and route protection are implemented 
 - isolated test fixtures for two customers, a restaurant user and an administrator,
   shared with every test directory.
 
-It extends the [M2 contract](M2_API_CONTRACT.md) and [data model](DATA_MODEL.md);
-where they differ, this document is the newer proposal for authentication.
+It extended the [initial M2 contract proposal](M2_API_CONTRACT.md) and [data model](DATA_MODEL.md). For current behavior, verify the actual [authentication dependency](../app/api/auth.py), [services](../app/services/auth.py), [API tests](../tests/test_customer_accounts_api.py) and [M2 handoff matrix](milestones/M2.md#m2-submission-readiness-audit-issue-104) rather than assuming an old proposed detail is implemented.
 
 ## What the sources require
 
@@ -339,13 +331,8 @@ These bypass the frontend. Each must also check that stored files are unchanged 
 
 ## Documentation and setup changes
 
-- **This PR:** `requirements.txt` adds `pwdlib[argon2]`. The install command is unchanged,
-  so [Quick setup](QUICK_SETUP.md) needs no edit; the dependency list in
-  [First-time setup](FIRST_TIME_SETUP.md) is updated. The contract, data model, example
-  errors and M2 evidence link here.
-- **When implemented (#79/#80/#84, [#107](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/107)):** both setup guides document the new data-path
-  variables and empty store files, plus the provisioning command. The README explains
-  signing in. OpenAPI shows the bearer security scheme and 401/403 responses (#103).
+- **Original design PR #106:** added the pinned `pwdlib[argon2]` dependency and expanded credential redaction; the existing dependency-install command remained unchanged.
+- **Implemented setup:** [First-Time Setup](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) and [Quick Setup](QUICK_SETUP.md) document six isolated stores and staff provisioning; the [README](../README.md) describes sign-in. OpenAPI's final security/error documentation audit remains tracked by [#103](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/103).
 
 ## Review status
 
@@ -355,4 +342,4 @@ These bypass the frontend. Each must also check that stored files are unchanged 
 | Figma sign-in screen | Checked by Sreeram on 2026-11-19; login changed to one endpoint to match ([details](#what-the-sources-require)). Other account screens not checked. |
 | Staff provisioning | [#107](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/107) |
 | Staff sign-in frontend | [#108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108) |
-| Adoption | When PR #106 is approved by Thomas and Gwantana |
+| Adoption | PR #106 merged 2026-11-19; integrated behavior and responsible-student sign-off must still be verified under #104 |
