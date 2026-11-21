@@ -1151,3 +1151,16 @@ its pending-auth and local-only status.
 - PR or commit: [PR #131](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/131), branch `feature/83-84-protection-evidence`.
 - Review follow-up: Gwantana Kiboigo (`gwan-kib`) noted that the inactive-write list left out `PATCH /customers/me`. Claude added profile edits to the old-token scenario (403 `Customer is inactive`, no writes), checked that repeating deactivation is an allowed no-op, and linked this PR.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+
+### Entry 84: M2 OpenAPI reconciliation (#103)
+
+- Student(s): Gwantana Kiboigo (gwan-kib), issue owner and requester; responsible-student explanation and individual understanding are pending confirmation.
+- Artifact: tests/test_m2_openapi_contract.py, tests/test_openapi.py, app/api/openapi.py, docs/M2_API_CONTRACT.md, docs/examples/m2.json, docs/milestones/M2.md, and this record.
+- Label: AI-GENERATED.
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Audit and reconcile M2 generated OpenAPI descriptions, parameters, security, request/response models, statuses, examples and M1 compatibility without changing feature business logic.
+- Influence: ChatGPT reviewed the actual route/model source, authored a 23-operation API documentation/response audit and its TestClient tests, added the opaque-ID cart-item deletion to the existing selective OpenAPI 422 exclusion, corrected an outdated example-bundle status claim, and linked the evidence in the M2 contract and checkpoint. No service, repository, data format or actual endpoint behavior changed.
+- Validation: Static source/contract comparison was performed before the pull request. The added TestClient checks are runnable but do not count as a passing test run until CI or a local execution confirms results. Hosted CI must exercise application compilation, the complete required-browser pytest suite and the committed-data guard; results are to be recorded in the PR after they are observed. No live Canvas source recheck, teammate review, or student-run verification is asserted here.
+- PR or commit: [Issue #103](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/103), branch docs/103-m2-openapi-audit; PR link to be added after creation.
+- Student review status: Pending human review and Gwantana's confirmation of understanding; agent-authored verification cannot establish these.
