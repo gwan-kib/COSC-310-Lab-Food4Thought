@@ -8,6 +8,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import StringConstraints
 
+from app.api.auth import require_restaurant_user
+from app.repositories.staff import StaffDataError
+from app.schemas.customer import Principal
 from app.repositories.restaurant import RestaurantDataError, RestaurantRepository
 from app.schemas.restaurant import (
     ErrorResponse,
@@ -30,7 +33,7 @@ from app.services.restaurant import (
 router = APIRouter()
 
 MENU_PERMISSION_RESPONSES = {
-    401: {"model": ErrorResponse, "description": "Availability requires authentication"},
+    401: {"model": ErrorResponse, "description": "Menu writes require authentication"},
     403: {"model": ErrorResponse, "description": "Caller cannot manage this restaurant"},
 }
 
@@ -41,6 +44,12 @@ CuisineFilter = Annotated[str, StringConstraints(strip_whitespace=True, min_leng
 def get_restaurant_service() -> RestaurantService:
     # Resolve configuration per request so isolated storage can be injected.
     return RestaurantService(RestaurantRepository())
+
+
+def get_menu_management_service(
+    principal: Annotated[Principal, Depends(require_restaurant_user)],
+) -> RestaurantService:
+    return RestaurantService(RestaurantRepository(), principal=principal)
 
 
 @router.get(
@@ -201,7 +210,7 @@ def get_menu(
         "Add and persist an item under an existing restaurant with a server-generated "
         "stable ID. Supply name, description, and a nonnegative decimal-string price "
         "no greater than 999.00, with at most two fractional digits. "
-        "Availability defaults to true. Explicit availability requires manager permission. "
+        "Availability defaults to true. Writing menu items requires the assigned restaurant manager. "
         "The saved price has two fractional digits."
     ),
     response_model=MenuItem,
@@ -218,10 +227,12 @@ def add_menu_item(
         Path(description="Stable restaurant identifier, for example `restaurant-001`."),
     ],
     request: MenuItemCreate,
-    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+    service: Annotated[RestaurantService, Depends(get_menu_management_service)],
 ) -> MenuItem:
     try:
         return service.add_menu_item(restaurant_id, request)
+    except StaffDataError as exc:
+        raise HTTPException(500, "Authentication data is unavailable") from exc
     except MenuAuthenticationRequired as exc:
         raise HTTPException(status_code=401, detail="Authentication required",
                             headers={"WWW-Authenticate": "Bearer"}) from exc
@@ -240,7 +251,7 @@ def add_menu_item(
     summary="Update a menu item",
     description=(
         "Persist a partial update to name, description, price, or availability under the specified "
-        "restaurant. Explicit availability requires manager permission. Supply at least "
+        "restaurant. Writing menu items requires the assigned restaurant manager. Supply at least "
         "one non-null field. Text must be nonblank; "
         "price must be a nonnegative decimal string no greater than 999.00, with "
         "at most two fractional digits. Omitted fields, IDs, parent relationships, "
@@ -268,10 +279,12 @@ def update_menu_item(
         Path(description="Stable item identifier from this restaurant's menu response."),
     ],
     request: MenuItemUpdate,
-    service: Annotated[RestaurantService, Depends(get_restaurant_service)],
+    service: Annotated[RestaurantService, Depends(get_menu_management_service)],
 ) -> MenuItem:
     try:
         return service.update_menu_item(restaurant_id, item_id, request)
+    except StaffDataError as exc:
+        raise HTTPException(500, "Authentication data is unavailable") from exc
     except MenuAuthenticationRequired as exc:
         raise HTTPException(status_code=401, detail="Authentication required",
                             headers={"WWW-Authenticate": "Bearer"}) from exc

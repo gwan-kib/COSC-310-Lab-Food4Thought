@@ -6,9 +6,7 @@
 import json
 
 import pytest
-from fastapi.testclient import TestClient
 
-from app.main import app
 
 
 @pytest.mark.parametrize(
@@ -28,7 +26,7 @@ from app.main import app
 )
 @pytest.mark.parametrize("raw_value", ["1e309", "NaN", "Infinity", "-Infinity", '"\\ud800"'])
 def test_invalid_values_return_serializable_422_without_writing(
-    isolated_restaurants_path, path, valid_body, field, raw_value
+    manager_client, isolated_restaurants_path, path, valid_body, field, raw_value
 ):
     # Send raw JSON: encoding through the client's json= parameter can reject
     # non-finite numbers before the request reaches the application.
@@ -36,7 +34,7 @@ def test_invalid_values_return_serializable_422_without_writing(
     body = json.dumps(remaining_fields)[:-1] + f', "{field}": {raw_value}' + "}"
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app, raise_server_exceptions=False).post(
+    response = manager_client.post(
         path, content=body, headers={"Content-Type": "application/json"}
     )
 
@@ -55,14 +53,14 @@ def _reject_nonfinite(value):
     raise AssertionError(f"Response contains a non-JSON number: {value}")
 
 
-def test_invalid_nested_extra_field_returns_serializable_error(isolated_restaurants_path):
+def test_invalid_nested_extra_field_returns_serializable_error(manager_client, isolated_restaurants_path):
     before = isolated_restaurants_path.read_bytes()
     body = (
         '{"name":"Soup","description":"Hot","price":"1.00",'
         '"extra":{"nested":[NaN,Infinity,{"\\udfff":"\\ud800"}]}}'
     )
 
-    response = TestClient(app, raise_server_exceptions=False).post(
+    response = manager_client.post(
         "/restaurants/restaurant-001/menu/items",
         content=body,
         headers={"Content-Type": "application/json"},
@@ -78,10 +76,10 @@ def test_invalid_nested_extra_field_returns_serializable_error(isolated_restaura
     assert isolated_restaurants_path.read_bytes() == before
 
 
-def test_ordinary_validation_error_keeps_diagnostic_fields(isolated_restaurants_path):
+def test_ordinary_validation_error_keeps_diagnostic_fields(manager_client, isolated_restaurants_path):
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).post(
+    response = manager_client.post(
         "/restaurants/restaurant-001/menu/items",
         json={"name": "Soup", "description": "Hot", "price": 4.5},
     )
@@ -98,10 +96,10 @@ def test_ordinary_validation_error_keeps_diagnostic_fields(isolated_restaurants_
     assert isolated_restaurants_path.read_bytes() == before
 
 
-def test_invalid_body_still_precedes_storage_failure(isolated_restaurants_path):
+def test_invalid_body_still_precedes_storage_failure(manager_client, isolated_restaurants_path):
     isolated_restaurants_path.unlink()
 
-    response = TestClient(app, raise_server_exceptions=False).post(
+    response = manager_client.post(
         "/restaurants/unknown/menu/items",
         content='{"name":"Soup","description":"Hot","price":1e309}',
         headers={"Content-Type": "application/json"},
@@ -127,12 +125,12 @@ def test_invalid_body_still_precedes_storage_failure(isolated_restaurants_path):
     ],
 )
 def test_invalid_input_always_has_serializable_validation_response(
-    isolated_restaurants_path, method, path, fields, invalid_field, error_type
+    manager_client, isolated_restaurants_path, method, path, fields, invalid_field, error_type
 ):
     original = isolated_restaurants_path.read_bytes()
     body = '{' + fields + ',"cuisine":"Cafe","description":"Food"}'
 
-    response = TestClient(app, raise_server_exceptions=False).request(
+    response = manager_client.request(
         method, path, content=body, headers={"Content-Type": "application/json"}
     )
 
@@ -155,11 +153,11 @@ def test_invalid_input_always_has_serializable_validation_response(
     [("patch", "/restaurants/restaurant-001"), ("post", "/restaurants")],
 )
 def test_non_json_invalid_utf8_body_returns_validation_error(
-    isolated_restaurants_path, method, path
+    manager_client, isolated_restaurants_path, method, path
 ):
     original = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app, raise_server_exceptions=False).request(
+    response = manager_client.request(
         method, path, content=b"\xff\xfe", headers={"Content-Type": "text/plain"}
     )
 

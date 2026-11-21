@@ -54,9 +54,9 @@ def menu_data(isolated_restaurants_path):
     ],
 )
 def test_update_persists_only_supplied_fields_under_correct_parent(
-    isolated_restaurants_path, menu_data, changes, expected_changes
+    manager_client, isolated_restaurants_path, menu_data, changes, expected_changes
 ):
-    response = TestClient(app).patch(PATH, json=changes)
+    response = manager_client.patch(PATH, json=changes)
 
     expected = {**ITEM, **expected_changes}
     assert response.status_code == 200
@@ -65,7 +65,7 @@ def test_update_persists_only_supplied_fields_under_correct_parent(
     assert json.loads(isolated_restaurants_path.read_text(encoding="utf-8")) == menu_data
     reloaded = RestaurantRepository(isolated_restaurants_path).get_record("target")
     assert reloaded.menu_items[1].model_dump() == expected
-    assert TestClient(app).get("/restaurants/target/menu").json() == {
+    assert manager_client.get("/restaurants/target/menu").json() == {
         "restaurant_id": "target", "items": menu_data[1]["menu_items"]
     }
 
@@ -86,11 +86,11 @@ def test_update_persists_only_supplied_fields_under_correct_parent(
     ],
 )
 def test_update_rejects_invalid_input_without_writing(
-    isolated_restaurants_path, menu_data, body
+    manager_client, isolated_restaurants_path, menu_data, body
 ):
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).patch(PATH, json=body)
+    response = manager_client.patch(PATH, json=body)
 
     assert response.status_code == 422
     assert isinstance(response.json()["detail"], list)
@@ -103,11 +103,11 @@ def test_update_rejects_invalid_input_without_writing(
      r'{"name":"\ud800"}', '{"extra":{"nested":[Infinity]}}'],
 )
 def test_update_rejected_raw_json_has_serializable_error(
-    isolated_restaurants_path, menu_data, body
+    manager_client, isolated_restaurants_path, menu_data, body
 ):
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app, raise_server_exceptions=False).patch(
+    response = manager_client.patch(
         PATH, content=body, headers={"Content-Type": "application/json"}
     )
 
@@ -126,31 +126,31 @@ def test_update_rejected_raw_json_has_serializable_error(
      ("target", "other-only", "Menu item not found")],
 )
 def test_update_missing_or_wrong_parent_item_does_not_write(
-    isolated_restaurants_path, menu_data, parent, item, detail
+    manager_client, isolated_restaurants_path, menu_data, parent, item, detail
 ):
     menu_data[0]["menu_items"].append({**ITEM, "id": "other-only"})
     isolated_restaurants_path.write_text(json.dumps(menu_data), encoding="utf-8")
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).patch(
+    response = manager_client.patch(
         f"/restaurants/{parent}/menu/items/{item}", json={"price": "7"}
     )
 
     assert response.status_code == 404
     assert response.json() == {"detail": detail}
     assert isolated_restaurants_path.read_bytes() == before
-    assert TestClient(app).patch(PATH, json={"price": "7"}).status_code == 200
+    assert manager_client.patch(PATH, json={"price": "7"}).status_code == 200
 
 
 @pytest.mark.parametrize("legacy", [False, True])
-def test_update_empty_menu_does_not_create_item(isolated_restaurants_path, menu_data, legacy):
+def test_update_empty_menu_does_not_create_item(manager_client, isolated_restaurants_path, menu_data, legacy):
     menu_data[1]["menu_items"] = []
     if legacy:
         menu_data[1].pop("menu_items")
     isolated_restaurants_path.write_text(json.dumps(menu_data), encoding="utf-8")
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).patch(PATH, json={"price": "7"})
+    response = manager_client.patch(PATH, json={"price": "7"})
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Menu item not found"}
@@ -158,13 +158,13 @@ def test_update_empty_menu_does_not_create_item(isolated_restaurants_path, menu_
 
 
 @pytest.mark.parametrize("contents", [None, "{broken", "{}", '[{"id":"invalid"}]'])
-def test_update_storage_failure_precedes_lookup(isolated_restaurants_path, contents):
+def test_update_storage_failure_precedes_lookup(manager_client, isolated_restaurants_path, contents):
     if contents is None:
         isolated_restaurants_path.unlink()
     else:
         isolated_restaurants_path.write_text(contents, encoding="utf-8")
 
-    response = TestClient(app).patch(PATH, json={"price": "7"})
+    response = manager_client.patch(PATH, json={"price": "7"})
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
@@ -176,7 +176,7 @@ def test_update_storage_failure_precedes_lookup(isolated_restaurants_path, conte
 
 @pytest.mark.parametrize("corruption", ["restaurant-id", "item-id", "unrelated-price"])
 def test_update_rejects_corrupt_stored_relationships(
-    isolated_restaurants_path, menu_data, corruption
+    manager_client, isolated_restaurants_path, menu_data, corruption
 ):
     if corruption == "restaurant-id":
         menu_data[0]["id"] = "target"
@@ -187,22 +187,22 @@ def test_update_rejects_corrupt_stored_relationships(
     isolated_restaurants_path.write_text(json.dumps(menu_data), encoding="utf-8")
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).patch(PATH, json={"price": "7"})
+    response = manager_client.patch(PATH, json={"price": "7"})
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
     assert isolated_restaurants_path.read_bytes() == before
 
 
-def test_update_validates_request_before_storage(isolated_restaurants_path):
+def test_update_validates_request_before_storage(manager_client, isolated_restaurants_path):
     isolated_restaurants_path.unlink()
-    response = TestClient(app).patch(PATH, json={"price": None})
+    response = manager_client.patch(PATH, json={"price": None})
     assert response.status_code == 422
     assert not isolated_restaurants_path.exists()
 
 
 def test_update_failed_save_preserves_file_and_allows_retry(
-    isolated_restaurants_path, menu_data, monkeypatch
+    manager_client, isolated_restaurants_path, menu_data, monkeypatch
 ):
     before = isolated_restaurants_path.read_bytes()
     files_before = set(isolated_restaurants_path.parent.iterdir())
@@ -212,13 +212,13 @@ def test_update_failed_save_preserves_file_and_allows_retry(
 
     with monkeypatch.context() as patch:
         patch.setattr("app.repositories.restaurant.os.replace", fail_replace)
-        response = TestClient(app).patch(PATH, json={"price": "7"})
+        response = manager_client.patch(PATH, json={"price": "7"})
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
     assert isolated_restaurants_path.read_bytes() == before
     assert set(isolated_restaurants_path.parent.iterdir()) == files_before
-    assert TestClient(app).patch(PATH, json={"price": "7"}).json() == {**ITEM, "price": "7.00"}
+    assert manager_client.patch(PATH, json={"price": "7"}).json() == {**ITEM, "price": "7.00"}
 
 
 def test_update_openapi_describes_partial_input_and_scoped_errors():
@@ -253,9 +253,8 @@ def test_update_openapi_describes_partial_input_and_scoped_errors():
 
 @pytest.mark.parametrize("other_write", ["update-item", "add-item", "update-restaurant"])
 def test_overlapping_menu_update_and_existing_writes_preserve_both_changes(
-    isolated_restaurants_path, menu_data, monkeypatch, other_write
+    menu_manager, isolated_restaurants_path, menu_data, monkeypatch, other_write
 ):
-    import app.repositories.restaurant as repository_module
     from app.schemas.restaurant import MenuItemCreate, MenuItemUpdate, RestaurantUpdate
     from app.services.restaurant import RestaurantService
 
@@ -263,17 +262,7 @@ def test_overlapping_menu_update_and_existing_writes_preserve_both_changes(
     second = RestaurantRepository(isolated_restaurants_path)
     loaded = threading.Event()
     waiting = threading.Event()
-    real_lock = repository_module._mutation_lock
     real_load = first.load_records
-
-    class ObservedLock:
-        def __enter__(self):
-            if loaded.is_set():
-                waiting.set()
-            real_lock.acquire()
-
-        def __exit__(self, *_):
-            real_lock.release()
 
     def load_first():
         records = real_load()
@@ -281,9 +270,12 @@ def test_overlapping_menu_update_and_existing_writes_preserve_both_changes(
         assert waiting.wait(5)
         return records
 
-    monkeypatch.setattr(repository_module, "_mutation_lock", ObservedLock())
+    def second_write(method, args):
+        waiting.set()
+        return method(*args)
+
     monkeypatch.setattr(first, "load_records", load_first)
-    service = RestaurantService(second)
+    service = RestaurantService(second, principal=menu_manager)
     if other_write == "update-item":
         method, args = service.update_menu_item, ("shared", MenuItemUpdate(name="Stew"))
     elif other_write == "add-item":
@@ -292,10 +284,10 @@ def test_overlapping_menu_update_and_existing_writes_preserve_both_changes(
         method, args = service.update_restaurant, (RestaurantUpdate(name="New restaurant"),)
 
     with ThreadPoolExecutor(max_workers=2) as pool:
-        one = pool.submit(RestaurantService(first).update_menu_item, "target", "shared",
+        one = pool.submit(RestaurantService(first, principal=menu_manager).update_menu_item, "target", "shared",
                           MenuItemUpdate(price="7"))
         assert loaded.wait(5)
-        two = pool.submit(method, "target", *args)
+        two = pool.submit(second_write, method, ("target", *args))
         assert one.result(timeout=10).price == "7.00"
         second_result = two.result(timeout=10)
 

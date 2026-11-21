@@ -3,9 +3,11 @@
 # repository mutation callbacks, keeping generated IDs and menu-item lookups scoped
 # to the appropriate resource.
 
-from collections.abc import Callable
 from uuid import uuid4
 
+from app.core.workflow import workflow_lock
+from app.repositories.staff import StaffRepository
+from app.schemas.customer import Principal
 from app.repositories.restaurant import RestaurantRepository
 from app.schemas.restaurant import (
     Menu,
@@ -40,15 +42,20 @@ class RestaurantService:
 
     def __init__(
         self, repository: RestaurantRepository, *,
-        can_manage_menu: Callable[[str], bool] | None = None,
+        principal: Principal | None = None,
     ) -> None:
         self.repository = repository
-        self.can_manage_menu = can_manage_menu
+        self.principal = principal
 
     def _require_menu_permission(self, restaurant_id: str) -> None:
-        if self.can_manage_menu is None:
+        if self.principal is None:
             raise MenuAuthenticationRequired()
-        if not self.can_manage_menu(restaurant_id):
+        if self.principal.role != "restaurant_user":
+            raise MenuPermissionDenied()
+        staff = StaffRepository().get_staff(self.principal.account_id)
+        if staff is None:
+            raise MenuAuthenticationRequired()
+        if staff.role != "restaurant_user" or restaurant_id not in staff.restaurant_ids:
             raise MenuPermissionDenied()
 
     def list_restaurants(self, cuisine: str | None = None) -> list[Restaurant]:
@@ -110,8 +117,6 @@ class RestaurantService:
 
     def add_menu_item(self, restaurant_id: str, request: MenuItemCreate) -> MenuItem:
         """Append an item to an existing restaurant and return its persisted form."""
-        if "available" in request.model_fields_set:
-            self._require_menu_permission(restaurant_id)
         created_id: str | None = None
 
         def add(records: list[RestaurantRecord]) -> None:
@@ -120,6 +125,7 @@ class RestaurantService:
             record = next((r for r in records if r.id == restaurant_id), None)
             if record is None:
                 raise RestaurantNotFoundError(restaurant_id)
+            self._require_menu_permission(restaurant_id)
 
             existing_ids = {item.id for item in record.menu_items}
             identifier = str(uuid4())
@@ -128,15 +134,14 @@ class RestaurantService:
             created_id = identifier
             record.menu_items.append(MenuItem(id=identifier, **request.model_dump()))
 
-        saved = self.repository.mutate_records(add)
+        with workflow_lock:
+            saved = self.repository.mutate_records(add)
         parent = next(record for record in saved if record.id == restaurant_id)
         return next(item for item in parent.menu_items if item.id == created_id)
 
     def update_menu_item(
         self, restaurant_id: str, item_id: str, request: MenuItemUpdate
     ) -> MenuItem:
-        if "available" in request.model_fields_set:
-            self._require_menu_permission(restaurant_id)
         changes = request.model_dump(exclude_unset=True)
 
         def update(records: list[RestaurantRecord]) -> None:
@@ -144,12 +149,14 @@ class RestaurantService:
             parent = next((r for r in records if r.id == restaurant_id), None)
             if parent is None:
                 raise RestaurantNotFoundError(restaurant_id)
+            self._require_menu_permission(restaurant_id)
             item = next((i for i in parent.menu_items if i.id == item_id), None)
             if item is None:
                 raise MenuItemNotFoundError(item_id)
             for field, value in changes.items():
                 setattr(item, field, value)
 
-        saved = self.repository.mutate_records(update)
+        with workflow_lock:
+            saved = self.repository.mutate_records(update)
         parent = next(record for record in saved if record.id == restaurant_id)
         return next(item for item in parent.menu_items if item.id == item_id)

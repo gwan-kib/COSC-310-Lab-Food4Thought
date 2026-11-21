@@ -847,5 +847,17 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Purpose: Implement the catalog portion of #94. Thomas chose to materialize omitted legacy flags on a successful full-store save.
 - Influence: Codex wrote the implementation, tests and documentation. Explicit flag changes use an injected restaurant permission check pending the shared staff identity implementation.
 - Validation: In the isolated worktree, 407 baseline tests passed. The initial new test run had 6 expected failures and 7 passes. After implementation all 13 focused tests passed. Compilation passed and the full browser-required suite passed 420 tests with committed data intact. Real staff login, cart and checkout integration and cross-workflow locking are pending.
-- PR or commit: Local work for [#94](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/94).
+- PR or commit: Initial catalog implementation at `0f55371`, [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
 - Student review status: Implementation review and peer feedback pending.
+
+### Entry 66: Integrate menu availability with authentication, cart and checkout
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu authentication, restaurant service, catalog adapter, API and integration tests, regression fixtures, setup guides, API contract and M2 evidence.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Integrate #94 with the shared staff, cart and checkout implementation from main.
+- Influence: Codex resolved the documentation conflicts, connected bearer identity and staff ownership to menu writes, applied the shared workflow lock, and wrote the integration tests and documentation.
+- Validation: After merging main, 9 of 18 focused tests failed before the integration. The final focused run passed 19, including a concurrent disable and checkout. The complete browser-required suite passed 636 tests. Compilation and committed-data checks passed.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible student walkthrough and human review pending.

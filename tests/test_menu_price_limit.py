@@ -6,15 +6,13 @@
 import json
 
 import pytest
-from fastapi.testclient import TestClient
 
-from app.main import app
 from app.repositories.restaurant import RestaurantDataError, RestaurantRepository
 
 
 @pytest.fixture(params=["create", "update"])
-def write_item(request):
-    client = TestClient(app)
+def write_item(manager_client, request):
+    client = manager_client
 
     def write(price):
         if request.param == "create":
@@ -68,8 +66,8 @@ def test_price_limit_rejects_above_maximum_without_writing(
 
 
 @pytest.mark.parametrize("model_name", ["MenuItemCreate", "MenuItemUpdate", "MenuItem"])
-def test_price_limit_is_documented_on_request_and_read_models(model_name):
-    schema = TestClient(app).get("/openapi.json").json()
+def test_price_limit_is_documented_on_request_and_read_models(manager_client, model_name):
+    schema = manager_client.get("/openapi.json").json()
     price = schema["components"]["schemas"][model_name]["properties"]["price"]
 
     assert price["type"] == "string"
@@ -106,7 +104,7 @@ def test_repository_rejects_stored_prices_above_limit_without_rewriting(
     ],
 )
 def test_out_of_range_stored_price_returns_generic_500_across_operations(
-    isolated_restaurants_path, method, path, body
+    manager_client, isolated_restaurants_path, method, path, body
 ):
     records = json.loads(isolated_restaurants_path.read_text(encoding="utf-8"))
     # Invalid data in another restaurant must not be ignored or silently repaired.
@@ -114,7 +112,7 @@ def test_out_of_range_stored_price_returns_generic_500_across_operations(
     isolated_restaurants_path.write_text(json.dumps(records), encoding="utf-8")
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).request(method, path, json=body)
+    response = manager_client.request(method, path, json=body)
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}

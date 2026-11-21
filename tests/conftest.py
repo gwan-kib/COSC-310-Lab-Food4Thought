@@ -5,6 +5,7 @@ detects unexpected writes to committed application data.
 """
 
 import hashlib
+import json
 import shutil
 from pathlib import Path
 
@@ -77,3 +78,27 @@ def m2_store_paths(isolated_restaurants_path, isolated_additional_m2_stores) -> 
 def auth_accounts(m2_store_paths) -> AuthFixture:
     """Two active customers, a restaurant user, an administrator and their sessions."""
     return build_auth_fixture(m2_store_paths)
+
+@pytest.fixture
+def menu_manager(auth_accounts, monkeypatch):
+    """Allow the fixture manager to edit the synthetic target restaurant in M1 tests."""
+    from app.api.auth import get_now
+    from app.main import app
+    from app.schemas.customer import Principal
+
+    path = auth_accounts.paths["staff"]
+    staff = json.loads(path.read_bytes())
+    owner = next(account for account in staff if account["role"] == "restaurant_user")
+    owner["restaurant_ids"].append("target")
+    path.write_text(json.dumps(staff), encoding="utf-8")
+    monkeypatch.setitem(app.dependency_overrides, get_now, lambda: auth_accounts.now)
+    return Principal(account_id=owner["id"], role=owner["role"])
+
+
+@pytest.fixture
+def manager_client(menu_manager, auth_accounts):
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    return TestClient(app, headers=auth_accounts.headers("restaurant_user"),
+                      raise_server_exceptions=False)

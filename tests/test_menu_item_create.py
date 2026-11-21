@@ -40,9 +40,9 @@ def menu_data(isolated_restaurants_path):
     ("price", "expected_price"), [("12.5", "12.50"), ("12", "12.00"), ("0", "0.00")]
 )
 def test_add_item_persists_under_correct_parent_and_can_be_browsed(
-    isolated_restaurants_path, menu_data, price, expected_price
+    manager_client, isolated_restaurants_path, menu_data, price, expected_price
 ):
-    response = TestClient(app).post(
+    response = manager_client.post(
         PATH, json={"name": "  Soup  ", "description": " Hot soup ", "price": price}
     )
 
@@ -61,7 +61,7 @@ def test_add_item_persists_under_correct_parent_and_can_be_browsed(
     ]
     fresh_repository = RestaurantRepository(isolated_restaurants_path)
     assert fresh_repository.get_record("target").menu_items[-1].model_dump() == created
-    browsed = TestClient(app).get("/restaurants/target/menu")
+    browsed = manager_client.get("/restaurants/target/menu")
     assert browsed.status_code == 200
     assert browsed.json() == {
         "restaurant_id": "target",
@@ -70,16 +70,16 @@ def test_add_item_persists_under_correct_parent_and_can_be_browsed(
 
 
 @pytest.mark.parametrize("legacy", [True, False])
-def test_add_item_to_empty_or_legacy_menu(isolated_restaurants_path, menu_data, legacy):
+def test_add_item_to_empty_or_legacy_menu(manager_client, isolated_restaurants_path, menu_data, legacy):
     menu_data[1].pop("menu_items")
     if not legacy:
         menu_data[1]["menu_items"] = []
     isolated_restaurants_path.write_text(json.dumps(menu_data), encoding="utf-8")
 
-    response = TestClient(app).post(PATH, json=BODY)
+    response = manager_client.post(PATH, json=BODY)
 
     assert response.status_code == 201
-    assert TestClient(app).get("/restaurants/target/menu").json()["items"] == [
+    assert manager_client.get("/restaurants/target/menu").json()["items"] == [
         response.json()
     ]
 
@@ -105,11 +105,11 @@ def test_add_item_to_empty_or_legacy_menu(isolated_restaurants_path, menu_data, 
     ],
 )
 def test_add_item_rejects_invalid_body_without_writing(
-    isolated_restaurants_path, menu_data, body
+    manager_client, isolated_restaurants_path, menu_data, body
 ):
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).post(PATH, json=body)
+    response = manager_client.post(PATH, json=body)
 
     assert response.status_code == 422
     assert isinstance(response.json()["detail"], list)
@@ -117,11 +117,11 @@ def test_add_item_rejects_invalid_body_without_writing(
 
 
 def test_add_item_unknown_parent_does_not_create_or_modify_records(
-    isolated_restaurants_path, menu_data
+    manager_client, isolated_restaurants_path, menu_data
 ):
     before = isolated_restaurants_path.read_bytes()
 
-    response = TestClient(app).post("/restaurants/unknown/menu/items", json=BODY)
+    response = manager_client.post("/restaurants/unknown/menu/items", json=BODY)
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Restaurant not found"}
@@ -130,14 +130,14 @@ def test_add_item_unknown_parent_does_not_create_or_modify_records(
 
 @pytest.mark.parametrize("contents", [None, "{broken", "{}", '[{"id":"invalid"}]'])
 def test_add_item_storage_errors_take_precedence_over_missing_parent(
-    isolated_restaurants_path, contents
+    manager_client, isolated_restaurants_path, contents
 ):
     if contents is None:
         isolated_restaurants_path.unlink()
     else:
         isolated_restaurants_path.write_text(contents, encoding="utf-8")
 
-    response = TestClient(app).post(PATH, json=BODY)
+    response = manager_client.post(PATH, json=BODY)
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
@@ -147,17 +147,17 @@ def test_add_item_storage_errors_take_precedence_over_missing_parent(
         assert isolated_restaurants_path.read_text(encoding="utf-8") == contents
 
 
-def test_add_item_validates_request_before_loading_storage(isolated_restaurants_path):
+def test_add_item_validates_request_before_loading_storage(manager_client, isolated_restaurants_path):
     isolated_restaurants_path.unlink()
 
-    response = TestClient(app).post(PATH, json={**BODY, "price": -1})
+    response = manager_client.post(PATH, json={**BODY, "price": -1})
 
     assert response.status_code == 422
     assert not isolated_restaurants_path.exists()
 
 
 def test_add_item_failed_save_preserves_file_and_allows_later_request(
-    isolated_restaurants_path, menu_data, monkeypatch
+    manager_client, isolated_restaurants_path, menu_data, monkeypatch
 ):
     before = isolated_restaurants_path.read_bytes()
     files_before = set(isolated_restaurants_path.parent.iterdir())
@@ -167,17 +167,17 @@ def test_add_item_failed_save_preserves_file_and_allows_later_request(
 
     with monkeypatch.context() as patch:
         patch.setattr("app.repositories.restaurant.os.replace", fail_replace)
-        response = TestClient(app).post(PATH, json=BODY)
+        response = manager_client.post(PATH, json=BODY)
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Restaurant data is unavailable"}
     assert isolated_restaurants_path.read_bytes() == before
     assert set(isolated_restaurants_path.parent.iterdir()) == files_before
-    assert TestClient(app).post(PATH, json=BODY).status_code == 201
+    assert manager_client.post(PATH, json=BODY).status_code == 201
 
 
 def test_add_item_retries_id_collision_within_parent(
-    isolated_restaurants_path, menu_data, monkeypatch
+    manager_client, isolated_restaurants_path, menu_data, monkeypatch
 ):
     existing_id = "f20dbbc4-5266-4f7b-bc5d-35cef3632c1c"
     new_id = "a4143258-5314-4576-92b8-8838c5b69c1f"
@@ -188,7 +188,7 @@ def test_add_item_retries_id_collision_within_parent(
     identifiers = iter([UUID(existing_id), UUID(new_id)])
     monkeypatch.setattr("app.services.restaurant.uuid4", lambda: next(identifiers))
 
-    response = TestClient(app).post(PATH, json=BODY)
+    response = manager_client.post(PATH, json=BODY)
 
     assert response.status_code == 201
     assert response.json()["id"] == new_id
@@ -197,19 +197,19 @@ def test_add_item_retries_id_collision_within_parent(
     assert stored[0].model_dump() == menu_data[0]
 
 
-def test_repeated_adds_preserve_items_with_distinct_stable_ids(menu_data):
-    first = TestClient(app).post(PATH, json=BODY)
-    second = TestClient(app).post(PATH, json=BODY)
+def test_repeated_adds_preserve_items_with_distinct_stable_ids(manager_client, menu_data):
+    first = manager_client.post(PATH, json=BODY)
+    second = manager_client.post(PATH, json=BODY)
 
     assert first.status_code == second.status_code == 201
     assert first.json()["id"] != second.json()["id"]
-    assert TestClient(app).get("/restaurants/target/menu").json()["items"] == [
+    assert manager_client.get("/restaurants/target/menu").json()["items"] == [
         menu_data[1]["menu_items"][0], first.json(), second.json()
     ]
 
 
-def test_service_add_item_returns_persisted_model(isolated_restaurants_path, menu_data):
-    service = RestaurantService(RestaurantRepository(isolated_restaurants_path))
+def test_service_add_item_returns_persisted_model(menu_manager, isolated_restaurants_path, menu_data):
+    service = RestaurantService(RestaurantRepository(isolated_restaurants_path), principal=menu_manager)
 
     item = service.add_menu_item("target", MenuItemCreate(**BODY))
 
@@ -221,7 +221,7 @@ def test_service_add_item_returns_persisted_model(isolated_restaurants_path, men
 
 @pytest.mark.parametrize("collision", [False, True])
 def test_service_returns_created_item_by_id_when_saved_order_changes(
-    isolated_restaurants_path, menu_data, monkeypatch, collision
+    menu_manager, isolated_restaurants_path, menu_data, monkeypatch, collision
 ):
     existing_id = "f20dbbc4-5266-4f7b-bc5d-35cef3632c1c"
     created_id = "a4143258-5314-4576-92b8-8838c5b69c1f"
@@ -242,7 +242,7 @@ def test_service_returns_created_item_by_id_when_saved_order_changes(
 
             return super().mutate_records(change_and_reorder)
 
-    service = RestaurantService(ReorderingRepository(isolated_restaurants_path))
+    service = RestaurantService(ReorderingRepository(isolated_restaurants_path), principal=menu_manager)
 
     item = service.add_menu_item("target", MenuItemCreate(**BODY))
 
@@ -253,16 +253,16 @@ def test_service_returns_created_item_by_id_when_saved_order_changes(
     assert item.model_dump(exclude={"id"}) == {**BODY, "available": True}
 
 
-def test_service_add_item_raises_for_unknown_parent(isolated_restaurants_path, menu_data):
-    service = RestaurantService(RestaurantRepository(isolated_restaurants_path))
+def test_service_add_item_raises_for_unknown_parent(menu_manager, isolated_restaurants_path, menu_data):
+    service = RestaurantService(RestaurantRepository(isolated_restaurants_path), principal=menu_manager)
 
     with pytest.raises(RestaurantNotFoundError):
         service.add_menu_item("missing", MenuItemCreate(**BODY))
 
 
-def test_service_add_item_propagates_storage_failure(isolated_restaurants_path):
+def test_service_add_item_propagates_storage_failure(menu_manager, isolated_restaurants_path):
     isolated_restaurants_path.unlink()
-    service = RestaurantService(RestaurantRepository(isolated_restaurants_path))
+    service = RestaurantService(RestaurantRepository(isolated_restaurants_path), principal=menu_manager)
 
     with pytest.raises(RestaurantDataError):
         service.add_menu_item("target", MenuItemCreate(**BODY))

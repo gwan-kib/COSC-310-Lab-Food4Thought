@@ -197,13 +197,13 @@ decimal-string prices, filtering, partial-update and 404/422/500 semantics.
 The #94 catalog implementation adds `available` to menu item create/read/update models;
 old valid create/PATCH requests remain valid and omitted PATCH fields retain their
 value. Legacy items read as available, with no read-time rewrite. Successful whole-file saves include the default on legacy items. A supplied
-`available` must be a JSON boolean. Both item write operations check manager
-permission for an explicitly supplied flag. Valid explicit writes on the default
-server return 401 until #78/#84 supply authenticated staff access. Scope denial
-returns 403 when a permission provider is supplied. Body validation currently
-runs first. Omitted-field M1 writes retain their existing behavior.
-Real cart-add and checkout enforcement and shared workflow locking depend on
-#86/#91. Availability by itself does not implement those operations.
+`available` must be a JSON boolean. Both menu item write operations require a bearer token from a restaurant user.
+For a parseable body, identity and role checks precede body validation. The service
+checks the parent exists and verifies current staff ownership under the workflow
+lock before editing its menu. An unknown parent returns 404 and an existing
+unmanaged parent returns 403. Public menu reads include unavailable items.
+Cart addition and checkout both read current availability under the same
+single-process workflow lock. A rejected purchase preserves the cart and orders.
 
 ### Concrete examples
 
