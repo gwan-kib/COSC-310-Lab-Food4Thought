@@ -5,6 +5,12 @@ customers, and can sign in through POST /auth/login once created.
 """
 
 import json
+import os
+import subprocess
+import sys
+import time
+from contextlib import contextmanager
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -104,3 +110,51 @@ def test_invalid_assignments_write_nothing(m2_store_paths, auth_accounts, email,
     with pytest.raises(error):
         StaffProvisioningService().assign_restaurant(email=email, restaurant_id=restaurant)
     assert _all(m2_store_paths) == before
+
+
+# --- PR #117 review: other processes (gwan-kib) ---------------------------------------------
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+@contextmanager
+def _other_process_holding_the_lock(tmp_path, action, argument):
+    """Run tests/account_lock_holder.py and wait until it holds the account lock."""
+    signal = tmp_path / f"lock-held-{action}"
+    env = {**os.environ, "PYTHONPATH": str(REPO_ROOT)}
+    child = subprocess.Popen([sys.executable, str(REPO_ROOT / "tests" / "account_lock_holder.py"),
+                              action, str(signal), argument], env=env, cwd=REPO_ROOT)
+    try:
+        deadline = time.monotonic() + 15
+        while not signal.exists():
+            assert child.poll() is None, "lock holder exited early"
+            assert time.monotonic() < deadline, "lock holder never took the lock"
+            time.sleep(0.02)
+        yield
+    finally:
+        assert child.wait(timeout=15) == 0
+
+
+def test_staff_creation_waits_for_a_registration_in_another_process(m2_store_paths, auth_accounts, tmp_path, capsys):
+    # A running API server registers Zed@Example.invalid while the command is creating it.
+    before = m2_store_paths["staff"].read_bytes()
+    with _other_process_holding_the_lock(tmp_path, "add-customer", "Zed@Example.invalid"):
+        code = main(["create", "--name", "Zed", "--email", "zed@example.invalid",
+                     "--role", "administrator"], password_prompt=_prompt())
+
+    assert code == 1
+    assert "StaffEmailTakenError" in capsys.readouterr().err
+    assert m2_store_paths["staff"].read_bytes() == before
+
+
+def test_concurrent_assignments_keep_every_restaurant(m2_store_paths, auth_accounts, tmp_path):
+    restaurants = json.loads(m2_store_paths["restaurants"].read_text(encoding="utf-8"))
+    restaurants.append({**restaurants[1], "id": "restaurant-003", "name": "Third Kitchen"})
+    m2_store_paths["restaurants"].write_text(json.dumps(restaurants), encoding="utf-8")
+
+    # Another provisioning command adds restaurant-002 while this one adds restaurant-003.
+    with _other_process_holding_the_lock(tmp_path, "assign", "owner@example.invalid|restaurant-002"):
+        assert main(["assign", "--email", "owner@example.invalid", "--restaurant", "restaurant-003"]) == 0
+
+    [owner] = [a for a in _staff(m2_store_paths) if a["email"] == "owner@example.invalid"]
+    assert owner["restaurant_ids"] == ["restaurant-001", "restaurant-002", "restaurant-003"]

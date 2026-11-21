@@ -68,17 +68,18 @@ class StaffProvisioningService:
         return account
 
     def assign_restaurant(self, *, email: str, restaurant_id: str) -> StaffAccount:
-        account = self.staff.find_by_email(email)
-        if account is None:
-            raise StaffNotFoundError(email)
-        if account.role != "restaurant_user":
-            raise InvalidStaffRequestError("Only restaurant users manage restaurants")
-        self._require_restaurants([restaurant_id])
-        if restaurant_id in account.restaurant_ids:
-            return account
-        updated = account.model_copy(update={"restaurant_ids": [*account.restaurant_ids, restaurant_id]})
-        self.staff.save_staff(updated)
-        return updated
+        def add_restaurant(account: StaffAccount | None) -> StaffAccount:
+            # Runs on the latest stored record, under the account lock.
+            if account is None:
+                raise StaffNotFoundError(email)
+            if account.role != "restaurant_user":
+                raise InvalidStaffRequestError("Only restaurant users manage restaurants")
+            self._require_restaurants([restaurant_id])
+            if restaurant_id in account.restaurant_ids:
+                return account
+            return account.model_copy(update={"restaurant_ids": [*account.restaurant_ids, restaurant_id]})
+
+        return self.staff.update_by_email(email, add_restaurant)
 
     def _require_restaurants(self, restaurant_ids: list[str]) -> None:
         for restaurant_id in restaurant_ids:
