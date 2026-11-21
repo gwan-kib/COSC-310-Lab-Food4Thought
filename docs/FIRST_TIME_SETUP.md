@@ -166,7 +166,16 @@ No environment variable is required for normal local use.
 
 The repository supports `RESTAURANTS_DATA_PATH` for another existing UTF-8 JSON file. Its parent directory must be writable for atomic replacement. The value is read per request; set it before starting the server. Tests configure their own temporary copies.
 
-Active carts are stored in `data/carts.json` (committed as an empty array `[]`); `CARTS_DATA_PATH` selects another file in the same way. Signed-in customers use it through `PUT`/`GET /customers/me/cart` and `POST /customers/me/cart/items`; copy it with the customer and session files for manual experiments.
+Active carts are stored in `data/carts.json` (committed as an empty array `[]`); `CARTS_DATA_PATH` selects another file in the same way. Signed-in customers use it through `PUT`/`GET /customers/me/cart` and `POST`/`DELETE /customers/me/cart/items`; copy it with the customer and session files for manual experiments.
+
+To verify clearing on disposable data in `/docs`, sign in as an active customer and
+use **Authorize**, create a cart with `PUT`, then add items with `POST`.
+`DELETE /customers/me/cart/items` takes no body and returns 200 with the same cart
+ID, empty items, a null restaurant and `"0.00"` subtotal/total. The revision increases
+once; repeating DELETE returns the same empty cart without a write. GET after a
+server restart using the same data paths returns that empty state. A cart not yet
+created returns 404. A purchased revision awaiting checkout recovery returns 409;
+ordinary clear does not perform checkout recovery. See the [clear contract](M2_API_CONTRACT.md#implemented-cart-clear-89).
 
 If the variable is not set, the application uses `data/restaurants.json`. Stored menu-item prices must also be at most `999.00`. An over-limit stored price makes the file invalid, causing generic HTTP 500 data errors without changing the file; correct it before starting normal use. The committed sample data already satisfies this rule.
 

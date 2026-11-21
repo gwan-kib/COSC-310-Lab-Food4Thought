@@ -1,5 +1,5 @@
 """Expose the signed-in customer's shopping cart: create or read it (#85), add menu
-items (#86) and see backend-calculated totals (#90). Every route needs a customer
+items (#86), clear the cart (#89) and see backend-calculated totals (#90). Every route needs a customer
 token (#84); cart changes also need an active account. Cart rules live in CartService.
 """
 
@@ -100,5 +100,22 @@ def add_item(principal: ActiveCustomer, request: AddCartItemRequest, service: Se
     """Adding an item already in the cart increases its quantity. Prices come from the menu."""
     try:
         return service.add_item(principal.account_id, request)
+    except HANDLED as error:
+        raise _http_error(error) from None
+
+
+@router.delete("/items", response_model=CartView, summary="Clear my shopping cart",
+               responses={**ERRORS,
+                          404: {"model": ErrorResponse, "description": "Cart not found"},
+                          409: {"model": ErrorResponse, "description": "Cart checkout recovery required"}})
+def clear_cart(principal: ActiveCustomer, service: Service) -> CartView:
+    """Clear all lines, release the restaurant and return zero subtotal/total.
+
+    Preserve cart/customer IDs and increment revision once for a nonempty cart.
+    Repeating a clear on an empty cart returns the same view without saving.
+    Purchased revisions pending checkout recovery must be recovered through checkout.
+    """
+    try:
+        return service.clear_cart(principal.account_id)
     except HANDLED as error:
         raise _http_error(error) from None
