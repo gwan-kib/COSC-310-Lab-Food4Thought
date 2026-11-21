@@ -1139,6 +1139,19 @@ its pending-auth and local-only status.
 - On Python 3.12, `python -m pytest -q tests/test_checkout_api.py --tb=line` failed all 20 cases before the route existed. After wiring it, `python -m pytest -q tests/test_checkout_api.py --tb=short` passed all 20. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed all 883 tests. `python -m compileall -q app` succeeded and Git reported a clean `data/` directory.
 - Branch `feature/91-checkout-http` starts at `da903cc`. Human peer review and integration are pending.
 
+### Entry 83: Customer resource protection evidence for #83 and #84
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #83 and #84.
+- Artifact: `tests/test_customer_resource_protection.py` and this record.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Add the end-to-end evidence that kept #83 and #84 open until the checkout route (#91, PR #130) merged.
+- Influence: Claude wrote 38 API test cases through real sign-in, cart, checkout and order routes with isolated stores. For #83, a customer signs in, buys once, refills the cart and deactivates. With the old token, profile edits, checkout (with a valid body) and every cart write return 403, repeating deactivation is an allowed no-op, `Customer is inactive` with all stores unchanged; the same account, cart and order remain readable; and a fresh sign-in is still refused at checkout. For #84, all twelve customer-scoped endpoints return 401 with `WWW-Authenticate: Bearer` for missing, invalid and expired tokens, and 403 `Operation not permitted` for restaurant users and administrators, without writes. A second customer cannot read, buy or change the first customer's cart or orders (a foreign order looks exactly like a missing one), and creating his own cart leaves hers unchanged. No application code changed.
+- Validation: The behaviour already existed on `main` (`10f0b2f`), so the tests passed when first run; they are characterization and integration evidence, not test-first. With the checkout route temporarily switched to the non-active dependency and the in-lock status check removed, the #83 test failed (an inactive customer's checkout returned 201); the change was reverted. `python -m pytest -q` passed 859 tests and `REQUIRE_BROWSER_TESTS=1 python -m pytest -q tests/browser` passed 62 (run separately to avoid an intermittent local browser hang).
+- PR or commit: [PR #131](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/131), branch `feature/83-84-protection-evidence`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) noted that the inactive-write list left out `PATCH /customers/me`. Claude added profile edits to the old-token scenario (403 `Customer is inactive`, no writes), checked that repeating deactivation is an allowed no-op, and linked this PR.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
 ### Entry 84: Team Receipt M2.3 evidence for #96
 
 - Student(s): Sreeram Nara (`SreeramNara`), assignee of #96.
