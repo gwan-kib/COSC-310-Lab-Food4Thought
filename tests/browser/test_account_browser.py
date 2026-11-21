@@ -262,6 +262,8 @@ def test_api_display_escapes_text_and_mobile_layout_supports_keyboard(page, live
     payload = '<img src=x onerror="window.injected=true"> A'
     register_fields(page, name=payload)
     page.locator("#register-form").get_by_role("button", name="Register").click()
+    # The POST must finish before signing in; otherwise this races account creation.
+    expect(page.locator("#register-status")).to_contain_text("Account created")
     sign_in(page, "casey@example.invalid", "casey-password-123")
     expect(page.locator("#saved-name")).to_have_text(payload)
     assert page.locator("#signed-in img").count() == 0
