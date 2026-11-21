@@ -51,6 +51,7 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 | --- | --- |
 | Customer: list, cuisine filter, details, menu | [Customer frontend](http://127.0.0.1:8000/app/) |
 | Customer: register, sign in, edit profile/address, deactivate | [Customer account](http://127.0.0.1:8000/app/account.html) |
+| Customer: add menu items, edit/clear cart, checkout, view order confirmation | [My cart](http://127.0.0.1:8000/app/cart.html) |
 | Management: Staff sign-in | [Staff sign-in](http://127.0.0.1:8000/app/staff-sign-in.html) |
 | Management: Create restaurant | [Create restaurant](http://127.0.0.1:8000/app/create-restaurant.html) |
 | Management: Edit restaurant | Select a restaurant in the [customer frontend](http://127.0.0.1:8000/app/) and follow **Edit restaurant** |
@@ -58,6 +59,8 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 | Generated API schema | [OpenAPI JSON](http://127.0.0.1:8000/openapi.json) |
 
 The root URL redirects to the customer page. Select a restaurant to view its details and menu; selection is retained in the URL. A menu-loading failure leaves successfully loaded details visible; selecting the restaurant again retries.
+
+For the customer-to-order flow, sign in through **My account**, return to a restaurant menu, and choose **Add to cart** on an available item. Open **My cart** to inspect current backend prices and totals, set a positive whole-number quantity, remove a line or clear the cart. **Place order** sends the current cart ID and revision to checkout, then displays the saved receipt and order ID. Unavailable items remain visible and removable; checkout rejects them. The UI never silently clears a cart from another restaurant or retries an uncertain checkout POST. If a response is lost, it reads your saved order history for the same cart/revision and offers explicit replay of that original attempt when needed. A saved order awaiting reset can be recovered using **Complete cart reset**. All experiments require disposable copies of the six JSON stores before starting the server.
 
 Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. To edit an existing restaurant, select it on the customer page and follow **Edit restaurant**. The form loads the current name, cuisine, and description, sends only changed fields with `PATCH /restaurants/{restaurant_id}`, and links back to the updated details. Validation errors preserve input. If the response is lost, check the details page before retrying. Authentication remains outside the historical M1 slice; the M2 customer-account page below provides it.
 

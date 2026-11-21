@@ -23,7 +23,7 @@ PROTECTED_WRITES = (
      "restaurant_user", "customer_a"),
 )
 
-CUSTOMER_WRITES = PROTECTED_WRITES[:-1]
+CUSTOMER_WRITES = tuple((method, path, allowed) for method, path, allowed, _ in PROTECTED_WRITES[:-1])
 
 
 @pytest.fixture
@@ -67,9 +67,9 @@ def test_auth_and_role_denial_precede_invalid_write_body(
     assert _store_snapshot(m2_store_paths) == before
 
 
-@pytest.mark.parametrize("method,path,allowed,wrong_role", CUSTOMER_WRITES)
+@pytest.mark.parametrize("method,path,allowed", CUSTOMER_WRITES)
 def test_inactive_customer_denial_precedes_invalid_write_body(
-        client, auth_accounts, m2_store_paths, method, path, allowed, wrong_role):
+        client, auth_accounts, m2_store_paths, method, path, allowed):
     headers = auth_accounts.headers(allowed)
     disabled = client.post("/customers/me/deactivate", headers=headers)
     assert (disabled.status_code, disabled.json()["status"]) == (200, "inactive")
