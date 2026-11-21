@@ -492,3 +492,137 @@ This checklist records the shared decisions developers need for implementation.
   now-inactive customer without writing an order or resetting the cart.
 - [ ] Link the integrated tests, passing CI, peer review and final merge from
   [M2 evidence](milestones/M2.md) before closing #77.
+
+
+## Implemented OpenAPI reconciliation (#103)
+
+This section audits the **implemented** API rather than retroactively treating the
+earlier proposed #77 interface as team-adopted. The source snapshot is
+[main at aa8087a](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/aa8087acacb615e49556ff37ac7448b3a53e9611)
+on 2026-11-20 (America/Vancouver). The source of truth for documented runtime
+behavior is [app/main.py](../app/main.py), the [route modules](../app/api/routes),
+their [Pydantic models](../app/schemas), and the
+[shared bearer dependency](../app/api/auth.py). The original M2 assignment
+text, not its currently inaccessible live Canvas page, remains the course source.
+
+The [live-schema regression audit](../tests/test_m2_openapi_contract.py)
+requests both /docs and /openapi.json from the actual FastAPI TestClient and
+checks operation descriptions, required parameters, JSON request/response
+schemas, status declarations, authorization and M1 retention. It also
+exercises representative 401/403/404/409/422/500 results with disposable
+stores; the existing feature tests below cover the other cases and persistence
+failure consequences. The table is a review of route declarations, **not a
+claim that CI, peer review, or browser execution passed**.
+
+### Operation, security and response matrix
+
+In the following table, **public** means no bearer security requirement and
+**bearer** means the OpenAPI HTTPBearer scheme. Every response body on success
+is JSON. Documented 422 means FastAPI's validation-error response, with a list
+of field errors in detail; other documented 4xx/500 errors have a string
+detail. Request schemas reject extra fields where the write contract requires
+it. Opaque path IDs are strings, not UUID-only.
+
+| Method / path | Security | Request / parameters | Successful response | Documented errors |
+| --- | --- | --- | --- | --- |
+| GET /health | public | none | 200 liveness JSON | none |
+| GET /restaurants | public | optional cuisine filter | 200 Restaurant[] | 422, 500 |
+| POST /restaurants | bearer (administrator) | RestaurantCreate | 201 Restaurant | 401, 403, 422, 500 |
+| GET /restaurants/{restaurant_id} | public | opaque restaurant ID | 200 Restaurant | 404, 500 |
+| PATCH /restaurants/{restaurant_id} | bearer (assigned manager) | ID, RestaurantUpdate | 200 Restaurant | 401, 403, 404, 422, 500 |
+| GET /restaurants/{restaurant_id}/menu | public | opaque restaurant ID | 200 Menu | 404, 500 |
+| POST /restaurants/{restaurant_id}/menu/items | bearer (assigned manager) | ID, MenuItemCreate | 201 MenuItem | 401, 403, 404, 422, 500 |
+| PATCH /restaurants/{restaurant_id}/menu/items/{item_id} | bearer (assigned manager) | IDs, MenuItemUpdate | 200 MenuItem | 401, 403, 404, 422, 500 |
+| POST /customers | public | CustomerRegistration | 201 Customer | 409, 422, 500 |
+| POST /auth/login | public | LoginRequest | 200 LoginResponse | 401, 422, 500 |
+| GET /customers/me | bearer (customer) | none | 200 Customer | 401, 403, 500 |
+| PATCH /customers/me | bearer (active customer) | CustomerProfileUpdate | 200 Customer | 401, 403, 422, 500 |
+| POST /customers/me/deactivate | bearer (customer) | none | 200 Customer | 401, 403, 500 |
+| PUT /customers/me/cart | bearer (active customer) | none | 201 new / 200 existing CartView | 401, 403, 404, 409, 500 |
+| GET /customers/me/cart | bearer (customer) | none | 200 CartView | 401, 403, 404, 409, 500 |
+| POST /customers/me/cart/items | bearer (active customer) | AddCartItemRequest | 200 CartView | 401, 403, 404, 409, 422, 500 |
+| PATCH /customers/me/cart/items/{item_id} | bearer (active customer) | ID, UpdateCartQuantityRequest | 200 CartView | 401, 403, 404, 409, 422, 500 |
+| DELETE /customers/me/cart/items/{item_id} | bearer (active customer) | opaque item ID | 200 CartView | 401, 403, 404, 409, 500 |
+| DELETE /customers/me/cart/items | bearer (active customer) | none | 200 CartView | 401, 403, 404, 409, 500 |
+| POST /customers/me/checkout | bearer (active customer) | CheckoutRequest | 201 new / 200 receipt replay CheckoutResponse | 401, 403, 404, 409, 422, 500 |
+| GET /customers/me/orders | bearer (customer) | none | 200 Order[] | 401, 403, 500 |
+| GET /customers/me/orders/{order_id} | bearer (customer) | opaque order ID | 200 Order | 401, 403, 404, 500 |
+
+### Validation, missing resources and failure evidence
+
+- **Validation / 422:** Filter whitespace, invalid/empty write bodies,
+  strict quantities and invalid checkout revisions return structured 422;
+  authorized request validation is distinct from the 401/403 identity-first
+  precedence. Tests:
+  [restaurant validation](../tests/test_validation_errors.py),
+  [account validation](../tests/test_customer_accounts_api.py),
+  [cart validation](../tests/test_cart_api.py),
+  [checkout](../tests/test_checkout_api.py), and the
+  [live-schema audit](../tests/test_m2_openapi_contract.py). **Do not
+  blanket-remove 422:** write operations and the cuisine query must retain it.
+- **Missing / scope / 404:** Restaurant/menu reads, missing owned carts and
+  items, and missing or foreign orders are documented. Foreign order IDs
+  deliberately have the same public 404 as unknown IDs.
+  [Restaurant tests](../tests/test_restaurant_details.py),
+  [cart tests](../tests/test_cart_remove.py),
+  [history](../tests/test_order_history_api.py),
+  [details](../tests/test_order_details.py).
+- **Authorization / 401/403:** Bearer identity is declared on every
+  protected operation. Missing/invalid/expired identity is 401; wrong
+  role, inactive writes and unmanaged restaurant mutations are 403.
+  OpenAPI indicates authentication, while *role/ownership and inactive
+  state* are enforced by dependencies/services rather than an OpenAPI
+  scope declaration. See [auth](../tests/test_customer_resource_protection.py),
+  [management](../tests/test_restaurant_management_auth.py) and
+  [accounts](../tests/test_customer_accounts_api.py).
+- **State / business rules / 409:** Duplicate registration, mixed
+  restaurants, unavailable items, pending checkout recovery, stale
+  revisions and empty checkout are separate 409 cases.
+  See [cart](../tests/test_cart_api.py),
+  [availability](../tests/test_menu_availability.py),
+  [checkout](../tests/test_checkout_api.py).
+- **Storage / 500:** Broken/corrupt isolated stores and failed writes
+  return generic errors rather than reporting missing resources or success.
+  See [cart](../tests/test_cart_repository.py),
+  [checkout](../tests/test_checkout_api.py),
+  [order repository](../tests/test_order_repository.py),
+  [history](../tests/test_order_history_api.py) and
+  [details](../tests/test_order_details.py).
+
+### Schema and example reconciliation
+
+The public Customer schema contains id, name, email, delivery_address and
+status, not password or its hash. Registration accepts a password, and login
+returns an opaque bearer token; neither token nor password is copied into
+public customer/cart/order models. The [example bundle](examples/m2.json)
+uses explicitly dummy values, not live credentials, and its previously stale
+claim that no M2 routes were implemented has been corrected.
+
+Menu prices, cart unit/line/totals and order amounts use decimal **strings**.
+Menu write prices normalize to two decimals with an inclusive 999.00
+unit-price cap; totals may be larger. Cart views reprice against the
+catalog and carry current availability. Purchased orders retain restaurant
+name, delivery address, line prices, quantities, source cart ID/revision and
+status "placed" as a snapshot; order reads never substitute current catalog
+values. The existing [Pydantic order model](../app/schemas/order.py) and
+[pricing helper](../app/core/pricing.py) enforce the snapshot/money shapes.
+
+### Documentation fix, remaining gates
+
+The generated schema formerly listed an automatic 422 on
+DELETE /customers/me/cart/items/{item_id}, even though this endpoint has
+only a nonempty opaque string path segment and no validating body/query.
+[The explicit OpenAPI allowlist](../app/api/openapi.py) now handles this
+operation alongside the existing three opaque-ID GETs. It does **not**
+remove 422 from a validating quantity PATCH or any other input boundary.
+This is a documentation-only correction; no route, service, repository,
+authorization, persistence or response behavior was changed.
+
+The automated audit and [M2 milestone index](milestones/M2.md#openapi-evidence-for-issue-103)
+track verification. Source-derived error behavior is already covered by the
+named implementation owners' existing tests; any later **behavioral**
+mismatch belongs in that feature owner's PR, not in this documentation
+audit. The original #77 adoption/review checklist above remains open
+where its evidence is still missing. Required-browser CI, human peer review,
+student explanation and merge are separate gates; do not infer them from a
+document or a newly opened PR.
