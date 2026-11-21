@@ -4,6 +4,7 @@ skips locally but fails when REQUIRE_BROWSER_TESTS=1, so CI cannot silently omit
 frontend verification.
 """
 
+import json
 import os
 import socket
 import threading
@@ -83,10 +84,13 @@ def page(browser):
 
 @pytest.fixture
 def staff_browser_session(page, live_server, auth_accounts, request):
-    """Exercise staff-authorized form submissions while #108 owns browser sign-in."""
+    """Seed the same tab-scoped session used by real management requests."""
     account = auth_accounts.accounts[request.param]
     login = page.request.post(f"{live_server}/auth/login", data={
         "email": account.record.email, "password": account.password,
     })
     assert login.status == 200
-    page.set_extra_http_headers({"Authorization": "Bearer " + login.json()["access_token"]})
+    token = login.json()["access_token"]
+    page.add_init_script(
+        script=f"sessionStorage.setItem('food4thought.staff.token', {json.dumps(token)});"
+    )
