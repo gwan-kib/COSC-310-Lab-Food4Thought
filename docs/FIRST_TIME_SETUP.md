@@ -2,7 +2,7 @@
 
 Use this guide when setting up Food4Thought on a machine for the first time.
 
-This document describes the application as it exists now. The repository currently contains a FastAPI backend serving customer, create-restaurant, and edit-restaurant pages, JSON restaurant data, and a pytest test suite. It does not require a database, frontend build step, API keys, or other secrets.
+This document describes the application as it exists now. The repository currently contains a FastAPI backend serving customer discovery, account, create-restaurant, and edit-restaurant pages, JSON restaurant data, and a pytest test suite. It does not require a database, frontend build step, API keys, or other secrets.
 
 For later sessions on a machine that is already configured, use [Quick Setup](QUICK_SETUP.md).
 
@@ -135,6 +135,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` | Updates supplied item fields and returns HTTP 200 with the saved item; unknown parent/item returns 404 and invalid input returns 422. |
 | `GET /docs` | FastAPI's interactive OpenAPI documentation. |
 | `GET /app/` | Customer frontend: restaurant list, cuisine filter, and the selected restaurant's details and menu. `GET /` redirects here. |
+| `GET /app/account.html` | Customer frontend: register, sign in, inspect/update the own profile/address, and deactivate using the existing account API. |
 | `GET /app/create-restaurant.html` | Management frontend: create a restaurant through the API, with validation/error feedback and a link to the saved restaurant. |
 | `GET /app/edit-restaurant.html?id=restaurant-001` | Management frontend: edit an existing restaurant's name, cuisine, or description through GET and PATCH. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
@@ -142,6 +143,8 @@ With the server running, the currently implemented HTTP surfaces are:
 A simple browser check is enough for the GET operations. To try `POST /restaurants`, use the interactive form at `/docs` with a body such as `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. It writes to the configured JSON file, so use a disposable copy through `RESTAURANTS_DATA_PATH` when experimenting.
 
 With a disposable data copy configured, open `/app/` and follow **Create restaurant**. Fill all three fields and submit; confirm the success message, then follow **View restaurant** to see the saved details. Restart with the same data path and verify that the restaurant remains in the list. Whitespace-only values show backend validation feedback; errors keep the form values. Correct a rejected field to a nonblank value and confirm its error clears before submitting again. A stalled request times out after 15 seconds and restores the controls. If creation cannot be confirmed because the connection or response failed or timed out, check **Browse restaurants** before trying again to avoid duplicates.
+
+To try accounts in the browser, first point **all six stores** at disposable copies using the commands below. Open `/app/account.html` (also linked as **My account** from restaurant browsing). Register, sign in, update the name or delivery address, and use **Check saved profile** to verify the server's current saved values. An interrupted registration should be checked by attempting sign-in before registering again; a lost profile update or deactivation response should be checked using **Check saved profile** before attempting another write. Deactivation requires a confirmation checkbox and leaves the account read-only. Tokens are kept in tab-scoped `sessionStorage` and sent only as bearer headers; signing out removes the browser copy, not the server session. A 401 prompts sign-in again. Browser-only controls do not replace backend 401/403 checks.
 
 To use the editor instead of Swagger, open `/app/`, choose a restaurant, and follow **Edit restaurant**. Existing fields load automatically; change one or more and save. An unchanged form does not send a PATCH. The page reports validation and server errors while preserving edits. If a save times out or the response is lost, check the details page before retrying, because the update may already have been saved.
 
@@ -242,7 +245,7 @@ A first-time setup is complete when:
 - `python -m pytest` completes successfully.
 - `python -m uvicorn app.main:app --reload` starts the API.
 - `/health`, `/restaurants`, `/docs`, and `/openapi.json` respond successfully.
-- `/app/`, `/app/create-restaurant.html`, and an edit page for a known restaurant load.
+- `/app/`, `/app/account.html`, `/app/create-restaurant.html`, and an edit page for a known restaurant load.
 - Browser tests run successfully when their optional dependencies are installed and required-browser mode is selected.
 
 For normal future sessions, continue with [Quick Setup](QUICK_SETUP.md).
