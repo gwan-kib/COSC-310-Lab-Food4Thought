@@ -195,17 +195,25 @@ def test_unreadable_store_is_not_silently_recreated(
         client, auth_accounts, m2_store_paths, monkeypatch, store):
     ada = auth_accounts.headers("customer_a")
     _cart_with_item(client, ada)
-    original_read = Path.read_bytes
+    original_read_bytes = Path.read_bytes
+    original_read_text = Path.read_text
     target = m2_store_paths[store]
     before = _bytes(m2_store_paths)
 
-    def deny_read(path):
+    def deny_bytes(path):
         if path == target:
             raise PermissionError("simulated unreadable storage")
-        return original_read(path)
+        return original_read_bytes(path)
+
+    def deny_text(path, *args, **kwargs):
+        if path == target:
+            raise PermissionError("simulated unreadable storage")
+        return original_read_text(path, *args, **kwargs)
 
     with monkeypatch.context() as denied:
-        denied.setattr(Path, "read_bytes", deny_read)
+        # RestaurantRepository reads text; cart/order repositories read bytes.
+        denied.setattr(Path, "read_bytes", deny_bytes)
+        denied.setattr(Path, "read_text", deny_text)
         if store == "restaurants":
             response = client.get("/restaurants")
             detail = "Restaurant data is unavailable"
