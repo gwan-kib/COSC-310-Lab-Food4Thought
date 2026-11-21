@@ -874,7 +874,7 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
 - Student review status: Responsible-student validation and teammate re-review of the fixes pending.
 
-### Entry 68: Staff account provisioning command
+### Entry 70: Staff account provisioning command
 
 - Student(s): Sreeram Nara (`SreeramNara`), assignee of #107.
 - Artifact: `app/scripts/create_staff_account.py`, `app/scripts/__init__.py`, `app/services/staff.py`, the write methods in `app/repositories/staff.py`, `tests/test_staff_provisioning.py`, and staff-account instructions in `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md` and `README.md`.
