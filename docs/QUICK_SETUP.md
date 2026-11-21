@@ -69,6 +69,7 @@ http://127.0.0.1:8000
 | Check | URL |
 | --- | --- |
 | Customer frontend | `http://127.0.0.1:8000/app/` |
+| Staff sign-in | `http://127.0.0.1:8000/app/staff-sign-in.html` |
 | Create restaurant frontend | `http://127.0.0.1:8000/app/create-restaurant.html` |
 | Edit restaurant frontend | Select a restaurant at `http://127.0.0.1:8000/app/` and follow **Edit restaurant** |
 | Health | `http://127.0.0.1:8000/health` |
@@ -78,7 +79,7 @@ http://127.0.0.1:8000
 
 Before trying the form, registering, signing in, or any other POST/PATCH operation, stop the server and follow the [disposable data-copy commands](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments). They point every store (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, and the cart and order paths) at new temporary copies before running the same startup command. Reuse that path on restart to verify persistence, and clear the override afterward. Full mutation examples and data validation are in [first-time setup](FIRST_TIME_SETUP.md#8-verify-the-current-application) and the [API contract](M1_API_CONTRACT.md).
 
-Menu reads include `available`. For manual writes, sign in with a provisioned staff account through `POST /auth/login` and use **Authorize** in `/docs`. Restaurant creation requires an administrator. Editing a restaurant or writing its menu requires a restaurant user assigned to it. Staff sign-in on the forms is tracked in #108.
+Menu reads include `available`. For manual writes, sign in with a provisioned staff account through `POST /auth/login` and use **Authorize** in `/docs`. Restaurant creation requires an administrator. Editing a restaurant or writing its menu requires a restaurant user assigned to it. For the management forms, use **Staff sign-in** first. The browser keeps its bearer token in sessionStorage for that tab and sends it on create, edit, and menu-availability PATCH requests. A 401 means sign in again; a 403 means the backend rejected the requested operation. The browser never decides management permissions by itself.
 
 Stop the server with `Ctrl+C`.
 
