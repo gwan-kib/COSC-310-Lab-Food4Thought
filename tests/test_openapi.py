@@ -46,8 +46,11 @@ def test_ignores_listed_operations_missing_from_schema():
     assert "422" in schema["paths"]["/present/{id}"]["get"]["responses"]
 
 
-def test_contract_list_names_the_menu_operation():
+def test_contract_list_names_opaque_gets_and_cart_item_deletion():
     assert ("get", "/restaurants/{restaurant_id}/menu") in (
+        CONTRACT_NO_VALIDATION_ERROR_OPERATIONS
+    )
+    assert ("delete", "/customers/me/cart/items/{item_id}") in (
         CONTRACT_NO_VALIDATION_ERROR_OPERATIONS
     )
 
