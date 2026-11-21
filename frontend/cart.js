@@ -183,6 +183,13 @@ async function refreshCart({ reconcile = true } = {}) {
   try {
     const response = await customerRequest("/customers/me/cart");
     if (response.status === 404) {
+      // An attempt belongs to the customer who made it. A new account may have
+      // no cart, so check identity before preserving an earlier tab's attempt.
+      if (attempt) {
+        const profile = await customerRequest("/customers/me");
+        if (profile.ok && typeof profile.body?.id === "string" &&
+            profile.body.id !== attempt.customer_id) clearAttempt();
+      }
       cart = null;
       cartContent.hidden = true;
       createButton.hidden = Boolean(attempt);
