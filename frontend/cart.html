@@ -1,0 +1,58 @@
+<!doctype html>
+<!--
+Present Food4Thought's customer cart and saved checkout receipt using the REST API.
+Accessible form controls and status messages keep cart changes and recovery explicit.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Food4Thought – My cart</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Food4Thought</h1>
+      <p>Review your cart and place an order.</p>
+      <nav aria-label="Main navigation">
+        <a href="./">Browse restaurants</a>
+        <a href="account.html">My account</a>
+      </nav>
+    </header>
+    <main class="management-layout cart-layout">
+      <h2>My cart</h2>
+      <p id="cart-status" class="status" role="status"></p>
+      <p id="cart-error" class="status error" role="alert"></p>
+      <div class="cart-toolbar">
+        <button id="refresh-cart" type="button">Refresh cart</button>
+        <button id="create-cart" type="button" hidden>Create cart</button>
+      </div>
+      <section id="cart-content" class="panel" aria-label="Current cart" hidden>
+        <ul id="cart-items" class="cart-items"></ul>
+        <p class="cart-summary">Subtotal <strong id="cart-subtotal"></strong></p>
+        <p class="cart-summary">Total <strong id="cart-total"></strong></p>
+        <p class="account-note">Prices are recalculated from the current menu at checkout; the displayed quote is not a price guarantee. Total excludes tax and fees.</p>
+        <div class="cart-toolbar">
+          <button id="clear-cart" type="button">Clear cart</button>
+          <button id="checkout-button" type="button" class="primary-action">Place order</button>
+        </div>
+      </section>
+      <section id="order-confirmation" class="panel" aria-labelledby="order-heading" hidden>
+        <h3 id="order-heading">Order saved</h3>
+        <p>Order ID: <strong id="order-id"></strong></p>
+        <p id="order-restaurant"></p>
+        <ul id="order-items" class="cart-items"></ul>
+        <p class="cart-summary">Saved total <strong id="order-total"></strong></p>
+        <p class="account-note">These details come from your persisted order, not the current menu.</p>
+      </section>
+      <section id="checkout-help" class="panel" aria-label="Checkout recovery" hidden>
+        <p id="checkout-status" class="status" role="status"></p>
+        <div class="cart-toolbar">
+          <button id="check-order" type="button">Check order status</button>
+          <button id="retry-checkout" type="button" hidden>Retry original checkout</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="cart.js"></script>
+  </body>
+</html>

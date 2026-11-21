@@ -4,6 +4,7 @@
 // the current filter or selection.
 
 import { requestJson } from "./api-client.js";
+import { customerToken, customerRequest, customerError } from "./customer-session.js";
 import { managementError, staffRequest } from "./staff-session.js";
 
 class ApiError extends Error {
@@ -224,10 +225,58 @@ function renderMenu(menu, restaurantId) {
     const controls = document.createElement("div");
     controls.className = "menu-item-controls";
     const availability = document.createElement("span");
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.textContent = "Add to cart";
+    addButton.setAttribute("aria-label", `Add ${menuItem.name} to cart`);
+    addButton.addEventListener("click", async () => {
+      if (addButton.disabled) return;
+      if (!customerToken()) {
+        setStatus(menuStatus, "Sign in through My account before adding to your cart.", true);
+        return;
+      }
+      addButton.disabled = true;
+      setStatus(menuStatus, "Adding to cart…");
+      try {
+        // The backend requires an explicitly created active cart. PUT returns
+        // the same cart when it already exists and never replaces its items.
+        const created = await customerRequest("/customers/me/cart", { method: "PUT" });
+        if (selectionVersion !== detailsRequest) return;
+        if (!created.ok) {
+          setStatus(menuStatus, customerError(created.status, created.body), true);
+          return;
+        }
+        if (typeof created.body?.id !== "string" || !Array.isArray(created.body.items)) {
+          setStatus(menuStatus, "Cart response was unexpected. Open My cart to verify before retrying.", true);
+          return;
+        }
+        const result = await customerRequest("/customers/me/cart/items", {
+          method: "POST", payload: { restaurant_id: restaurantId, item_id: menuItem.id, quantity: 1 },
+        });
+        if (selectionVersion !== detailsRequest) return;
+        if (!result.ok) {
+          setStatus(menuStatus, customerError(result.status, result.body), true);
+          return;
+        }
+        if (typeof result.body?.id !== "string" || !Array.isArray(result.body.items)) {
+          setStatus(menuStatus, "Item addition could not be confirmed. Open My cart and refresh before retrying.", true);
+          return;
+        }
+        setStatus(menuStatus, `Added ${menuItem.name} to your cart. Open My cart to review it.`);
+      } catch {
+        if (selectionVersion === detailsRequest) {
+          // A request can reach the server even when its response is lost.
+          setStatus(menuStatus, "Could not confirm item addition. Open My cart and refresh before trying again.", true);
+        }
+      } finally {
+        addButton.disabled = !menuItem.available;
+      }
+    });
     const button = document.createElement("button");
     button.type = "button";
     function displayAvailability() {
       availability.textContent = menuItem.available ? "Available" : "Unavailable";
+      addButton.disabled = !menuItem.available;
       button.textContent = menuItem.available ? "Mark unavailable" : "Mark available";
       button.setAttribute("aria-label", `${button.textContent} for ${menuItem.name}`);
     }
@@ -266,7 +315,7 @@ function renderMenu(menu, restaurantId) {
       }
     });
 
-    controls.append(availability, button);
+    controls.append(availability, addButton, button);
     item.append(heading, description, controls);
     menuList.append(item);
   }
