@@ -78,6 +78,8 @@ http://127.0.0.1:8000
 
 Before trying the form, registering, signing in, or any other POST/PATCH operation, stop the server and follow the [disposable data-copy commands](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments). They point every store (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, and the cart and order paths) at new temporary copies before running the same startup command. Reuse that path on restart to verify persistence, and clear the override afterward. Full mutation examples and data validation are in [first-time setup](FIRST_TIME_SETUP.md#8-verify-the-current-application) and the [API contract](M1_API_CONTRACT.md).
 
+Menu reads include `available`. For manual writes, sign in with a provisioned staff account through `POST /auth/login` and use **Authorize** in `/docs`. Restaurant creation requires an administrator. Editing a restaurant or writing its menu requires a restaurant user assigned to it. Staff sign-in on the forms is tracked in #108.
+
 Stop the server with `Ctrl+C`.
 
 For order repository experiments, set `ORDERS_DATA_PATH` to a disposable copy

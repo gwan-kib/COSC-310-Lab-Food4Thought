@@ -20,6 +20,12 @@ from playwright.sync_api import expect  # noqa: E402
 DETAILS_PATH = "**/restaurants/restaurant-001"
 
 
+pytestmark = [
+    pytest.mark.usefixtures("staff_browser_session"),
+    pytest.mark.parametrize("staff_browser_session", ["restaurant_user"], indirect=True),
+]
+
+
 def open_editor(page, live_server, restaurant_id="restaurant-001"):
     page.goto(f"{live_server}/app/edit-restaurant.html?id={restaurant_id}")
     expect(page.get_by_label("Name", exact=True)).to_have_value(
