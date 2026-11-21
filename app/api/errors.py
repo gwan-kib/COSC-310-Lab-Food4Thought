@@ -20,10 +20,16 @@ SAFE_SENSITIVE_ERROR_TYPES = frozenset(
     {"missing", "string_type", "string_too_short", "string_too_long", "extra_forbidden"}
 )
 SENSITIVE_ERROR_MESSAGE = "Invalid password"
-# Endpoints whose bodies carry credentials. A body sent with the wrong content type
-# reaches the handler as raw text, which field-based redaction cannot see inside.
-CREDENTIAL_PATHS = frozenset({"/customers", "/auth/login"})
+# Account and sign-in endpoints, whose bodies may carry credentials (or a password a
+# client wrongly sends, such as to PATCH /customers/me). A body sent with the wrong
+# content type reaches the handler as raw text, which field-based redaction cannot
+# see inside, so raw input is dropped for every path under these prefixes.
+CREDENTIAL_PATH_PREFIXES = ("/customers", "/auth")
 STRING_LENGTH_ERROR_TYPES = frozenset({"string_too_short", "string_too_long"})
+
+
+def _is_credential_path(path: str) -> bool:
+    return any(path == prefix or path.startswith(prefix + "/") for prefix in CREDENTIAL_PATH_PREFIXES)
 
 
 def _is_sensitive(name: object) -> bool:
@@ -120,7 +126,7 @@ async def request_validation_error(
     # Rejected input may contain overflowing numbers, lone surrogates, or raw
     # non-UTF-8 bytes. Error rendering must not turn those failures into a 500.
     redacted = [_redact_error(error, body_secrets) for error in exc.errors()]
-    if request.url.path in CREDENTIAL_PATHS and not isinstance(exc.body, dict):
+    if _is_credential_path(request.url.path) and not isinstance(exc.body, dict):
         redacted = [{key: value for key, value in error.items() if key != "input"}
                     for error in redacted]
     errors = jsonable_encoder(
