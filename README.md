@@ -79,6 +79,7 @@ Follow **Create restaurant**, enter name, cuisine, and description, then submit.
 | `PUT /customers/me/cart` | Create the cart (201) or return the existing one (200) |
 | `GET /customers/me/cart` | Cart items with backend-calculated subtotal and total |
 | `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
+| `DELETE /customers/me/cart/items/{item_id}` | Remove an owned line; return current totals and release restaurant binding when empty |
 
 In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors.
 
@@ -86,7 +87,7 @@ Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRAC
 
 ## Data
 
-Representative data lives in `data/restaurants.json`. Customer accounts and sign-in sessions are stored in `data/customers.json` and `data/sessions.json` (committed empty; `CUSTOMERS_DATA_PATH` and `SESSIONS_DATA_PATH` select other files). Passwords are stored only as Argon2id hashes and tokens only as SHA-256 digests. Set `RESTAURANTS_DATA_PATH` before starting the server to use another JSON file; no environment variable is required for normal use. For manual POST/PATCH experiments, follow the [disposable data-copy procedure](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) so the committed sample stays unchanged.
+Representative data lives in `data/restaurants.json`. Customer accounts and sign-in sessions are stored in `data/customers.json` and `data/sessions.json` (committed empty; `CUSTOMERS_DATA_PATH` and `SESSIONS_DATA_PATH` select other files). Passwords are stored only as Argon2id hashes and tokens only as SHA-256 digests. Set `RESTAURANTS_DATA_PATH` before starting the server to use another JSON file; no environment variable is required for normal use. For manual mutation experiments, follow the [disposable data-copy procedure](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) so the committed sample stays unchanged.
 
 Menu items are stored inside their restaurant record. Writes persist before returning success and use atomic replacement with a process-wide mutation lock. This supports a single application process; multiple workers and external writers are not coordinated. Invalid/unavailable data produces generic HTTP 500 errors. Stored menu prices above `999.00` are invalid and must be corrected before data operations can succeed; the sample data satisfies the limit.
 

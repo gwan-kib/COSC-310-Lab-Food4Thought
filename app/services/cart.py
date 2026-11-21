@@ -1,5 +1,5 @@
-"""Apply Food4Thought's cart rules: create or read a customer's active cart (#85) and
-add menu items (#86). Edits run under the shared workflow lock, re-read the customer's
+"""Apply Food4Thought's cart rules: create/read (#85), add (#86) and remove (#88).
+Edits run under the shared workflow lock, re-read the customer's
 current status, price lines from current menu data rather than client input, and
 build the response before saving so a failed read never leaves a half-finished change.
 """
@@ -44,6 +44,10 @@ class CustomerInactiveError(Exception):
 
 class CartNotFoundError(Exception):
     """The customer has no active cart yet."""
+
+
+class CartItemNotFoundError(Exception):
+    """The selected item is not a line in the customer's cart."""
 
 
 class CartRestaurantConflictError(Exception):
@@ -114,6 +118,29 @@ class CartService:
             updated = CartRecord(id=cart.id, customer_id=customer_id, revision=cart.revision + 1,
                                  restaurant_id=request.restaurant_id, items=items)
             view = self._view(updated, menu)  # every fallible read happens before the write
+            self.carts.save_cart(updated)
+            return view
+
+    def remove_item(self, customer_id: str, item_id: str) -> CartView:
+        """Remove one owned line, including an unavailable item, and persist its priced result."""
+        with workflow_lock:
+            self._require_active(customer_id)
+            cart = self.carts.get_cart(customer_id)
+            if cart is None:
+                raise CartNotFoundError(customer_id)
+            if not any(line.item_id == item_id for line in cart.items):
+                raise CartItemNotFoundError(item_id)
+            if self._receipt_for(cart) is not None:
+                raise CheckoutRecoveryRequiredError(cart.id)
+
+            # Unavailable items can be removed; missing stored references are still corruption.
+            menu = self.catalog.get_menu(cart.restaurant_id)
+            if menu is None or item_id not in menu:
+                raise CartDataError(f"Cart {cart.id} references a missing restaurant or item")
+            items = [line.model_copy() for line in cart.items if line.item_id != item_id]
+            updated = CartRecord(id=cart.id, customer_id=cart.customer_id, revision=cart.revision + 1,
+                                 restaurant_id=cart.restaurant_id if items else None, items=items)
+            view = self._view(updated, menu)  # validate remaining references before the write
             self.carts.save_cart(updated)
             return view
 

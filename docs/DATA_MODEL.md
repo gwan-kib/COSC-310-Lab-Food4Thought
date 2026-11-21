@@ -68,6 +68,9 @@ contract's source gap before treating any field/permission as final.
 `checkout_order_id` are read projections, not stored authorities. The empty state
 requires null restaurant and empty items together. Normal edits and successful
 checkout reset increment revision on actual change; reset preserves the cart ID.
+Item removal (#88) uses the same record and atomic save: it removes only the selected
+line, preserves all IDs and other quantities, increments revision once, and sets
+`restaurant_id` to null only when no lines remain. No migration or new store is needed.
 
 `CartView` adds current line `name`, `unit_price`, `line_total`, `available`, and
 `subtotal`, `total`, plus nullable `checkout_order_id`. The latter is derived by
@@ -109,7 +112,7 @@ writer coordination, power-loss durability, or complete M3 recovery is made.
 Checkout acquires [the workflow lock](../app/core/workflow.py). The other
 writers must acquire that same lock for cross-store serialization to hold in the
 integrated app. Customer authentication and repository adapters are implemented,
-and cart create/read/add HTTP routes are provided by #115. Checkout HTTP integration
+and cart create/read/add HTTP routes are provided by #115, with item removal in #88. Checkout HTTP integration
 remains separate work (#84).
 
 ## Verification responsibilities

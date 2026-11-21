@@ -201,6 +201,33 @@ value. Legacy items read as available, with no read-time rewrite. Current M1
 #94 must update the models and compatibility tests before adding the field to
 data. Do not claim this proposal already changed OpenAPI or runtime behavior.
 
+### Implemented item removal (#88)
+
+`DELETE /customers/me/cart/items/{item_id}` uses the existing bearer identity and
+active-customer pre-check, then `CartService.remove_item` rechecks current customer
+status under the shared workflow lock. Ownership is selected by the server-resolved
+customer ID; request bodies or query parameters cannot select another cart. The
+opaque item ID selects a line in that cart, not an arbitrary menu entry.
+
+Success is 200 `CartView`. Other quantities and cart/customer IDs remain unchanged;
+revision increases once and totals use the current menu. Removing the last line
+sets null restaurant, empty items and `"0.00"` totals. A valid unavailable line can
+be removed. Missing stored menu references remain a generic 500 rather than being
+silently repaired. One menu snapshot validates references and prices the response
+before the repository performs its atomic save.
+
+Missing cart or line returns 404 `Cart not found` or `Cart item not found`, including
+repeated removal. After finding the line, an order receipt for the current revision
+returns 409 `Cart checkout recovery required`; checkout replay must finish recovery
+before another removal. Identity/role/inactive denials retain the shared 401/403
+semantics. Failed reads or saves return generic data errors and preserve stored state.
+
+[Removal tests](../tests/test_cart_remove.py) cover the real API/stores, reload,
+cross-customer isolation, failure and checkout recovery. Availability tests use the
+catalog seam while #94's persisted availability model remains unmerged. #88 extends
+the existing shared cart service/repository; Thomas's live issue assignment takes
+precedence over the earlier workstream ownership table for this capability.
+
 ### Concrete examples
 
 The machine-readable [example bundle](examples/m2.json) contains registration,
