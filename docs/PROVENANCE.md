@@ -1151,3 +1151,16 @@ its pending-auth and local-only status.
 - PR or commit: [PR #131](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/131), branch `feature/83-84-protection-evidence`.
 - Review follow-up: Gwantana Kiboigo (`gwan-kib`) noted that the inactive-write list left out `PATCH /customers/me`. Claude added profile edits to the old-token scenario (403 `Customer is inactive`, no writes), checked that repeating deactivation is an allowed no-op, and linked this PR.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+
+### Entry 84: Customer cart and checkout frontend (#100)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), assigned to [issue #100](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/100). Responsible-student walkthrough and understanding confirmation are pending.
+- Artifact: `frontend/customer-session.js`, `frontend/cart.html`, `frontend/cart.js`, updates to `frontend/app.js`, `frontend/index.html`, `frontend/account.html`, `frontend/styles.css`, `tests/browser/test_cart_checkout_browser.py`, README, both setup guides, and the testing guide.
+- Label: `AI-GENERATED`
+- AI tool: OpenAI ChatGPT (GPT-6).
+- Purpose: Implement the frontend customer-to-order feature using the already integrated M2 authentication, cart, checkout, order APIs, team conventions, and source contract.
+- Influence: AI wrote the new customer cart UI, REST integration, menu add actions, browser tests and supporting documentation. It kept business rules server-side; a saved order is displayed from the checkout response or owned order history. A lost checkout response triggers read-only receipt reconciliation and permits only explicit replay of the original cart ID/revision.
+- Validation: The contract, live API routing, source and tests were inspected through the connected GitHub repository. Tests were committed before the new UI; the connector-only environment could not run local pytest/Chromium. Hosted CI results, any required fixes, manual browser demonstration, student review, and teammate approval must be recorded after execution; none is asserted by this entry.
+- PR: [#133](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/133).
+- Student review status: Pending; neither agent changes nor automated checks establish student understanding or peer review.
