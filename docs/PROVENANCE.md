@@ -837,3 +837,15 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: The file differences and preserved tree paths were inspected prior to integration. Passing CI and merge outcome are verified separately; no student understanding or manual testing is claimed.
 - PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
 - Student review status: Pending confirmation by responsible students.
+
+### Entry 65: Customer authentication and account frontend (#99)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), implementation requester and responsible student; student review/understanding not yet confirmed.
+- Artifact: `frontend/account.html`, `frontend/account.js`, `frontend/index.html`, `frontend/styles.css`, `tests/browser/test_account_browser.py`, `README.md`, `docs/QUICK_SETUP.md`, and `docs/FIRST_TIME_SETUP.md`.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Build the M2 customer-account browser workflow required by #99 against the existing REST API without duplicating backend authorization.
+- Influence: ChatGPT generated the account page, form submission and token handling, validation/access feedback, read-only/deactivation interactions, browser test cases with mock and real API expectations, navigation and setup documentation. The interface stores the bearer token in per-tab session storage, avoids automatic retry of ambiguous writes, and keeps saved-profile checks separate from unsaved edit values.
+- Validation: Source and API contract were inspected; the form disabling/data-capture ordering was corrected during review. Tests have been authored, but the complete-repository browser suite and CI status must be recorded after execution. No passing test result, manual student review, or student understanding is claimed by this entry.
+- PR or commit: [PR #118](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/118); branch `feature/99-customer-account-frontend`.
+- Student review status: Pending. The responsible student must inspect the diff, execute and explain the workflow, and obtain a teammate review before merge.
