@@ -89,6 +89,23 @@ REQUIRE_BROWSER_TESTS=1 python -m pytest
 git status --porcelain --untracked-files=all --ignored -- data/
 ```
 
+The [hosted diagnostic run 44877528951](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877528951)
+on Python 3.12 completed with:
+
+- `python -m pytest -q tests/test_cross_subsystem_persistence.py`: **22 passed** (0.63s).
+- `REQUIRE_BROWSER_TESTS=1 timeout --signal=INT 120s python -m pytest -vv --tb=short`:
+  **943 passed** (27.85s), including Chromium browser tests.
+- `python -m compileall app`: success; CI's `git status --porcelain
+  --untracked-files=all --ignored -- data/` guard: success, no data writes.
+
+The first focused diagnostic run found one test-injection error: the unreadable
+restaurant test intercepted `Path.read_bytes()`, while the real repository
+uses `Path.read_text()`. The final test injects both readers, and all cases pass.
+No implementation change or reproducible subsystem defect was required.
+The temporary CI diagnostic commands were restored to the repository's normal
+workflow; verify the final standard run from [PR #132](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/132).
+The tests were executed by hosted CI, not locally in the current assistant runtime.
+
 The last command must print nothing. Confirm hosted GitHub Actions results on
 the PR rather than presuming a local run proves the hosted environment works.
 The source/repository contracts and original per-owner tests were inspected
