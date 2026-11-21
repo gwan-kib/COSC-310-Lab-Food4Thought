@@ -425,3 +425,20 @@ def test_quantity_patch_failed_replace_keeps_original_cart(client, ada, two_line
     assert (result.status_code, result.json()) == (500, {"detail": "Cart data is unavailable"})
     assert m2_store_paths["carts"].read_bytes() == before
     assert client.get("/customers/me/cart", headers=ada).json() == two_line_cart
+
+
+@pytest.mark.parametrize("missing_id", ["item-001", "item-002"], ids=["target", "sibling"])
+def test_quantity_patch_dangling_menu_reference_preserves_cart(
+    client, ada, two_line_cart, m2_store_paths, missing_id
+):
+    catalog = m2_store_paths["restaurants"]
+    restaurants = json.loads(catalog.read_bytes())
+    restaurant = next(r for r in restaurants if r["id"] == two_line_cart["restaurant_id"])
+    restaurant["menu_items"] = [item for item in restaurant["menu_items"] if item["id"] != missing_id]
+    catalog.write_text(json.dumps(restaurants), encoding="utf-8")
+    before = m2_store_paths["carts"].read_bytes()
+
+    response = client.patch(ITEM_URL, headers=ada, json={"quantity": 3})
+
+    assert (response.status_code, response.json()) == (500, {"detail": "Cart data is unavailable"})
+    assert m2_store_paths["carts"].read_bytes() == before
