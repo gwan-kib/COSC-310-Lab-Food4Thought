@@ -1,6 +1,5 @@
-# Compose Food4Thought's FastAPI application from the health, restaurant, customer
-# account, cart and order history/detail routers, shared validation-error handler, and OpenAPI customization. Serve the frontend
-# pages alongside the API so their relative request URLs use the same application.
+# Compose Food4Thought's health, restaurant, account, cart, checkout and order APIs
+# with shared validation and OpenAPI settings. Serve the frontend alongside them.
 
 from pathlib import Path
 
@@ -11,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.errors import request_validation_error
 from app.api.openapi import install_openapi
-from app.api.routes import carts, customers, health, order_details, order_history, restaurants
+from app.api.routes import carts, checkout, customers, health, order_details, order_history, restaurants
 
 # Resolved from this file, not the working directory, so uvicorn can start anywhere.
 FRONTEND_DIR = Path(__file__).resolve().parents[1] / "frontend"
@@ -27,6 +26,7 @@ app.include_router(health.router)
 app.include_router(restaurants.router)
 app.include_router(customers.router)
 app.include_router(carts.router)
+app.include_router(checkout.router)
 app.include_router(order_history.router)
 app.include_router(order_details.router)
 

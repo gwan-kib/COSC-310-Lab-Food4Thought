@@ -257,7 +257,7 @@ Missing/invalid/expired identity is 401, wrong role or inactive customer is 403,
 and a saved order for the current revision is 409 `Cart checkout recovery required`.
 Ordinary clear never invokes checkout's conditional `reset_after_order` and never
 edits orders. Real checkout-service replay recovers that revision before normal
-mutations resume; the checkout HTTP route is not yet wired in this base checkout.
+mutations resume. HTTP clients can replay the purchased revision through checkout.
 The generated OpenAPI and [clear tests](../tests/test_clear_cart.py) cover the
 route, errors, no-op semantics, persistence and recovery integration.
 
@@ -312,7 +312,7 @@ exercise real bearer resolution and stores, inactive reads and direct denials,
 and registration/login → cart API → real checkout service → history HTTP. The
 purchase integration uses no auth/customer/cart/catalog/repository doubles and
 reopens history with a fresh application and repositories. Checkout itself is
-called at its service boundary; its HTTP route remains separate #91 work.
+called at its service boundary in the #92 suite.
 
 ## Implemented order details (#93)
 
@@ -339,15 +339,18 @@ Denied identity/role checks precede private order reads, and GET writes nothing.
 Details use only the saved transaction: current catalog/cart contents are not
 looked up or used to reconstruct names, amounts, address or relationships.
 `tests/test_order_details.py` covers independent fixture orders and real
-registration/login/cart plus checkout-service-created orders. The complete HTTP
-checkout-to-detail workflow still awaits #91's checkout endpoint; history remains #92.
+registration/login/cart plus checkout-service-created orders. The [checkout HTTP
+tests](../tests/test_checkout_api.py) also retrieve the purchased snapshot through detail and history.
 
 ## Checkout ordering, failures, and retry contract
 
-The [checkout service](../app/services/checkout.py) and [JSON order store](../app/repositories/order.py)
-implement the purchase and replay sequence below. The HTTP route remains #91 work.
-Bind `CustomerService(CustomerRepository()).active_customer_for` as the
-service's active-customer resolver. It executes inside `app.core.workflow.workflow_lock`.
+The [checkout route](../app/api/routes/checkout.py) accepts a bearer token and
+a strict `CheckoutRequest` at `POST /customers/me/checkout`. The response includes
+the saved `order` and `cart_reset_pending` for both a new purchase (201) and a replay (200).
+The route uses the shared active-customer precheck and binds
+`CustomerService.active_customer_for` to the [checkout service](../app/services/checkout.py).
+The service reloads the customer inside `app.core.workflow.workflow_lock` and uses
+the real cart repository, catalog and [order repository](../app/repositories/order.py).
 Cart access must return validated records, distinguish absence from storage failure,
 and signal storage failures with `app.core.storage.StorageFailure`. The active
 customer resolver uses the same signal for storage errors and propagates its
@@ -355,9 +358,7 @@ own authorization errors. A reset storage failure after saving the order trigger
 a fresh cart read to determine whether the purchased revision is still pending.
 Cart, menu and customer writers must adopt the same outer lock before integration.
 
-For review with the other owners, checkout gives the same `Cart not found` domain
-error for a foreign receipt as for an unknown cart. The intended HTTP mapping is
-404 in both cases. A retry never reveals the other customer's order.
+Checkout returns 404 `Cart not found` for a foreign receipt or an unknown cart.
 
 The durable attempt identity is **`(source_cart_id, source_cart_revision)`**,
 unique across orders. No client-supplied order ID or arbitrary retry token.

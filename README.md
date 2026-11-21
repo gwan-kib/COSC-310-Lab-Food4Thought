@@ -85,6 +85,7 @@ Management forms now use a staff sign-in page. First provision a staff account u
 | `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
 | `DELETE /customers/me/cart/items` | Clear all lines and release the restaurant; preserve the cart ID, return zero totals; repeat is a no-op |
 | `DELETE /customers/me/cart/items/{item_id}` | Remove an owned line; return current totals and release restaurant binding when empty |
+| `POST /customers/me/checkout` | Purchase a cart revision (201) or retrieve its saved order on retry (200) |
 | `GET /customers/me/orders` | Own saved orders in insertion order; `[]` if none; inactive customers retain read access |
 | `GET /customers/me/orders/{order_id}` | Read an owned saved order, including original items, prices and address; inactive owners retain access |
 | `PATCH /customers/me/cart/items/{item_id}` | Set an existing available line to the supplied positive integer `quantity` and return the repriced cart |
@@ -94,8 +95,9 @@ For browser-based account management, open [Customer account](http://127.0.0.1:8
 In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors. Restaurant users and administrators are created with `python -m app.scripts.create_staff_account` (see the [disposable-data steps](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments)).
 
 Order details return the same `404 Order not found` for missing and foreign IDs.
-The empty order seed contains no demo orders. Checkout-created orders can currently
-be produced through the service; the checkout HTTP endpoint remains pending (#91).
+To create an order, sign in as an active customer and send the populated cart's
+ID and revision to checkout. If `cart_reset_pending` is true, repeat the same
+request to finish clearing the purchased revision.
 See the [implemented detail contract](docs/M2_API_CONTRACT.md#implemented-order-details-93).
 
 Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRACT.md) maintains request/response models, cuisine matching, validation, decimal-string prices, partial updates, error precedence, and persistence decisions. `/docs` shows interactive forms and generated schemas.
@@ -150,7 +152,7 @@ requirements-dev.txt    Pinned browser-test dependencies
 - [Testing conventions](docs/TESTING.md)
 - [M0 checkpoint](docs/milestones/M0.md) and [M1 checkpoint](docs/milestones/M1.md)
 - [M1 API/data contract](docs/M1_API_CONTRACT.md)
-- [M2 API/persistence contract](docs/M2_API_CONTRACT.md), [data model](docs/DATA_MODEL.md), and [M2 evidence/status](docs/milestones/M2.md). The checkout service and order store are implemented. The HTTP checkout workflow awaits integration.
+- [M2 API/persistence contract](docs/M2_API_CONTRACT.md), [data model](docs/DATA_MODEL.md), and [M2 evidence/status](docs/milestones/M2.md).
 - [M1 Engineering Decision Receipt — menu-item price validation](docs/DECISION_RECEIPT.md)
 - [Shared AI provenance record](docs/PROVENANCE.md)
 - [M1 sprint plan](scrum/SPRINT-Planning-M1.md) and [signed team agreement](scrum/team-agreement.md)
