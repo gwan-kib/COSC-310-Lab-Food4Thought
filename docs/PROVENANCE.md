@@ -1151,3 +1151,15 @@ its pending-auth and local-only status.
 - PR or commit: [PR #131](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/131), branch `feature/83-84-protection-evidence`.
 - Review follow-up: Gwantana Kiboigo (`gwan-kib`) noted that the inactive-write list left out `PATCH /customers/me`. Claude added profile edits to the old-token scenario (403 `Customer is inactive`, no writes), checked that repeating deactivation is an allowed no-op, and linked this PR.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 84: M2 handoff documentation audit and #104 backlog coordination
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue coordinator and requesting student; responsible-student review is pending.
+- Artifact: [Issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/DATA_MODEL.md`, `docs/milestones/M2.md`, and this provenance entry.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT.
+- Purpose: Translate the M2 integration/release backlog into an evidence-based documentation audit, correct stale setup/status text, and build a source-to-issue/test/PR handoff checklist.
+- Influence: AI authored substantial changes to the cited documentation, the M2 handoff matrix and release/demo checks; issue #104 itself records AI-GENERATED backlog planning. No student-authored review or agreement is inferred.
+- Validation: Inspected the repository's `main` tree, relevant documentation, issue #104 and merged/open PR metadata on 2026-11-20; checked that pending integration work was not represented as delivered. Documentation-only changes; no application tests or manual demo were run by this documentation audit. Final link verification, student review and integrated-release checks remain separate gates.
+- PR or commit: branch `docs/104-m2-handoff-audit` (PR link added in the PR description); [issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104).
+- Student review status: Pending. Gwantana must review/validate the final documentation and confirm understanding; teammate PR review is also pending.
