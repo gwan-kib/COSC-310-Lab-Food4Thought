@@ -188,3 +188,30 @@ Record:
 - Any environment limitation, pre-existing failure, product failure, and remaining risk.
 
 Never fabricate output, report an unrun command as passing, weaken assertions to hide a defect, or treat API tests as proof that a frontend works. Documentation-only changes need appropriate link/template/content checks, not invented application test results.
+
+
+## #101 full workflow integration checks
+
+The backend [complete-workflow tests](../tests/test_complete_workflow.py) run
+real account creation and sign-in through the HTTP application, catalog/menu,
+cart, checkout and saved-order reads through a fresh API instance. They also
+check authorized/unauthorized paths, changed catalog values, rejected requests
+and both persistence failure stages. The associated
+[browser journey](../tests/browser/test_complete_workflow_browser.py) uses the
+real frontend from #100 and verifies a visible saved receipt and an owned
+order-detail read. These tests do not mock application services, repositories
+or HTTP responses; only the clock and deliberate filesystem failures are
+controlled. All six data paths are isolated by `tests/conftest.py`.
+
+Focused commands from the repository root (with dependencies and Chromium
+installed):
+
+```sh
+REQUIRE_BROWSER_TESTS=1 python -m pytest -q tests/test_complete_workflow.py tests/browser/test_complete_workflow_browser.py
+python -m compileall app
+REQUIRE_BROWSER_TESTS=1 python -m pytest
+git status --porcelain --untracked-files=all --ignored -- data/
+```
+
+These are verification commands, not claims that a particular execution passed.
+See the #101 PR for exact run results and the stacked dependency on #100.
