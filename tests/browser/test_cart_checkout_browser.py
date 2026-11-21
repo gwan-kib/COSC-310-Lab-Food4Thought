@@ -264,3 +264,37 @@ def test_switching_customer_does_not_trap_new_account_in_old_checkout_attempt(
     assert any(c["customer_id"] == other.record.id and c["items"] == [] for c in stored)
     assert any(c["id"] == first_cart["id"] and c["items"] == first_cart["items"] for c in stored)
     assert page.page_errors == []
+
+
+def test_pending_checkout_reset_requires_explicit_same_revision_replay(
+    page, live_server, auth_accounts, m2_store_paths
+):
+    sign_in_customer(page, live_server, auth_accounts)
+    add_bowl(page, live_server)
+    calls = []
+
+    def simulate_pending_reset(route):
+        calls.append(route.request.post_data_json)
+        actual = route.fetch()
+        body = actual.json()
+        if len(calls) == 1:
+            assert actual.status == 201
+            body["cart_reset_pending"] = True
+            route.fulfill(status=201, json=body)
+        else:
+            route.fulfill(status=actual.status, json=body)
+
+    page.route("**/customers/me/checkout", simulate_pending_reset)
+    page.goto(f"{live_server}/app/cart.html")
+    page.locator("#checkout-button").click()
+    expect(page.locator("#order-confirmation")).to_be_visible()
+    expect(page.get_by_role("button", name="Complete cart reset")).to_be_visible()
+    page.wait_for_timeout(250)
+    assert len(calls) == 1
+
+    page.get_by_role("button", name="Complete cart reset").click()
+    expect(page.locator("#checkout-status")).to_be_hidden()
+    expect(page.locator("#cart-total")).to_have_text("$0.00")
+    assert len(calls) == 2 and calls[0] == calls[1]
+    assert len(json.loads(m2_store_paths["orders"].read_text())) == 1
+    assert page.page_errors == []
