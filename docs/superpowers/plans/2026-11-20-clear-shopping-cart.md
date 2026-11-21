@@ -133,3 +133,27 @@ needed conflict resolution. `python -m compileall -q app` succeeded and
 `python -m pytest -q tests/test_clear_cart.py tests/test_order_details.py` passed
 59 tests in 5.86s; whitespace and committed-data guards passed. The hosted full
 suite for this integrated revision is recorded in [PR #126 checks](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/126/checks).
+
+
+PR #126 review follow-up: the review requested synchronization with #125's
+quantity update. Merged main `cf172eb`, which also includes #124 staff sign-in.
+Resolved the cart route/service conflicts by retaining both complete operations
+and the quantity-specific exception/import mapping. Reviewed the combined README,
+setup guides and M2 contract; retained all main provenance and renumbered the clear
+entry to 76. No clear or quantity business rules were changed.
+
+Requested verification before the merge passed 90 tests. After conflict resolution:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q tests/test_clear_cart.py tests/test_cart_api.py tests/test_order_details.py
+.\.venv\Scripts\python.exe -m compileall -q app
+git diff --cached --check
+git status --porcelain --untracked-files=all --ignored -- data/
+```
+
+Results: 108 passed in 9.35s, compilation succeeded, whitespace check passed and
+data status was empty. PR #123 was still open when checked. Fresh hosted full CI
+for the pushed merge will be recorded in the PR description. The prior hosted run
+on `59e9031` passed 763 tests, but does not verify this new integration. Review
+feedback is addressed by this merge; renewed review, student explanation and
+integration into main remain pending.

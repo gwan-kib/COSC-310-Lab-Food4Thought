@@ -163,6 +163,16 @@ button.restaurant[aria-current="true"] {
   color: var(--muted);
 }
 
+.menu-item-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
 .menu-item-heading {
   display: flex;
   justify-content: space-between;

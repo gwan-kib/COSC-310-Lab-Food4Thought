@@ -70,6 +70,7 @@ http://127.0.0.1:8000
 | --- | --- |
 | Customer frontend | `http://127.0.0.1:8000/app/` |
 | Customer account (registration, sign-in, profile, deactivation) | `http://127.0.0.1:8000/app/account.html` |
+| Staff sign-in | `http://127.0.0.1:8000/app/staff-sign-in.html` |
 | Create restaurant frontend | `http://127.0.0.1:8000/app/create-restaurant.html` |
 | Edit restaurant frontend | Select a restaurant at `http://127.0.0.1:8000/app/` and follow **Edit restaurant** |
 | Health | `http://127.0.0.1:8000/health` |
@@ -86,9 +87,13 @@ without saving; GET after restart preserves the empty state. Missing carts retur
 404 and purchased revisions awaiting checkout recovery return 409. See the
 [clear contract](M2_API_CONTRACT.md#implemented-cart-clear-89).
 
-Menu reads include `available`. For manual writes, sign in with a provisioned staff account through `POST /auth/login` and use **Authorize** in `/docs`. Restaurant creation requires an administrator. Editing a restaurant or writing its menu requires a restaurant user assigned to it. Staff sign-in on the forms is tracked in #108.
+Menu reads include `available`. For manual writes, sign in with a provisioned staff account through `POST /auth/login` and use **Authorize** in `/docs`. Restaurant creation requires an administrator. Editing a restaurant or writing its menu requires a restaurant user assigned to it. For the management forms, use **Staff sign-in** first. The browser keeps its bearer token in sessionStorage for that tab and sends it on create, edit, and menu-availability PATCH requests. A 401 means sign in again; a 403 means the backend rejected the requested operation. The browser never decides management permissions by itself.
 
 Stop the server with `Ctrl+C`.
+
+To change a cart quantity on disposable data, authorize as the active cart owner in
+`/docs` and send `PATCH /customers/me/cart/items/{item_id}` for an existing available
+line. The body `{"quantity": 3}` sets its quantity to three.
 
 For order repository experiments, set `ORDERS_DATA_PATH` to a disposable copy
 of the empty `data/orders.json` before constructing the repository. Run

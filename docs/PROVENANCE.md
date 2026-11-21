@@ -997,7 +997,43 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #119](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119), synchronization follow-up to review of `927a4d5`.
 - Student review status: Independent human peer review, approval and student understanding remain pending; this records automated verification and agent integration work.
 
-### Entry 74: Clear the active customer's cart (#89)
+### Issue 87: Update a cart line's quantity
+
+- Student: Thomas Chen (`Tc2006415`), assigned to [#87](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/87).
+- Artifact: Quantity PATCH route, service, request schema, API tests, README, setup guides and M2 contract clarification on branch `feature/87-update-cart-quantity`.
+- Label: `AI-GENERATED`
+- AI tool: Codex (OpenAI).
+- Purpose and influence: Codex implemented the endpoint and tests using the shared cart, catalog, pricing, authorization and order-receipt interfaces. Codex chose to reject an unavailable target even when the submitted quantity is the same.
+- Validation: `python -m pytest -q tests/test_cart_api.py -k quantity_patch --tb=line` failed all 16 selected cases on the missing route, then passed all 16. `python -m compileall -q app` succeeded. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q --tb=line` passed all 701 tests.
+- Review follow-up: After [peer review on PR #125](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/125#pullrequestreview-6002737142), Codex merged `main` at `9474129`, retained the #99 and #87 provenance entries, and added two characterization cases in [commit d21e482](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/d21e482). Both passed against the existing implementation. A missing target or sibling menu reference returns a generic 500 and preserves the stored cart bytes.
+- Integration evidence: `python -m pytest -q tests/test_cart_api.py tests/test_cart_service.py tests/test_cart_repository.py --tb=line` passed 93 tests. In an isolated local merge with [PR #123](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/123) at `c95a8ae`, `python -m pytest -q tests/test_cart_api.py tests/test_cart_remove.py --tb=line` passed 80 tests. Both HTTP operations shared one missing-line exception and HTTP mapping in that merge.
+- Student review status: Peer changes requested and addressed on the feature branch. Responsible-student walkthrough and renewed peer approval pending.
+
+### Entry 74: Staff management sign-in and authorization browser coverage (#108)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee; personal review and understanding still to be confirmed.
+- Artifact: `frontend/staff-session.js`, `frontend/staff-sign-in.html`, `frontend/staff-sign-in.js`, `tests/browser/test_staff_sign_in_browser.py`.
+- Label: AI-GENERATED.
+- AI tool: ChatGPT.
+- Purpose: Implement the assigned staff sign-in flow and browser tests for protected restaurant/menu management.
+- Influence: Generated sessionStorage-based bearer transport, a sign-in page, and real-API Chromium tests for login, denial, and ownership.
+- Validation: Tests added. Branch CI results to be recorded in the PR; no local complete-repository browser test was performed because the runtime cannot clone GitHub.
+- PR or commit: [Issue #108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108), [feature branch](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/tree/feature/108-staff-sign-in).
+- Student review status: Pending.
+
+### Entry 75: Integrate staff authentication into existing frontend (#108)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee; personal review and understanding still to be confirmed.
+- Artifact: `frontend/app.js`, `frontend/create-restaurant.js`, `frontend/edit-restaurant.js`, `frontend/create-restaurant.html`, `frontend/edit-restaurant.html`, `frontend/styles.css`, `tests/browser/conftest.py`, `README.md`, `docs/QUICK_SETUP.md`, `docs/FIRST_TIME_SETUP.md`.
+- Label: AI-REVISED.
+- AI tool: ChatGPT.
+- Purpose: Route management writes through the staff token, show 401/403 feedback, offer menu availability controls, and document the browser workflow.
+- Influence: Updated existing browser forms, menu rendering and browser test fixtures without changing backend permission logic or persistence.
+- Validation: Branch CI results to be recorded in the PR; dedicated browser tests target success, denied writes and unchanged storage.
+- PR or commit: [Issue #108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108), [feature branch](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/tree/feature/108-staff-sign-in).
+- Student review status: Pending.
+
+### Entry 76: Clear the active customer's cart (#89)
 
 - Student(s): Thomas Chen (`Tc2006415`), issue assignee and implementation requester.
 - Artifact: `app/services/cart.py`, `app/api/routes/carts.py`, `tests/test_clear_cart.py`, `README.md`, M2 API contract, both setup guides, testing/milestone evidence, and `docs/superpowers/plans/2026-11-20-clear-shopping-cart.md`.
@@ -1008,4 +1044,5 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Validation: On Python 3.12, the baseline `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed 704 tests. Before implementation, `python -m pytest -q tests/test_clear_cart.py --tb=short` failed all 27 cases for missing route/service/OpenAPI; afterward all 27 passed. Agent review found a restored-cart/next-revision receipt collision; its added regression failed (200 vs 500) before the guard, then all 28 focused tests passed. `python -m compileall -q app` succeeded. Final verification used `python -u -m pytest -q --ignore=tests/test_customer_accounts_api.py -o faulthandler_timeout=30` with Chromium required (675 passed) and `python -u -m pytest -vv tests/test_customer_accounts_api.py -o faulthandler_timeout=30` (57 passed), covering all 732 cases without skips. Committed-data and staged whitespace checks passed. A prior single-process diagnostic run passed 731 cases before the added regression, but multiple full runs stalled in existing profile-validation TestClient teardown on Windows and were interrupted. The cause remains unresolved; exact commands and diagnostic limits are in the [plan](superpowers/plans/2026-11-20-clear-shopping-cart.md). No manual student testing, human peer approval or student understanding is inferred.
 - PR or commit: [PR #126](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/126), branch `feature/89-clear-shopping-cart`, implementation commit `dfdb0db`, [issue #89](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/89). Published at Thomas's request; human review and merge remain pending. Remote CI results are tracked on the PR.
 - Integration follow-up: Main advanced to `c2d4aa8` when #119 merged during publication. Codex merged it without rewriting history, retained both endpoint rows and all order-details provenance, and reviewed the automatic documentation merges. No clear or order-detail application behavior changed. `python -m compileall -q app` succeeded; `python -m pytest -q tests/test_clear_cart.py tests/test_order_details.py` passed 59 tests; whitespace and committed-data checks passed. Full hosted verification for the integrated revision is tracked in [PR #126 checks](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/126/checks).
+- PR #126 review follow-up: At the user's request, Codex addressed [the integration review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/126#pullrequestreview-6002913897) by merging main `cf172eb` (#125 quantity updates and #124 staff sign-in). Resolved both cart modules by preserving the complete quantity implementation and clear operation, including shared imports and error mapping. Retained main documentation and every provenance entry; renumbered this entry to 76 to avoid the staff entries. Before the merge, the requested clear/cart-API/order-details suite passed 90 tests; afterward `python -m pytest -q tests/test_clear_cart.py tests/test_cart_api.py tests/test_order_details.py` passed 108 tests in 9.35s. `python -m compileall -q app`, whitespace and committed-data checks passed. PR #123 remained open at this check. Fresh hosted CI is recorded in the PR; renewed review and student understanding remain pending.
 - Student review status: Thomas authorized the recommended implementation; responsible-student code review and explanation remain pending. Canvas and full live Project fields could not be reverified in this run.

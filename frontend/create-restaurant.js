@@ -3,8 +3,9 @@
 // input on failures; an unconfirmed POST is never retried automatically because the
 // server may already have saved it.
 
-import { requestJson } from "./api-client.js";
+import { managementError, staffRequest, staffSignInHref } from "./staff-session.js";
 
+document.getElementById("staff-signin-link").href = staffSignInHref();
 const form = document.getElementById("create-form");
 const fieldset = document.getElementById("create-fields");
 const status = document.getElementById("create-status");
@@ -74,7 +75,7 @@ form.addEventListener("submit", async event => {
   let focusAfter = null;
 
   try {
-    const { ok, status: statusCode, body } = await requestJson("/restaurants", {
+    const { ok, status: statusCode, body } = await staffRequest("/restaurants", {
       method: "POST", payload,
     });
     status.textContent = "";
@@ -82,7 +83,7 @@ form.addEventListener("submit", async event => {
       if (statusCode === 422 && Array.isArray(body?.detail) && body.detail.length) {
         focusAfter = showValidation(body.detail);
       } else {
-        const detail = typeof body?.detail === "string" ? body.detail : `Request failed (HTTP ${statusCode}).`;
+        const detail = managementError(statusCode, body);
         errors.textContent = `Could not create restaurant: ${detail}`;
       }
       return;

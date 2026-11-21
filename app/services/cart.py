@@ -1,7 +1,6 @@
-"""Apply Food4Thought's cart rules: create/read (#85), add (#86) and clear (#89).
-Edits run under the shared workflow lock, re-read the customer's
-current status, price lines from current menu data rather than client input, and
-build the response before saving so a failed read never leaves a half-finished change.
+"""Apply Food4Thought cart rules for creation, reads, item additions, quantity edits
+and clearing. Changes check current customer status under the shared workflow lock
+and build backend-priced responses before saving.
 """
 
 from typing import Protocol
@@ -10,6 +9,7 @@ from app.core.pricing import line_total, sum_line_totals
 from app.core.workflow import workflow_lock
 from app.repositories.cart import CartDataError, CartRepository
 from app.schemas.cart import AddCartItemRequest, CartItem, CartRecord, CartView, CartViewItem
+from app.schemas.cart import UpdateCartQuantityRequest
 from app.services.catalog import CatalogItem
 from app.services.restaurant import MenuItemNotFoundError, RestaurantNotFoundError
 
@@ -44,6 +44,10 @@ class CustomerInactiveError(Exception):
 
 class CartNotFoundError(Exception):
     """The customer has no active cart yet."""
+
+
+class CartItemNotFoundError(Exception):
+    """The selected item is not a line in the customer's cart."""
 
 
 class CartRestaurantConflictError(Exception):
@@ -115,6 +119,33 @@ class CartService:
                                  restaurant_id=request.restaurant_id, items=items)
             view = self._view(updated, menu)  # every fallible read happens before the write
             self.carts.save_cart(updated)
+            return view
+
+    def update_quantity(self, customer_id: str, item_id: str, request: UpdateCartQuantityRequest) -> CartView:
+        """Set one existing line and price the result before committing the edit."""
+        with workflow_lock:
+            self._require_active(customer_id)
+            cart = self.carts.get_cart(customer_id)
+            if cart is None:
+                raise CartNotFoundError(customer_id)
+            if self._receipt_for(cart) is not None:
+                raise CheckoutRecoveryRequiredError(cart.id)
+            line = next((line for line in cart.items if line.item_id == item_id), None)
+            if line is None:
+                raise CartItemNotFoundError(item_id)
+
+            menu = self.catalog.get_menu(cart.restaurant_id)
+            if menu is None or item_id not in menu:
+                raise CartDataError(f"Cart {cart.id} references a missing restaurant or item")
+            if not menu[item_id].available:
+                raise MenuItemUnavailableError(item_id)
+            if line.quantity == request.quantity:
+                return self._view(cart, menu)
+
+            line.quantity = request.quantity
+            cart.revision += 1
+            view = self._view(cart, menu)
+            self.carts.save_cart(cart)
             return view
 
     def clear_cart(self, customer_id: str) -> CartView:
