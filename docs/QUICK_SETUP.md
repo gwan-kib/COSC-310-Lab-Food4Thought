@@ -70,6 +70,7 @@ http://127.0.0.1:8000
 | --- | --- |
 | Customer frontend | `http://127.0.0.1:8000/app/` |
 | Customer account (registration, sign-in, profile, deactivation) | `http://127.0.0.1:8000/app/account.html` |
+| Customer cart and checkout | `http://127.0.0.1:8000/app/cart.html` |
 | Staff sign-in | `http://127.0.0.1:8000/app/staff-sign-in.html` |
 | Create restaurant frontend | `http://127.0.0.1:8000/app/create-restaurant.html` |
 | Edit restaurant frontend | Select a restaurant at `http://127.0.0.1:8000/app/` and follow **Edit restaurant** |
@@ -79,6 +80,8 @@ http://127.0.0.1:8000
 | API documentation/schema | `http://127.0.0.1:8000/docs` and `/openapi.json` |
 
 Before trying the form, registering, signing in, or any other mutation, stop the server and follow the [disposable data-copy commands](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments). They point every store (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, and the cart and order paths) at new temporary copies before running the same startup command. Reuse that path on restart to verify persistence, and clear the override afterward. Full mutation examples and data validation are in [first-time setup](FIRST_TIME_SETUP.md#8-verify-the-current-application) and the [API contract](M1_API_CONTRACT.md).
+
+In the browser, sign in as a customer at **My account** in the same tab, browse a menu, select **Add to cart**, then open **My cart**. Edit or clear the server-priced cart and use **Place order** to display its saved receipt. If checkout is uncertain, check order status before explicitly replaying the original cart ID/revision. Use disposable data paths for every manual write.
 
 To check cart removal in `/docs`, authorize an active customer token, PUT
 `/customers/me/cart`, POST an item, then DELETE `/customers/me/cart/items/{item_id}`

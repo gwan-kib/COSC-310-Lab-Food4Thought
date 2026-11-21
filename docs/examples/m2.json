@@ -1,5 +1,5 @@
 {
-  "contract_status": "Proposed under issue #77; no M2 routes implemented or teammate adoption recorded",
+  "contract_status": "Illustrative M2 request/response shapes; HTTP routes are implemented, while team adoption evidence remains separately tracked. Password/token values below are dummy examples only",
   "registration_request": {
     "name": "Example Customer",
     "email": "customer@example.invalid",
