@@ -838,6 +838,66 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
 - Student review status: Pending confirmation by responsible students.
 
+### Entry 65: Menu availability and legacy compatibility (#94)
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu schemas, restaurant service and routes, availability and regression tests, API/data contract and setup guides on the #94 branch.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Implement the catalog portion of #94. Thomas chose to materialize omitted legacy flags on a successful full-store save.
+- Influence: Codex wrote the implementation, tests and documentation. Explicit flag changes use an injected restaurant permission check pending the shared staff identity implementation.
+- Validation: In the isolated worktree, 407 baseline tests passed. The initial new test run had 6 expected failures and 7 passes. After implementation all 13 focused tests passed. Compilation passed and the full browser-required suite passed 420 tests with committed data intact. Real staff login, cart and checkout integration and cross-workflow locking are pending.
+- PR or commit: Initial catalog implementation at `0f55371`, [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Implementation review and peer feedback pending.
+
+### Entry 66: Integrate menu availability with authentication, cart and checkout
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu authentication, restaurant service, catalog adapter, API and integration tests, regression fixtures, setup guides, API contract and M2 evidence.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Integrate #94 with the shared staff, cart and checkout implementation from main.
+- Influence: Codex resolved the documentation conflicts, connected bearer identity and staff ownership to menu writes, applied the shared workflow lock, and wrote the integration tests and documentation.
+- Validation: After merging main, 9 of 18 focused tests failed before the integration. The final focused run passed 19, including a concurrent disable and checkout. The complete browser-required suite passed 636 tests. Compilation and committed-data checks passed.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible student walkthrough and human review pending.
+
+### Entry 67: Restaurant management authorization review fixes
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner. Gwantana Kiboigo supplied the [requested changes](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109#pullrequestreview-6002389649).
+- Artifact: Restaurant route and service authorization, staff role dependencies, regression and browser tests, setup and API documentation.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Address the unprotected restaurant create/edit operations and make the service’s staff store injectable.
+- Influence: Codex wrote the fixes and tests. The reviewer identified the policy gaps and dependency change.
+- Validation: Before implementation the new policy tests produced 17 failures and 4 passes. The authorization and availability tests subsequently passed together (40 tests). The browser-required full suite passed 657 tests using isolated data.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible-student validation and teammate re-review of the fixes pending.
+
+### Entry 68: Shared JSON-array store helper (architectural improvement)
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #96.
+- Artifact: `app/core/json_file.py`, `app/repositories/cart.py`, the reader in `app/repositories/order.py`, `tests/test_json_file.py`, two monkeypatch targets in `tests/test_cart_repository.py` and `tests/test_cart_service.py`, and a convention sentence in `docs/DATA_MODEL.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Remove a design weakness exposed by Sreeram's M2 work and its reviews: each repository had its own copy of JSON reading and atomic saving, and defects found by Thomas Chen in PR #113 (a temporary file left after a serialization failure, and integers past Python's 4300-digit text limit) had to be fixed separately in the cart and order repositories while the shared helper used by customers, sessions and staff still had the integer defect.
+- Influence: Claude proposed consolidating on one helper rather than a generic repository base class (larger change across owners) or leaving per-repository copies (the cause of the repeated defects). It made `app/core/json_file.py` read with exact integers and write with Pydantic's serializer, cleaning up on any failure; moved the cart repository's read and save onto it; and made the order reader use the shared `loads_exact` instead of its own copy. The order write path and the restaurant repository were left to their owner.
+- Validation: Before the change, the existing cart, customer, order and checkout-integration tests passed (120, characterization) and the new helper test for a 5,001-digit integer failed. After the change, `tests/test_json_file.py` and the same suites passed (128). `pyflakes` reported no unused imports. The diff removes 57 lines and adds 32 in `app/`.
+- PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116), branch `feature/96-shared-json-store`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #116. Claude wrote failing regressions, then made `loads_exact` decode bytes strictly as UTF-8 (so a UTF-16 or UTF-32 store is the store's error instead of being silently accepted and later rewritten), and made `write_json_array` raise the store's error even when deleting its temporary file also fails, noting in the message that the temporary file may remain. The branch was first synced with `main` after #115 merged; the final merge later incorporated #109 and renumbered this disclosure to avoid overwriting the existing entry 66.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 69: Integrate shared JSON helper with merged menu availability
+- Student(s): Gwantana Kiboigo (`gwan-kib`), integration requester; Sreeram Nara remains the owner of the #96 implementation.
+- Artifact: Merge resolution of [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116) into the current `main` after [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109); `docs/DATA_MODEL.md` and `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Preserve PR #109's restaurant authorization/menu availability and provenance entries while integrating the reviewed JSON helper improvement.
+- Influence: ChatGPT reconciled the two documentation files, retained main's entries 65–67, numbered Sreeram's original #96 disclosure 68, and constructed the integration merge commit with the unchanged feature code and current main as parents.
+- Validation: Inspected the compared file lists and overlapping documentation changes; CI and final merge outcome are checked separately, and no student code-understanding claim is made.
+- PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116).
+- Student review status: Pending responsible-student confirmation.
+
 ### Issue #88: Remove an item from the active customer's cart
 
 - Student(s): Thomas Chen (`Tc2006415`), live assignee of #88 and requester.
@@ -847,7 +907,8 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - Purpose: Check #88's dependencies and implement removal after Thomas authorized the recommended interview choices if blockers were cleared.
 - Influence: Codex checked live issue/dependency/PR state, extended the shared cart service and protected router, wrote the tests before implementation, and updated documentation. Removal preserves IDs and other quantities, recalculates exact current totals before atomic save, increments revision once, releases the last line's restaurant binding, and respects active-customer and purchased-revision recovery checks. Existing repositories, pricing, auth and storage formats are reused.
 - Validation: On Python 3.12.10 in the isolated worktree, the shared environment initially failed test collection because `pwdlib` was absent. A worktree-local `.venv` was created and installed from `requirements.txt` and `requirements-dev.txt`; `python -m playwright install chromium` completed. The required-browser baseline passed 617 tests. Before implementation, `.venv\Scripts\python.exe -m pytest -q tests/test_cart_remove.py --tb=short` failed all 30 new cases for the absent DELETE route/service. After implementation, `.venv\Scripts\python.exe -m pytest -q tests/test_cart_remove.py tests/test_cart_api.py tests/test_cart_service.py tests/test_cart_repository.py tests/test_cart_checkout_integration.py` passed 106 tests. `.venv\Scripts\python.exe -m compileall -q app` passed; `$env:REQUIRE_BROWSER_TESTS='1'; .venv\Scripts\python.exe -m pytest -q` passed 647 tests with no skips. `git diff --check`, `git status --porcelain --untracked-files=all --ignored -- data/`, and `.venv\Scripts\python.exe -m pip check` passed with no data changes or broken requirements.
-- Limits: Live Canvas and full board fields were inaccessible; the issue displayed Thomas/Todo and the native blocker #77 was closed. #78 and PRs #105/#106/#113/#114/#115 were also verified closed/merged. Unavailable-line tests use the existing catalog seam until #94's real persistence model is integrated; all other removal, auth, save/reload and checkout-recovery paths use real isolated components. No manual browser workflow or hosted CI run is claimed. Agent review does not replace a teammate's review or establish Thomas's understanding.
-- PR or commit: Local uncommitted branch `feature/88-remove-cart-item` based on `95c7c8e`; no push, PR, issue closure or board update performed.
+- Limits: Live Canvas and full board fields were inaccessible; the issue displayed Thomas/Todo and the native blocker #77 was closed. #78 and PRs #105/#106/#113/#114/#115 were also verified closed/merged. Initial unavailable-line tests used the catalog seam. Publication integration incorporates merged #94 and exercises manager-authorized availability updates and removal against real isolated stores, including the last unavailable line. No manual browser workflow or hosted CI run is claimed. Agent review does not replace a teammate's review or establish Thomas's understanding.
+- PR or commit: Implementation commit `55f8e94` on `feature/88-remove-cart-item`, initially based on `95c7c8e`; publication integrates `67417bb` from main (PRs #109/#116). PR/CI status is recorded on GitHub; no merge, issue closure or board update is claimed.
+- Publication integration validation: After merging main, the focused removal run reported 1 failure and 29 passes because the failure-injection target had moved with #96. The test now injects the failure at `app.core.json_file.os.replace`. Availability tests now call the real staff-authorized PATCH route and include last-unavailable-line removal. The combined removal/cart/menu-availability/JSON-helper command passed 138 tests; `.venv\Scripts\python.exe -m compileall -q app` passed and `$env:REQUIRE_BROWSER_TESTS='1'; .venv\Scripts\python.exe -m pytest -q` passed 700 tests without skips. Diff and committed-data checks were clean. A read-only integration review found no defects and independently passed all 31 removal tests. No production removal behavior needed changing during integration.
 - Agent review: A separate read-only Codex reviewer inspected all changed/new files and reported no actionable findings. Its independent `python -m pytest -q tests/test_cart_remove.py` run passed all 30 tests; diff check and data guard were clean. This is automated review, not human peer approval.
 - Student review status: Pending Thomas's explanation and validation, human teammate feedback, and integration.

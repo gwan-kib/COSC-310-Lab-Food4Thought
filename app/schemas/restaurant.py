@@ -11,6 +11,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    StrictBool,
     StringConstraints,
     model_validator,
 )
@@ -82,6 +83,7 @@ class MenuItemCreate(BaseModel):
     name: WriteText
     description: WriteText
     price: WritePrice
+    available: StrictBool = True
 
 
 class MenuItemUpdate(BaseModel):
@@ -92,6 +94,7 @@ class MenuItemUpdate(BaseModel):
     # Match RestaurantUpdate: omission is internal None, never a documented default.
     name: WriteText | SkipJsonSchema[None] = Field(default_factory=lambda: None)
     description: WriteText | SkipJsonSchema[None] = Field(default_factory=lambda: None)
+    available: StrictBool | SkipJsonSchema[None] = Field(default_factory=lambda: None)
     price: WritePrice | SkipJsonSchema[None] = Field(default_factory=lambda: None)
 
     @model_validator(mode="after")

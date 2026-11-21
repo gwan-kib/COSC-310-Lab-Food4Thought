@@ -1,16 +1,14 @@
 """Verify #88 removal through Food4Thought's auth, cart, catalog and JSON stores.
-Exercise recovery, persistence and denied requests using isolated real stores;
-availability uses the existing catalog seam until #94's model is integrated.
+Exercise recovery, availability, persistence and denied requests using isolated
+real stores, including the restaurant manager's availability API.
 """
 
 import json
-from dataclasses import replace
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.api.auth import get_now
-from app.api.routes.carts import get_cart_service
 from app.main import app
 from app.repositories.cart import CartDataError, CartRepository
 from app.repositories.customer import CustomerRepository
@@ -53,9 +51,9 @@ def _stores(paths):
     return {name: path.read_bytes() for name, path in paths.items()}
 
 
-def _service(catalog=None):
+def _service():
     return CartService(CartRepository(), CustomerRepository(),
-                       catalog or RestaurantCatalog(), OrderRepository())
+                       RestaurantCatalog(), OrderRepository())
 
 
 def test_remove_one_then_last_line_reload_and_rebind_restaurant(client, ada, filled, m2_store_paths):
@@ -209,24 +207,29 @@ def test_service_rejects_unknown_customer(filled, m2_store_paths):
     assert _stores(m2_store_paths) == before
 
 
-@pytest.mark.parametrize("remove_id", ["item-001", "item-002"])
-def test_unavailable_line_can_be_removed_or_remain_in_totals(client, ada, filled, remove_id):
-    assert client.post(f"{CART}/items", headers=ada,
-                       json={**ADD, "item_id": "item-002", "quantity": 1}).status_code == 200
+@pytest.mark.parametrize(("remove_id", "last_line", "expected_total"), [
+    ("item-001", False, "14.00"), ("item-002", False, "25.00"), ("item-001", True, "0.00"),
+])
+def test_unavailable_line_can_be_removed_or_remain_in_totals(
+    client, ada, filled, auth_accounts, remove_id, last_line, expected_total
+):
+    if not last_line:
+        assert client.post(f"{CART}/items", headers=ada,
+                           json={**ADD, "item_id": "item-002", "quantity": 1}).status_code == 200
+    for item_id in ("item-001", "item-002"):
+        disabled = client.patch(f"/restaurants/restaurant-001/menu/items/{item_id}",
+                                headers=auth_accounts.headers("restaurant_user"), json={"available": False})
+        assert disabled.status_code == 200 and disabled.json()["available"] is False
 
-    class UnavailableCatalog(RestaurantCatalog):
-        def get_menu(self, restaurant_id):
-            menu = super().get_menu(restaurant_id)
-            return {key: replace(item, available=False) for key, item in menu.items()}
+    response = client.delete(f"{CART}/items/{remove_id}", headers=ada)
 
-    app.dependency_overrides[get_cart_service] = lambda: _service(UnavailableCatalog())
-    try:
-        response = client.delete(f"{CART}/items/{remove_id}", headers=ada)
-    finally:
-        app.dependency_overrides.pop(get_cart_service, None)
     assert response.status_code == 200
-    assert response.json()["items"][0]["available"] is False
-    assert response.json()["total"] == ("14.00" if remove_id == "item-001" else "25.00")
+    if last_line:
+        assert response.json()["items"] == [] and response.json()["restaurant_id"] is None
+    else:
+        assert response.json()["items"][0]["available"] is False
+    assert response.json()["total"] == expected_total
+    assert _service().get_cart("customer-001").model_dump() == response.json()
 
 
 @pytest.mark.parametrize("store", ["carts", "orders", "restaurants"])
@@ -268,7 +271,7 @@ def test_failed_atomic_save_keeps_previous_cart_and_no_temporary_file(
         raise OSError("test-only private disk failure")
 
     with monkeypatch.context() as failure:
-        failure.setattr("app.repositories.cart.os.replace", failed_replace)
+        failure.setattr("app.core.json_file.os.replace", failed_replace)
         response = client.delete(ITEM, headers=ada)
 
     assert (response.status_code, response.json()) == (500, {"detail": "Cart data is unavailable"})

@@ -84,6 +84,8 @@ without a body. Expect 200 with current totals; the last removal empties the car
 releases its restaurant while retaining IDs. GET after restarting with the same
 disposable paths verifies persistence. [Removal details](M2_API_CONTRACT.md#implemented-item-removal-88).
 
+Menu reads include `available`. For manual writes, sign in with a provisioned staff account through `POST /auth/login` and use **Authorize** in `/docs`. Restaurant creation requires an administrator. Editing a restaurant or writing its menu requires a restaurant user assigned to it. Staff sign-in on the forms is tracked in #108.
+
 Stop the server with `Ctrl+C`.
 
 For order repository experiments, set `ORDERS_DATA_PATH` to a disposable copy

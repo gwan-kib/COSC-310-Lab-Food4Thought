@@ -41,3 +41,17 @@ Interface: `CartService.remove_item(customer_id: str, item_id: str) -> CartView`
 - No commit, push, PR, board change or human review is implied by local implementation.
 - Baseline: 617 passed, required browser mode. RED: all 30 removal tests failed for missing implementation. GREEN: 106 focused cart tests passed. Full verification: compileall passed; 647 tests passed with required Chromium and no skips; pip check, diff whitespace check and CI's committed-data guard passed. Commands are recorded in the #88 provenance entry.
 - Final agent review: no actionable findings; independently reran all 30 removal tests, diff check and data guard. Scope rulings: frontend/quantity/clear are separate tasks; persisted availability awaits #94; trusted customer-ID service boundaries and single-process locking remain the existing implementation conventions. Human review, hosted CI and student understanding cannot be certified by agent checks. Keep the branch/worktree with uncommitted changes for review; no publication or integration performed.
+
+## Publication follow-up
+
+Thomas subsequently authorized commit, push, PR creation and CI monitoring. The
+implementation was committed as `55f8e94`. Main advanced to `67417bb`, incorporating
+#94 availability and #96's shared JSON helper, so publication integrates that revision.
+The provenance conflict retained both contributors' records. One removal test initially
+failed because its atomic-replacement injection targeted the old repository module;
+it now targets the shared helper. Unavailable-line tests now use the real manager API,
+including last-line removal, replacing the earlier catalog double. No removal production
+logic changed. The focused integration suite passed 138 tests and the full required-browser
+suite passed 700; compileall and data/diff checks passed. A second agent review found no
+integration defects and independently passed all 31 removal cases. Publication status
+and hosted CI evidence belong to the PR; human review and merge remain separate steps.
