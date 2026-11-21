@@ -20,7 +20,16 @@ SAFE_SENSITIVE_ERROR_TYPES = frozenset(
     {"missing", "string_type", "string_too_short", "string_too_long", "extra_forbidden"}
 )
 SENSITIVE_ERROR_MESSAGE = "Invalid password"
+# Account and sign-in endpoints, whose bodies may carry credentials (or a password a
+# client wrongly sends, such as to PATCH /customers/me). A body sent with the wrong
+# content type reaches the handler as raw text, which field-based redaction cannot
+# see inside, so raw input is dropped for every path under these prefixes.
+CREDENTIAL_PATH_PREFIXES = ("/customers", "/auth")
 STRING_LENGTH_ERROR_TYPES = frozenset({"string_too_short", "string_too_long"})
+
+
+def _is_credential_path(path: str) -> bool:
+    return any(path == prefix or path.startswith(prefix + "/") for prefix in CREDENTIAL_PATH_PREFIXES)
 
 
 def _is_sensitive(name: object) -> bool:
@@ -109,15 +118,19 @@ def _redact_error(error: dict[str, Any], body_secrets: set[str]) -> dict[str, An
 
 
 async def request_validation_error(
-    _request: Request, exc: RequestValidationError
+    request: Request, exc: RequestValidationError
 ) -> Response:
     """Return validation details even when rejected input cannot be rendered as JSON."""
     # An individual error's input may contain only the field being validated.
     body_secrets = _submitted_secrets(exc.body)
     # Rejected input may contain overflowing numbers, lone surrogates, or raw
     # non-UTF-8 bytes. Error rendering must not turn those failures into a 500.
+    redacted = [_redact_error(error, body_secrets) for error in exc.errors()]
+    if _is_credential_path(request.url.path) and not isinstance(exc.body, dict):
+        redacted = [{key: value for key, value in error.items() if key != "input"}
+                    for error in redacted]
     errors = jsonable_encoder(
-        [_redact_error(error, body_secrets) for error in exc.errors()],
+        redacted,
         custom_encoder={
             float: lambda value: value if math.isfinite(value) else str(value),
             bytes: lambda value: value.decode("utf-8", errors="backslashreplace"),
