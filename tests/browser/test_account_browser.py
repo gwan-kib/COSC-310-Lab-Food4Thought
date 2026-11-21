@@ -266,6 +266,9 @@ def test_api_display_escapes_text_and_mobile_layout_supports_keyboard(page, live
     expect(page.locator("#register-status")).to_contain_text("Account created")
     sign_in(page, "casey@example.invalid", "casey-password-123")
     expect(page.locator("#saved-name")).to_have_text(payload)
+    page.get_by_role("button", name="Check saved profile").focus()
+    page.keyboard.press("Enter")
+    expect(page.locator("#refresh-status")).to_contain_text("Saved profile checked")
     assert page.locator("#signed-in img").count() == 0
     assert page.evaluate("window.injected") is None
     assert page.evaluate("document.documentElement.scrollWidth") <= 390
