@@ -55,3 +55,12 @@ logic changed. The focused integration suite passed 138 tests and the full requi
 suite passed 700; compileall and data/diff checks passed. A second agent review found no
 integration defects and independently passed all 31 removal cases. Publication status
 and hosted CI evidence belong to the PR; human review and merge remain separate steps.
+
+[PR #123](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/123) was opened.
+Main advanced again to `aaca156` (staff provisioning #117), so both provenance records
+were retained in a second merge. The new pinned filelock dependency was installed.
+One local Windows run stalled and was terminated; a diagnostic rerun with
+`REQUIRE_BROWSER_TESTS=1` and `python -m pytest -vv -o faulthandler_timeout=30` passed
+715 tests in 34.35 seconds. The nearby 50-test group also passed independently.
+No application change was made for the unreproduced stall. Final compilation,
+dependency, whitespace and committed-data checks passed.

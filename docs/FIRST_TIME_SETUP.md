@@ -139,7 +139,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | `GET /app/edit-restaurant.html?id=restaurant-001` | Management frontend: edit an existing restaurant's name, cuisine, or description through GET and PATCH. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
 
-Browse restaurant and menu GETs directly. For writes, use disposable stores and sign in through `POST /auth/login` with a provisioned staff account. In Swagger UI (`/docs`), choose **Authorize** and enter the returned bearer token.
+Browse restaurant and menu GETs directly. For writes, use disposable stores and sign in through `POST /auth/login` with a provisioned staff account (create one with the [staff-account commands](#disposable-data-for-manual-experiments)). In Swagger UI (`/docs`), choose **Authorize** and enter the returned bearer token.
 
 An administrator can call `POST /restaurants` with `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. The 201 response contains its stable ID. Creating a restaurant does not assign a manager. For edits, sign in as a restaurant user assigned to the selected restaurant and switch tokens in Swagger. Anonymous writes return 401. A caller with the wrong role or an unassigned manager receives 403. A manager editing a missing restaurant with a valid body receives 404.
 
@@ -195,7 +195,7 @@ Customer accounts, sign-in sessions and provisioned staff accounts use `data/cus
 
 **HTTP experiments (restaurants, accounts, carts, orders)**
 
-Stop any existing server first. Registering, signing in, editing a cart and changing restaurants all write to `data/`, so point every store at a disposable copy. From the repository root, with the virtual environment active, these commands copy each store that exists into a new temporary directory and set its `*_DATA_PATH` variable (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, `CARTS_DATA_PATH`, `ORDERS_DATA_PATH`). They create a new copy each time; to verify persistence after restarting, keep the same terminal instead of repeating the copy step.
+Stop any existing server first. Registering, signing in, editing a cart and changing restaurants all write to `data/`, so point every store at a disposable copy. From the repository root, with the virtual environment active, these commands copy each store that exists into a new temporary directory and set its `*_DATA_PATH` variable (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, `CARTS_DATA_PATH`, `ORDERS_DATA_PATH`). They create a new copy each time; to verify persistence after restarting, keep the same terminal instead of repeating the copy step. The steps below then optionally create staff accounts, start the server, and finally clear the overrides; follow them in order.
 
 Windows PowerShell:
 
@@ -209,7 +209,6 @@ foreach ($store in 'restaurants', 'customers', 'sessions', 'staff', 'carts', 'or
     }
 }
 Write-Output $manualDataDir
-python -m uvicorn app.main:app --reload
 ```
 
 macOS/Linux:
@@ -223,12 +222,47 @@ for store in restaurants customers sessions staff carts orders; do
   fi
 done
 printf '%s\n' "$manual_data_dir"
+```
+
+**Optional: staff accounts.** There is no public sign-up for restaurant users or
+administrators; create them with the provisioning command, in the **same terminal** while the
+overrides above are set, so it writes to the copies and not to `data/staff.json`. It asks for
+the password twice with a hidden prompt and stores only its hash. Run these before starting the
+server; if the server is already running, stop it with `Ctrl+C` first (keep the terminal and its
+overrides), run them, then start the server again. The same commands work in PowerShell.
+
+Create a demo manager for `restaurant-001`:
+
+```sh
+python -m app.scripts.create_staff_account create --name "Cedar Bowl Manager" --email manager@cedarbowl.invalid --role restaurant_user --restaurant restaurant-001
+```
+
+Create an administrator (administrators manage no restaurants):
+
+```sh
+python -m app.scripts.create_staff_account create --name "Platform Admin" --email admin@food4thought.invalid --role administrator
+```
+
+Give an existing manager another restaurant:
+
+```sh
+python -m app.scripts.create_staff_account assign --email manager@cedarbowl.invalid --restaurant restaurant-002
+```
+
+Emails must be unused by any customer or staff account, and unknown restaurant IDs are rejected
+without writing anything. The command and a running server share a lock file beside the customer
+store (for example `.customers.json.lock` in the temporary directory), so they never accept the
+same email at once.
+
+**Start the server** in the same terminal:
+
+```sh
 python -m uvicorn app.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000/app/create-restaurant.html` or `/docs` and use the POST/PATCH examples above, or register with `POST /customers`, sign in with `POST /auth/login`, and click **Authorize** with the returned token. Confirm saved values with GET, stop with `Ctrl+C`, then run the same Uvicorn command in the same terminal to verify persistence. All experiments in that server use the copies.
+Open `http://127.0.0.1:8000/app/create-restaurant.html` or `/docs` and use the POST/PATCH examples above, or register with `POST /customers`, sign in with `POST /auth/login` (customers, or the staff accounts created above; the response's `role` is `customer`, `restaurant_user` or `administrator`), and click **Authorize** with the returned token. Confirm saved values with GET, stop with `Ctrl+C`, then run the same Uvicorn command in the same terminal to verify persistence. All experiments in that server use the copies.
 
-After stopping the experiment server, clear the overrides before returning to normal sample-data use:
+**Finish:** only after stopping the experiment server, clear the overrides before returning to normal sample-data use:
 
 ```powershell
 foreach ($store in 'restaurants', 'customers', 'sessions', 'staff', 'carts', 'orders') {
