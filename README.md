@@ -11,7 +11,7 @@ The M0 foundation and M1 feature PRs are merged; final verification, the Decisio
 - Python 3.12 (the version used by CI).
 - Git.
 
-Python dependencies are pinned in `requirements.txt`; browser-test dependencies are in `requirements-dev.txt`. Both frontends are served by FastAPI without Node.js or a build step. No database, API keys, or external services are required.
+Python dependencies are pinned in `requirements.txt`; browser-test dependencies are in `requirements-dev.txt`. The frontend pages are served by FastAPI without Node.js or a build step. No database, API keys, or external services are required.
 
 ## Setup
 
@@ -50,6 +50,7 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 | Page | URL |
 | --- | --- |
 | Customer: list, cuisine filter, details, menu | [Customer frontend](http://127.0.0.1:8000/app/) |
+| Customer: register, sign in, edit profile/address, deactivate | [Customer account](http://127.0.0.1:8000/app/account.html) |
 | Management: Create restaurant | [Create restaurant](http://127.0.0.1:8000/app/create-restaurant.html) |
 | Management: Edit restaurant | Select a restaurant in the [customer frontend](http://127.0.0.1:8000/app/) and follow **Edit restaurant** |
 | Interactive API documentation | [Swagger UI](http://127.0.0.1:8000/docs) |
@@ -57,7 +58,7 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 
 The root URL redirects to the customer page. Select a restaurant to view its details and menu; selection is retained in the URL. A menu-loading failure leaves successfully loaded details visible; selecting the restaurant again retries.
 
-Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. To edit an existing restaurant, select it on the customer page and follow **Edit restaurant**. The form loads the current name, cuisine, and description, sends only changed fields with `PATCH /restaurants/{restaurant_id}`, and links back to the updated details. Validation errors preserve input. If the response is lost, check the details page before retrying. Authentication is outside this M1 slice.
+Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. To edit an existing restaurant, select it on the customer page and follow **Edit restaurant**. The form loads the current name, cuisine, and description, sends only changed fields with `PATCH /restaurants/{restaurant_id}`, and links back to the updated details. Validation errors preserve input. If the response is lost, check the details page before retrying. Authentication remains outside the historical M1 slice; the M2 customer-account page below provides it.
 
 ## API endpoints
 
@@ -80,8 +81,16 @@ Follow **Create restaurant**, enter name, cuisine, and description, then submit.
 | `GET /customers/me/cart` | Cart items with backend-calculated subtotal and total |
 | `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
 | `GET /customers/me/orders` | Own saved orders in insertion order; `[]` if none; inactive customers retain read access |
+| `GET /customers/me/orders/{order_id}` | Read an owned saved order, including original items, prices and address; inactive owners retain access |
+
+For browser-based account management, open [Customer account](http://127.0.0.1:8000/app/account.html) or follow **My account** from restaurant browsing. Register with a name, email, delivery address and password, then sign in. You can view/update your own name and address, check the saved profile to verify an uncertain update, and deactivate after explicitly confirming the permanent inactive state. A profile refresh preserves fields you are editing and updates untouched fields from the server; saving sends only edited fields. Signing out or session expiration clears displayed personal information and the deactivation confirmation. Passwords are never stored in the browser's account profile; the bearer token is kept in tab-scoped `sessionStorage`. **Sign out of this tab** removes that local copy but does not revoke the server session, which expires after 24 hours. On an expired token, sign in again. Inactive customers can read their profiles but cannot edit or order. For manual browser experiments, use disposable copies of **all** six JSON stores (see [First-Time Setup](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments)).
 
 In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors. Restaurant users and administrators are created with `python -m app.scripts.create_staff_account` (see the [disposable-data steps](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments)).
+
+Order details return the same `404 Order not found` for missing and foreign IDs.
+The empty order seed contains no demo orders. Checkout-created orders can currently
+be produced through the service; the checkout HTTP endpoint remains pending (#91).
+See the [implemented detail contract](docs/M2_API_CONTRACT.md#implemented-order-details-93).
 
 Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRACT.md) maintains request/response models, cuisine matching, validation, decimal-string prices, partial updates, error precedence, and persistence decisions. `/docs` shows interactive forms and generated schemas.
 
@@ -99,7 +108,7 @@ From the repository root with the virtual environment active:
 python -m pytest
 ```
 
-Tests use temporary data copies and check that committed `data/` files remain unchanged. Browser tests exercise both pages in Chromium against a local test server. Without Playwright/Chromium they skip locally; CI installs both and requires them to run.
+Tests use temporary data copies and check that committed `data/` files remain unchanged. Browser tests exercise the frontend pages (including account API workflows) in Chromium against a local test server. Without Playwright/Chromium they skip locally; CI installs both and requires them to run.
 
 ```sh
 python -m pip install -r requirements-dev.txt
@@ -118,7 +127,7 @@ app/services/           Restaurant/menu rules and checkout orchestration
 app/repositories/       JSON loading, validation, and persistence
 app/schemas/            Pydantic request, response, and persistence models
 app/core/config.py      Configurable restaurant and order data paths
-frontend/               Customer, Create restaurant, and Edit restaurant pages and shared styles
+frontend/               Customer discovery, account, Create restaurant, and Edit restaurant pages and shared styles
 data/restaurants.json   Representative restaurant/menu data
 data/orders.json        Empty order store for the checkout service
 tests/                  Backend/API tests; tests/browser/ for customer and management pages

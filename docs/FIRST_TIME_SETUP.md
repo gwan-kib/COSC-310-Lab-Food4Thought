@@ -2,7 +2,7 @@
 
 Use this guide when setting up Food4Thought on a machine for the first time.
 
-This document describes the application as it exists now. The repository currently contains a FastAPI backend serving customer, create-restaurant, and edit-restaurant pages, JSON restaurant data, and a pytest test suite. It does not require a database, frontend build step, API keys, or other secrets.
+This document describes the application as it exists now. The repository currently contains a FastAPI backend serving customer discovery, account, create-restaurant, and edit-restaurant pages, JSON restaurant data, and a pytest test suite. It does not require a database, frontend build step, API keys, or other secrets.
 
 For later sessions on a machine that is already configured, use [Quick Setup](QUICK_SETUP.md).
 
@@ -135,13 +135,17 @@ With the server running, the currently implemented HTTP surfaces are:
 | `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` | Updates supplied item fields and returns HTTP 200 with the saved item; unknown parent/item returns 404 and invalid input returns 422. |
 | `GET /docs` | FastAPI's interactive OpenAPI documentation. |
 | `GET /app/` | Customer frontend: restaurant list, cuisine filter, and the selected restaurant's details and menu. `GET /` redirects here. |
+| `GET /app/account.html` | Customer frontend: register, sign in, inspect/update the own profile/address, and deactivate using the existing account API. |
 | `GET /app/create-restaurant.html` | Management frontend: create a restaurant through the API, with validation/error feedback and a link to the saved restaurant. |
 | `GET /app/edit-restaurant.html?id=restaurant-001` | Management frontend: edit an existing restaurant's name, cuisine, or description through GET and PATCH. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
+| `GET /customers/me/orders/{order_id}` | Bearer-authenticated owner reads the saved transaction, including original prices and address. Active and inactive owners are allowed. |
 
 Browse restaurant and menu GETs directly. For writes, use disposable stores and sign in through `POST /auth/login` with a provisioned staff account (create one with the [staff-account commands](#disposable-data-for-manual-experiments)). In Swagger UI (`/docs`), choose **Authorize** and enter the returned bearer token.
 
 An administrator can call `POST /restaurants` with `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. The 201 response contains its stable ID. Creating a restaurant does not assign a manager. For edits, sign in as a restaurant user assigned to the selected restaurant and switch tokens in Swagger. Anonymous writes return 401. A caller with the wrong role or an unassigned manager receives 403. A manager editing a missing restaurant with a valid body receives 404.
+
+To try accounts in the browser, first point **all six stores** at disposable copies using the commands below. Open `/app/account.html` (also linked as **My account** from restaurant browsing). Register, sign in, update the name or delivery address, and use **Check saved profile** to verify the server's current saved values. Refreshing keeps locally edited fields but updates untouched inputs to the newly saved server values; a profile save sends only fields you changed. Sign-out and expiry clear personal details and the confirmation checkbox. An interrupted registration should be checked by attempting sign-in before registering again; a lost profile update or deactivation response should be checked using **Check saved profile** before attempting another write. Deactivation requires a confirmation checkbox and leaves the account read-only. Tokens are kept in tab-scoped `sessionStorage` and sent only as bearer headers; signing out removes the browser copy, not the server session. A 401 prompts sign-in again. Browser-only controls do not replace backend 401/403 checks.
 
 The Create and Edit pages load in a browser. Their authenticated submission workflow depends on [staff sign-in #108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108). Use Swagger for manual write checks on this branch.
 
@@ -176,6 +180,15 @@ set `ORDERS_DATA_PATH` to the copy. A configured missing or invalid file is a
 storage error. The focused checkout tests select their own disposable files:
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`.
 Checkout is currently available at the service layer only.
+
+Order details are available through HTTP. In `/docs`, sign in with `POST /auth/login`,
+click **Authorize** and paste the returned token, then call
+`GET /customers/me/orders/{order_id}` with an owned persisted ID. Unknown and foreign
+IDs both return `404 Order not found`; staff receive 403 and absent/invalid tokens
+receive 401. No fixture order or customer is seeded into committed data. Use
+`python -m pytest -q tests/test_order_details.py` for the isolated, reproducible
+registration/login/cart/checkout-service/detail example. It verifies saved prices
+and address after live changes; it does not imply the checkout HTTP route exists.
 
 Customer accounts, sign-in sessions and provisioned staff accounts use `data/customers.json`
 (`CUSTOMERS_DATA_PATH`), `data/sessions.json` (`SESSIONS_DATA_PATH`) and `data/staff.json`
@@ -285,7 +298,7 @@ A first-time setup is complete when:
 - `python -m pytest` completes successfully.
 - `python -m uvicorn app.main:app --reload` starts the API.
 - `/health`, `/restaurants`, `/docs`, and `/openapi.json` respond successfully.
-- `/app/`, `/app/create-restaurant.html`, and an edit page for a known restaurant load.
+- `/app/`, `/app/account.html`, `/app/create-restaurant.html`, and an edit page for a known restaurant load.
 - Browser tests run successfully when their optional dependencies are installed and required-browser mode is selected.
 
 For normal future sessions, continue with [Quick Setup](QUICK_SETUP.md).

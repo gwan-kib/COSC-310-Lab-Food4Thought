@@ -69,6 +69,7 @@ http://127.0.0.1:8000
 | Check | URL |
 | --- | --- |
 | Customer frontend | `http://127.0.0.1:8000/app/` |
+| Customer account (registration, sign-in, profile, deactivation) | `http://127.0.0.1:8000/app/account.html` |
 | Create restaurant frontend | `http://127.0.0.1:8000/app/create-restaurant.html` |
 | Edit restaurant frontend | Select a restaurant at `http://127.0.0.1:8000/app/` and follow **Edit restaurant** |
 | Health | `http://127.0.0.1:8000/health` |
@@ -92,6 +93,14 @@ call `GET /customers/me/orders`: it returns your saved snapshots, or `[]` when
 you have no orders. Inactive customers retain read access. Run
 `python -m pytest -q tests/test_order_history_api.py` for isolated real-auth and
 purchase-to-history checks; no manual seed edits are required.
+
+`GET /customers/me/orders/{order_id}` is implemented. In `/docs`, sign in and
+use **Authorize** with the returned token, then supply an owned ID already saved
+in the disposable order store. The empty seed has no orders; an unknown ID returns
+404. Active and inactive owners can read snapshots. Run
+`python -m pytest -q tests/test_order_details.py` for fixture-based API checks and
+the real account/cart/checkout-service/detail integration; checkout HTTP remains
+separate work.
 
 To sign in as a restaurant user or administrator, create the account after setting the disposable data paths and **before** clearing them, in the same terminal with the server stopped: `python -m app.scripts.create_staff_account create --name "Cedar Bowl Manager" --email manager@cedarbowl.invalid --role restaurant_user --restaurant restaurant-001`, then start the server again. The [disposable-data steps](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) show the full order, administrators and assigning restaurants.
 

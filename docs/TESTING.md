@@ -69,8 +69,8 @@ Run `python -m pytest -q tests/test_order_repository.py tests/test_checkout_serv
 for #91. These tests use a temporary order file, reopen the repository for retry,
 and check current pricing, authorization timing and conditional reset failures.
 Customer, cart and menu inputs in that focused suite are doubles. Real-store
-purchase-to-history coverage is provided by the #92 API tests below; checkout
-HTTP and order detail remain separate work.
+purchase-to-history and purchase-to-detail coverage is provided by the #92 and
+#93 API tests below; checkout HTTP remains separate work.
 
 Run `python -m pytest -q tests/test_order_history_service.py` for the #92 service.
 Independent A1/B1/A2 JSON fixtures verify customer scoping, persisted insertion
@@ -95,6 +95,15 @@ the snapshot through history HTTP and a fresh application. Customer, cart,
 catalog, auth and persistence are real; only the clock is fixed. Later address
 and menu-price changes do not rewrite historical orders. Checkout's HTTP route
 is not part of this test or issue.
+
+Run `python -m pytest -q tests/test_order_details.py` for #93. Independent fixture
+orders cover owner/inactive access, missing/foreign 404 equivalence, identity/role
+denials before private storage, generic storage failures, current-account rechecks,
+fresh repository reload, exact large quantities, and OpenAPI. Its multisubsystem
+test registers/signs in, creates/fills a cart via HTTP, invokes the real checkout
+service with real stores, changes profile/menu values, and retrieves the original
+snapshot through the detail API. It is not an HTTP checkout test: that route remains
+#91 work, and history integration is #92. All participating files are isolated.
 
 ### Test-first cycle
 
