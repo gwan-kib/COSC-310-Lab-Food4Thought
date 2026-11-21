@@ -34,7 +34,7 @@ jobs:
         env:
           # Fail, rather than skip, if the browser tests cannot run.
           REQUIRE_BROWSER_TESTS: "1"
-        run: python -m pytest
+        run: timeout --signal=INT 120s python -m pytest -vv --tb=short
       - name: Confirm tests left application data unchanged
         if: ${{ !cancelled() }}
         run: |
