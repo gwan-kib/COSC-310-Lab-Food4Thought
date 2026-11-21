@@ -78,7 +78,20 @@ http://127.0.0.1:8000
 | Restaurant details/menu | `/restaurants/restaurant-001` and `/restaurants/restaurant-001/menu` |
 | API documentation/schema | `http://127.0.0.1:8000/docs` and `/openapi.json` |
 
-Before trying the form, registering, signing in, or any other POST/PATCH operation, stop the server and follow the [disposable data-copy commands](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments). They point every store (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, and the cart and order paths) at new temporary copies before running the same startup command. Reuse that path on restart to verify persistence, and clear the override afterward. Full mutation examples and data validation are in [first-time setup](FIRST_TIME_SETUP.md#8-verify-the-current-application) and the [API contract](M1_API_CONTRACT.md).
+Before trying the form, registering, signing in, or any other mutation, stop the server and follow the [disposable data-copy commands](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments). They point every store (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, and the cart and order paths) at new temporary copies before running the same startup command. Reuse that path on restart to verify persistence, and clear the override afterward. Full mutation examples and data validation are in [first-time setup](FIRST_TIME_SETUP.md#8-verify-the-current-application) and the [API contract](M1_API_CONTRACT.md).
+
+To check cart removal in `/docs`, authorize an active customer token, PUT
+`/customers/me/cart`, POST an item, then DELETE `/customers/me/cart/items/{item_id}`
+without a body. Expect 200 with current totals; the last removal empties the cart and
+releases its restaurant while retaining IDs. GET after restarting with the same
+disposable paths verifies persistence. [Removal details](M2_API_CONTRACT.md#implemented-item-removal-88).
+
+For cart clear, authorize as an active customer in `/docs`, create/add to the cart,
+then call `DELETE /customers/me/cart/items` without a body. Expect 200, the same ID,
+empty items, null restaurant and `"0.00"` totals. Repeating it keeps the revision
+without saving; GET after restart preserves the empty state. Missing carts return
+404 and purchased revisions awaiting checkout recovery return 409. See the
+[clear contract](M2_API_CONTRACT.md#implemented-cart-clear-89).
 
 Menu reads include `available`. For manual writes, sign in with a provisioned staff account through `POST /auth/login` and use **Authorize** in `/docs`. Restaurant creation requires an administrator. Editing a restaurant or writing its menu requires a restaurant user assigned to it. For the management forms, use **Staff sign-in** first. The browser keeps its bearer token in sessionStorage for that tab and sends it on create, edit, and menu-availability PATCH requests. A 401 means sign in again; a 403 means the backend rejected the requested operation. The browser never decides management permissions by itself.
 
