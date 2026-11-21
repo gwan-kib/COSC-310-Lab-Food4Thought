@@ -1,4 +1,4 @@
-"""Define Food4Thought's stored cart record, add-item request and priced cart view.
+"""Define Food4Thought's stored cart record, item mutation requests and priced cart view.
 Carts store only item IDs and quantities; the view adds current names, prices and
 totals that the cart service calculates from backend menu data.
 """
@@ -47,6 +47,12 @@ class AddCartItemRequest(CartModel):
 
     restaurant_id: Identifier
     item_id: Identifier
+    quantity: Quantity
+
+
+class UpdateCartQuantityRequest(CartModel):
+    """Set the absolute quantity of the line selected by the URL."""
+
     quantity: Quantity
 
 

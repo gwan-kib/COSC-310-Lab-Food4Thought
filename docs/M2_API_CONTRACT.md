@@ -150,9 +150,11 @@ missing IDs; role denials use 403.
   defaults to `true` for valid legacy items and new requests omitting it. Explicit
   null/nonboolean values are invalid; unavailable items remain stored and visible.
   This single flag controls orderability; no separate deactivation lifecycle.
-- Add and quantity increases/changes require the selected item to exist under
-  the bound parent and be available. Decreasing an unavailable line is also
-  rejected under this simple proposal; remove/clear are the recovery operations.
+- Add and quantity PATCH require the selected item to exist under the bound
+  restaurant and be available. PATCH returns 409 `Menu item is unavailable`
+  for an unavailable target, including a decrease or the same quantity. For an
+  available line, repeating its quantity returns the current priced view without
+  saving or advancing the revision. Remove/clear are the recovery operations.
   Viewing an existing unavailable item is allowed: show `available: false` and
   its current price. It still contributes to displayed totals; checkout rejects it.
   No menu-delete operation is introduced. Missing stored references are storage
@@ -221,6 +223,34 @@ persisted order. For example, if a fresh read finds cart `cart-001` still at
 revision 2, return `cart_reset_pending: true` so the client can retry that
 revision. If the read confirms the purchased revision is gone, return
 `cart_reset_pending: false`. If the cart cannot be read, return `true`.
+
+## Implemented order details (#93)
+
+`GET /customers/me/orders/{order_id}` returns the existing `Order` snapshot with
+200. The opaque ID may be a seed ID such as `order-001`; it is not UUID-only. The
+route accepts no request body and documents bearer security and 200/401/403/404/500
+in generated OpenAPI. No new fields or persistence format are introduced.
+
+The route uses `CurrentCustomer` from `app/api/auth.py`. `OrderDetailsService`
+independently rejects noncustomer principals, then reloads the current customer
+and reads the order under `workflow_lock`. Active and inactive owners are allowed.
+The proposed `app/services/access.py` helper is not present in this implementation;
+the checkout-only `active_customer_for` cannot be used for read-only order access.
+
+Missing/invalid/expired identity or a vanished account returns 401
+`Authentication required` with `WWW-Authenticate: Bearer`. Staff get 403
+`Operation not permitted`. Missing and foreign orders both return 404
+`Order not found`. Authentication storage failures return 500
+`Authentication data is unavailable`; a customer-store failure during the service's
+recheck returns 500 `Customer data is unavailable`; an invalid/unreadable order
+store returns 500 `Order data is unavailable`, even for an unknown order ID.
+Denied identity/role checks precede private order reads, and GET writes nothing.
+
+Details use only the saved transaction: current catalog/cart contents are not
+looked up or used to reconstruct names, amounts, address or relationships.
+`tests/test_order_details.py` covers independent fixture orders and real
+registration/login/cart plus checkout-service-created orders. The complete HTTP
+checkout-to-detail workflow still awaits #91's checkout endpoint; history remains #92.
 
 ## Checkout ordering, failures, and retry contract
 

@@ -951,6 +951,64 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 
 - Merge-conflict follow-up: ChatGPT reconciled this branch against `main` at commit `572368d`, retained provenance entries 65–72 from other teammates, renumbered this account record to Entry 73, and kept the updated staff-account setup and shared pricing changes. The frontend also clears a superseded profile-refresh status during writes, covered by a regression test. Passing CI and peer approval must be checked after integration.
 
+### Issue 93: owner-scoped order details
+
+- Student(s): Thomas Chen (`Tc2006415`), issue #93 implementation owner and requester.
+- Artifact: `app/services/order_details.py`, `app/api/routes/order_details.py`, router/OpenAPI registration, `tests/test_order_details.py`, README, both setup guides, M2 API/data/testing/milestone documentation and the implementation plan.
+- Label: `AI-GENERATED`
+- AI tool: OpenAI Codex.
+- Purpose: Implement authenticated retrieval of an owned historical order without duplicating #91 storage or modifying #92's separate work.
+- Influence: Codex inspected refreshed main `95c7c8e`, the issue and adopted contracts; wrote tests before the route/service; implemented current-customer and ownership checks under the shared lock; and documented the result. Thomas authorized implementation and PR creation after the dependency review. Order reads allow inactive customers and use the existing immutable snapshot rather than live menu/address values.
+- Validation: Python 3.12.10, pinned dependencies. Baseline `python -m pytest -q` with `REQUIRE_BROWSER_TESTS=1` passed 617 tests with two pre-existing Playwright coroutine-cleanup warnings. Before implementation, `python -m pytest -q tests/test_order_details.py` failed all 28 initial cases because the route/service/OpenAPI operation were missing; after implementation all 28 passed. Three additional boundary checks (post-auth account changes and large quantities) passed against the implemented feature. Final focused run: 31 passed. `python -m compileall app` succeeded; required-browser `python -m pytest -q` passed 648 tests with no skips or warnings. Final diff/data checks and hosted CI are recorded in the PR.
+- Limits: Real checkout-created detail integration uses the production checkout service and real stores. The checkout HTTP endpoint is still absent; full HTTP checkout/detail integration remains pending #91/#101. No frontend was added. This evidence does not certify individual architectural credit or peer review.
+- PR or commit: Branch `feature/93-order-details`, referencing [#93](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/93); the PR links this entry.
+- Student review status: Implementation review, individual understanding and human peer review remain pending. Agent verification is not student approval.
+
+### PR #119 review follow-up: implementation plan status
+
+- Student(s): Thomas Chen (`Tc2006415`), requester and #93 owner; Gwantana Kiboigo (`gwan-kib`), repository owner who initiated the ChatGPT-authored/submitted review through his connected GitHub account. This attribution does not establish independent human review.
+- Artifact: `docs/superpowers/plans/2026-11-20-order-details.md` and this provenance entry.
+- Label: `AI-GENERATED`
+- AI tool: OpenAI Codex.
+- Purpose and influence: Codex reconciled Task 4 and the execution status with the published PR, marked implementation/documentation/local verification/publication complete, and separately listed hosted CI, independent human peer review, student understanding, external #91/#101 HTTP integration and merge as pending at that revision. Application code and tests were unchanged.
+- Validation: Compared the plan against commit `5b05a59`, live PR #119, its agent-submitted GitHub review and the then-current check status. Reviewed the documentation diff and checked whitespace and local Markdown links. No application tests rerun for this prose-only correction; the earlier 648-pass result belongs to the implementation revision, not a new test run.
+- PR or commit: [PR #119](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119), addressing [the inline review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119#discussion_r4650156124).
+- Student review status: The ChatGPT-authored/submitted review requested this documentation correction; it was not independent human peer review. Independent human review/approval and individual understanding remain pending.
+
+### PR #119 follow-up: correct review attribution and CI status
+
+- Student(s): Thomas Chen (`Tc2006415`), requester and #93 owner. The review clarification was submitted through repository owner Gwantana Kiboigo's (`gwan-kib`) connected GitHub account.
+- Artifact: `docs/superpowers/plans/2026-11-20-order-details.md`, this provenance record, and the PR descriptions.
+- Label: `AI-GENERATED`
+- AI tool: OpenAI Codex.
+- Purpose and influence: Codex corrected the earlier inference that an authenticated GitHub review established human peer review. The documents now attribute it to ChatGPT acting on the repository owner's behalf, keep independent human review/student understanding pending, and link the verified successful CI run for `8811eea`. The correction was initially published in separate PR #122. Thomas clarified that he wanted re-review on #119, so the correction was carried directly onto `feature/93-order-details` instead.
+- Validation: Read [the clarification](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119#pullrequestreview-6002430412) and both inline comments; checked GitHub's check-run API, which reports `validate` completed successfully for `8811eea`. Reviewed the complete documentation-only diff, whitespace and local links. Application tests are not rerun for prose-only changes; no new application-test result is claimed.
+- PR or commit: [PR #119](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119), including correction commit `0c072e7`; the separate [PR #122](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/122) is superseded by the direct update.
+- Student review status: Independent human peer review, approval and student understanding confirmation remain pending. Neither the agent-submitted GitHub reviews nor CI establish them.
+
+### PR #119 review follow-up: synchronize current main
+
+- Student(s): Thomas Chen (`Tc2006415`), requester and #93 owner. The repository owner's agent-submitted review identified the merge blocker; no independent human peer review is inferred.
+- Artifact: Merge of main `9474129` into `feature/93-order-details`; conflict resolutions in `docs/PROVENANCE.md`, `docs/QUICK_SETUP.md` and `docs/milestones/M2.md`; `tests/test_order_details.py`; implementation-plan status and PR evidence.
+- Label: `AI-GENERATED`
+- AI tool: OpenAI Codex.
+- Purpose and influence: Codex preserved main's JSON/pricing/authentication/staff/frontend changes and all existing provenance entries while retaining #93's route/service and documentation. The snapshot integration test now signs in through the real restaurant-user login before menu/restaurant mutations, respecting the newly protected writes instead of bypassing authorization. No order-detail application behavior was changed.
+- Validation: Installed current pinned requirements. Before the test adjustment, `python -m pytest -q tests/test_order_details.py` yielded 1 failed / 30 passed, with the unauthenticated menu update returning 401. After adjustment, the same command passed 31 tests. `python -m compileall app` succeeded; `REQUIRE_BROWSER_TESTS=1` with `python -m pytest -q` passed 735 tests with no skips or warnings. Whitespace and data-status checks passed; all main provenance text was verified retained, and 128 local documentation links/anchors passed. Hosted CI for the pushed merge is separate evidence in the PR.
+- PR or commit: [PR #119](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119), synchronization follow-up to review of `927a4d5`.
+- Student review status: Independent human peer review, approval and student understanding remain pending; this records automated verification and agent integration work.
+
+### Issue 87: Update a cart line's quantity
+
+- Student: Thomas Chen (`Tc2006415`), assigned to [#87](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/87).
+- Artifact: Quantity PATCH route, service, request schema, API tests, README, setup guides and M2 contract clarification on branch `feature/87-update-cart-quantity`.
+- Label: `AI-GENERATED`
+- AI tool: Codex (OpenAI).
+- Purpose and influence: Codex implemented the endpoint and tests using the shared cart, catalog, pricing, authorization and order-receipt interfaces. Codex chose to reject an unavailable target even when the submitted quantity is the same.
+- Validation: `python -m pytest -q tests/test_cart_api.py -k quantity_patch --tb=line` failed all 16 selected cases on the missing route, then passed all 16. `python -m compileall -q app` succeeded. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q --tb=line` passed all 701 tests.
+- Review follow-up: After [peer review on PR #125](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/125#pullrequestreview-6002737142), Codex merged `main` at `9474129`, retained the #99 and #87 provenance entries, and added two characterization cases in [commit d21e482](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/commit/d21e482). Both passed against the existing implementation. A missing target or sibling menu reference returns a generic 500 and preserves the stored cart bytes.
+- Integration evidence: `python -m pytest -q tests/test_cart_api.py tests/test_cart_service.py tests/test_cart_repository.py --tb=line` passed 93 tests. In an isolated local merge with [PR #123](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/123) at `c95a8ae`, `python -m pytest -q tests/test_cart_api.py tests/test_cart_remove.py --tb=line` passed 80 tests. Both HTTP operations shared one missing-line exception and HTTP mapping in that merge.
+- Student review status: Peer changes requested and addressed on the feature branch. Responsible-student walkthrough and renewed peer approval pending.
+
 ### Entry 74: Staff management sign-in and authorization browser coverage (#108)
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee; personal review and understanding still to be confirmed.

@@ -140,6 +140,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | `GET /app/create-restaurant.html` | Management frontend: create a restaurant through the API, with validation/error feedback and a link to the saved restaurant. |
 | `GET /app/edit-restaurant.html?id=restaurant-001` | Management frontend: edit an existing restaurant's name, cuisine, or description through GET and PATCH. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
+| `GET /customers/me/orders/{order_id}` | Bearer-authenticated owner reads the saved transaction, including original prices and address. Active and inactive owners are allowed. |
 
 Browse restaurant and menu GETs directly. For writes, use disposable stores and sign in through `POST /auth/login` with a provisioned staff account (create one with the [staff-account commands](#disposable-data-for-manual-experiments)). In Swagger UI (`/docs`), choose **Authorize** and enter the returned bearer token.
 
@@ -169,6 +170,8 @@ The repository supports `RESTAURANTS_DATA_PATH` for another existing UTF-8 JSON 
 
 Active carts are stored in `data/carts.json` (committed as an empty array `[]`); `CARTS_DATA_PATH` selects another file in the same way. Signed-in customers use it through `PUT`/`GET /customers/me/cart` and `POST /customers/me/cart/items`; copy it with the customer and session files for manual experiments.
 
+To try a quantity update on disposable data, sign in as an active customer, create a cart and add an item. In `/docs`, send `PATCH /customers/me/cart/items/{item_id}` with that item's ID and `{"quantity": 3}`. The returned cart shows three units at the current menu price. Repeat the request to verify the revision stays the same.
+
 If the variable is not set, the application uses `data/restaurants.json`. Stored menu-item prices must also be at most `999.00`. An over-limit stored price makes the file invalid, causing generic HTTP 500 data errors without changing the file; correct it before starting normal use. The committed sample data already satisfies this rule.
 
 ### Disposable data for manual experiments
@@ -180,6 +183,15 @@ set `ORDERS_DATA_PATH` to the copy. A configured missing or invalid file is a
 storage error. The focused checkout tests select their own disposable files:
 `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`.
 Checkout is currently available at the service layer only.
+
+Order details are available through HTTP. In `/docs`, sign in with `POST /auth/login`,
+click **Authorize** and paste the returned token, then call
+`GET /customers/me/orders/{order_id}` with an owned persisted ID. Unknown and foreign
+IDs both return `404 Order not found`; staff receive 403 and absent/invalid tokens
+receive 401. No fixture order or customer is seeded into committed data. Use
+`python -m pytest -q tests/test_order_details.py` for the isolated, reproducible
+registration/login/cart/checkout-service/detail example. It verifies saved prices
+and address after live changes; it does not imply the checkout HTTP route exists.
 
 Customer accounts, sign-in sessions and provisioned staff accounts use `data/customers.json`
 (`CUSTOMERS_DATA_PATH`), `data/sessions.json` (`SESSIONS_DATA_PATH`) and `data/staff.json`

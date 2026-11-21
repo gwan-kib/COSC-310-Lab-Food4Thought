@@ -83,10 +83,17 @@ Management forms now use a staff sign-in page. First provision a staff account u
 | `PUT /customers/me/cart` | Create the cart (201) or return the existing one (200) |
 | `GET /customers/me/cart` | Cart items with backend-calculated subtotal and total |
 | `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
+| `GET /customers/me/orders/{order_id}` | Read an owned saved order, including original items, prices and address; inactive owners retain access |
+| `PATCH /customers/me/cart/items/{item_id}` | Set an existing available line to the supplied positive integer `quantity` and return the repriced cart |
 
 For browser-based account management, open [Customer account](http://127.0.0.1:8000/app/account.html) or follow **My account** from restaurant browsing. Register with a name, email, delivery address and password, then sign in. You can view/update your own name and address, check the saved profile to verify an uncertain update, and deactivate after explicitly confirming the permanent inactive state. A profile refresh preserves fields you are editing and updates untouched fields from the server; saving sends only edited fields. Signing out or session expiration clears displayed personal information and the deactivation confirmation. Passwords are never stored in the browser's account profile; the bearer token is kept in tab-scoped `sessionStorage`. **Sign out of this tab** removes that local copy but does not revoke the server session, which expires after 24 hours. On an expired token, sign in again. Inactive customers can read their profiles but cannot edit or order. For manual browser experiments, use disposable copies of **all** six JSON stores (see [First-Time Setup](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments)).
 
 In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors. Restaurant users and administrators are created with `python -m app.scripts.create_staff_account` (see the [disposable-data steps](docs/FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments)).
+
+Order details return the same `404 Order not found` for missing and foreign IDs.
+The empty order seed contains no demo orders. Checkout-created orders can currently
+be produced through the service; the checkout HTTP endpoint remains pending (#91).
+See the [implemented detail contract](docs/M2_API_CONTRACT.md#implemented-order-details-93).
 
 Use IDs returned by the API. The [adopted API/data contract](docs/M1_API_CONTRACT.md) maintains request/response models, cuisine matching, validation, decimal-string prices, partial updates, error precedence, and persistence decisions. `/docs` shows interactive forms and generated schemas.
 
