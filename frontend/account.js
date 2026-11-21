@@ -95,6 +95,7 @@ function wireFieldCorrection(form, errorElement) {
 
 async function submitOnce(form, elements, progress, operation) {
   if (pendingForms.has(form) || !form.reportValidity()) return;
+  const payload = formValues(form);
   pendingForms.add(form);
   const fieldset = form.querySelector("fieldset");
   fieldset.disabled = true;
@@ -102,7 +103,7 @@ async function submitOnce(form, elements, progress, operation) {
   elements.status.textContent = progress;
   resetErrors(form, elements.errors);
   try {
-    await operation();
+    await operation(payload);
   } finally {
     pendingForms.delete(form);
     fieldset.disabled = false;
@@ -223,10 +224,10 @@ for (const [form, elements] of [
 
 signInForm.addEventListener("submit", async event => {
   event.preventDefault();
-  await submitOnce(signInForm, signin, "Signing in…", async () => {
+  await submitOnce(signInForm, signin, "Signing in…", async values => {
     try {
       const result = await requestJson("/auth/login", {
-        method: "POST", payload: formValues(signInForm),
+        method: "POST", payload: values,
       });
       signin.status.textContent = "";
       if (!result.ok) {
@@ -259,10 +260,10 @@ signInForm.addEventListener("submit", async event => {
 
 registerForm.addEventListener("submit", async event => {
   event.preventDefault();
-  await submitOnce(registerForm, register, "Registering…", async () => {
+  await submitOnce(registerForm, register, "Registering…", async values => {
     try {
       const result = await requestJson("/customers", {
-        method: "POST", payload: formValues(registerForm),
+        method: "POST", payload: values,
       });
       register.status.textContent = "";
       if (!result.ok) {
@@ -287,7 +288,7 @@ registerForm.addEventListener("submit", async event => {
 
 profileForm.addEventListener("submit", async event => {
   event.preventDefault();
-  if (accountWriting || !customer || customer.status !== "active" || !token) return;
+  if (accountWriting || !customer || customer.status !== "active" || !token || !profileForm.reportValidity()) return;
   const changes = {};
   for (const [name, value] of Object.entries(formValues(profileForm))) {
     if (value.trim() !== customer[name]) changes[name] = value;
@@ -330,7 +331,7 @@ profileForm.addEventListener("submit", async event => {
 
 deactivateForm.addEventListener("submit", async event => {
   event.preventDefault();
-  if (accountWriting || !customer || customer.status !== "active" || !token) return;
+  if (accountWriting || !customer || customer.status !== "active" || !token || !deactivateForm.reportValidity()) return;
   lockAccountWrites(true);
   try {
     await submitOnce(deactivateForm, deactivate, "Deactivating account…", async () => {
