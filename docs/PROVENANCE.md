@@ -1151,3 +1151,15 @@ its pending-auth and local-only status.
 - PR or commit: [PR #131](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/131), branch `feature/83-84-protection-evidence`.
 - Review follow-up: Gwantana Kiboigo (`gwan-kib`) noted that the inactive-write list left out `PATCH /customers/me`. Claude added profile edits to the old-token scenario (403 `Customer is inactive`, no writes), checked that repeating deactivation is an allowed no-op, and linked this PR.
 - Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 84: Cross-subsystem error-precedence characterization (#102)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #102 assignee. Student verification and understanding are pending.
+- Artifact: `tests/test_cross_subsystem_error_precedence.py`, `docs/milestones/M2.md`, and this record.
+- Label: `AI-GENERATED`.
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Cover error-precedence and persistence-invariance gaps across authenticated customer, cart, checkout and restaurant-management HTTP operations after PR #110 was merged.
+- Influence: ChatGPT authored a parameterized HTTP characterization suite using the existing authentication fixtures and per-test JSON stores. It verifies that unauthorized and wrong-role calls receive 401/403 ahead of model-validation errors, that authorized calls with the same structurally invalid body receive 422, and that inactive customer writes are denied. Each rejection asserts unchanged bytes and absent-file state for every test store. No application code was changed.
+- Validation: Local Python execution is unavailable in this connector-only session. The tests have **not been run** at the time of this entry. GitHub Actions required-browser pytest, compilation, and the committed-data guard must be inspected on the PR head; failing checks and environment limitations must be recorded before claiming acceptance. This is characterization of intended behavior, not a failing-before production defect. Original defect evidence remains in entries 55–57 for PR #110.
+- PR: [#135](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/135), branch `test/102-cross-subsystem-error-precedence`.
+- Student review status: Responsible student's code walkthrough and teammate review have not yet been confirmed. Neither CI nor AI checks substitute for these approvals.
