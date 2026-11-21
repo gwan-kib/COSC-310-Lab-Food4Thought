@@ -46,6 +46,7 @@ def get_staff_data_path() -> Path:
         return Path(override)
     return Path(__file__).resolve().parents[2] / "data" / "staff.json"
 
+
 def get_carts_data_path() -> Path:
     """Resolve cart storage when constructing the repository."""
     override = os.getenv("CARTS_DATA_PATH")
