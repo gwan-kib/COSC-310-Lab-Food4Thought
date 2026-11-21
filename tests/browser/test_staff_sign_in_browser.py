@@ -112,7 +112,7 @@ def test_menu_availability_sends_bearer_and_enforces_ownership(page, live_server
     assert RestaurantRepository(isolated_restaurants_path).get_record("restaurant-001").menu_items[0].available is False
 
     page.goto(f"{live_server}/app/#/restaurants/restaurant-002")
-    expect(page.locator("#menu-list li")).to_have_count(1)
+    expect(page.locator("#menu-list li")).to_have_count(2)
     before = isolated_restaurants_path.read_bytes()
     with page.expect_response(lambda r: r.request.method == "PATCH" and "/menu/items/" in r.url) as denied:
         page.get_by_role("button", name="Mark unavailable").first.click()
