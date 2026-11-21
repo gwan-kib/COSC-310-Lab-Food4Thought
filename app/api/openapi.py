@@ -1,5 +1,5 @@
 # Align Food4Thought's generated OpenAPI responses with the restaurant, menu and
-# order-detail contracts. Remove automatic 422 documentation only from explicitly listed
+# M2 cart/order contracts. Remove automatic 422 documentation only from explicitly listed
 # operations with opaque string IDs, leaving runtime validation and other
 # operations' schemas intact.
 
@@ -17,6 +17,7 @@ CONTRACT_NO_VALIDATION_ERROR_OPERATIONS: frozenset[tuple[str, str]] = frozenset(
         ("get", "/restaurants/{restaurant_id}"),
         ("get", "/restaurants/{restaurant_id}/menu"),
         ("get", "/customers/me/orders/{order_id}"),
+        ("delete", "/customers/me/cart/items/{item_id}"),
     }
 )
 
