@@ -150,9 +150,11 @@ missing IDs; role denials use 403.
   defaults to `true` for valid legacy items and new requests omitting it. Explicit
   null/nonboolean values are invalid; unavailable items remain stored and visible.
   This single flag controls orderability; no separate deactivation lifecycle.
-- Add and quantity increases/changes require the selected item to exist under
-  the bound parent and be available. Decreasing an unavailable line is also
-  rejected under this simple proposal; remove/clear are the recovery operations.
+- Add and quantity PATCH require the selected item to exist under the bound
+  restaurant and be available. PATCH returns 409 `Menu item is unavailable`
+  for an unavailable target, including a decrease or the same quantity. For an
+  available line, repeating its quantity returns the current priced view without
+  saving or advancing the revision. Remove/clear are the recovery operations.
   Viewing an existing unavailable item is allowed: show `available: false` and
   its current price. It still contributes to displayed totals; checkout rejects it.
   No menu-delete operation is introduced. Missing stored references are storage

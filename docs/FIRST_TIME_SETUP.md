@@ -136,6 +136,7 @@ With the server running, the currently implemented HTTP surfaces are:
 | `GET /docs` | FastAPI's interactive OpenAPI documentation. |
 | `GET /app/` | Customer frontend: restaurant list, cuisine filter, and the selected restaurant's details and menu. `GET /` redirects here. |
 | `GET /app/account.html` | Customer frontend: register, sign in, inspect/update the own profile/address, and deactivate using the existing account API. |
+| `GET /app/staff-sign-in.html` | Staff sign-in form: calls `POST /auth/login`, keeps the bearer token in the current tab and returns to the management page. |
 | `GET /app/create-restaurant.html` | Management frontend: create a restaurant through the API, with validation/error feedback and a link to the saved restaurant. |
 | `GET /app/edit-restaurant.html?id=restaurant-001` | Management frontend: edit an existing restaurant's name, cuisine, or description through GET and PATCH. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
@@ -147,7 +148,7 @@ An administrator can call `POST /restaurants` with `{"name":"New Cafe","cuisine"
 
 To try accounts in the browser, first point **all six stores** at disposable copies using the commands below. Open `/app/account.html` (also linked as **My account** from restaurant browsing). Register, sign in, update the name or delivery address, and use **Check saved profile** to verify the server's current saved values. Refreshing keeps locally edited fields but updates untouched inputs to the newly saved server values; a profile save sends only fields you changed. Sign-out and expiry clear personal details and the confirmation checkbox. An interrupted registration should be checked by attempting sign-in before registering again; a lost profile update or deactivation response should be checked using **Check saved profile** before attempting another write. Deactivation requires a confirmation checkbox and leaves the account read-only. Tokens are kept in tab-scoped `sessionStorage` and sent only as bearer headers; signing out removes the browser copy, not the server session. A 401 prompts sign-in again. Browser-only controls do not replace backend 401/403 checks.
 
-The Create and Edit pages load in a browser. Their authenticated submission workflow depends on [staff sign-in #108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108). Use Swagger for manual write checks on this branch.
+The Create and Edit pages are usable with the staff sign-in form. Provision an administrator or assigned restaurant user in the disposable staff store first, open `/app/staff-sign-in.html`, and sign in. The browser keeps the bearer token only for its tab, sends it on protected restaurant/menu writes, and reports 401 as "sign in again" or 403 as "not permitted". The backend remains responsible for enforcing roles and assignments. Menu availability can also be toggled from the selected restaurant's menu; confirm the result before retrying an uncertain PATCH.
 
 For `PATCH /restaurants/{restaurant_id}`, use an ID from `GET /restaurants` and a body such as `{"description":"Seasonal bowls and noodles"}` in `/docs`, also with a disposable data copy. Supply at least one of `name`, `cuisine`, or `description`; supplied values must be nonblank strings. Nulls and unsupported fields are rejected. Re-list restaurants to check the saved result. See the [API contract](M1_API_CONTRACT.md#responses-and-failure-precedence) for the full update/error behavior.
 
@@ -168,6 +169,8 @@ No environment variable is required for normal local use.
 The repository supports `RESTAURANTS_DATA_PATH` for another existing UTF-8 JSON file. Its parent directory must be writable for atomic replacement. The value is read per request; set it before starting the server. Tests configure their own temporary copies.
 
 Active carts are stored in `data/carts.json` (committed as an empty array `[]`); `CARTS_DATA_PATH` selects another file in the same way. Signed-in customers use it through `PUT`/`GET /customers/me/cart` and `POST /customers/me/cart/items`; copy it with the customer and session files for manual experiments.
+
+To try a quantity update on disposable data, sign in as an active customer, create a cart and add an item. In `/docs`, send `PATCH /customers/me/cart/items/{item_id}` with that item's ID and `{"quantity": 3}`. The returned cart shows three units at the current menu price. Repeat the request to verify the revision stays the same.
 
 If the variable is not set, the application uses `data/restaurants.json`. Stored menu-item prices must also be at most `999.00`. An over-limit stored price makes the file invalid, causing generic HTTP 500 data errors without changing the file; correct it before starting normal use. The committed sample data already satisfies this rule.
 
@@ -298,7 +301,7 @@ A first-time setup is complete when:
 - `python -m pytest` completes successfully.
 - `python -m uvicorn app.main:app --reload` starts the API.
 - `/health`, `/restaurants`, `/docs`, and `/openapi.json` respond successfully.
-- `/app/`, `/app/account.html`, `/app/create-restaurant.html`, and an edit page for a known restaurant load.
+- `/app/`, `/app/account.html`, `/app/staff-sign-in.html`, `/app/create-restaurant.html`, and an edit page for a known restaurant load.
 - Browser tests run successfully when their optional dependencies are installed and required-browser mode is selected.
 
 For normal future sessions, continue with [Quick Setup](QUICK_SETUP.md).
