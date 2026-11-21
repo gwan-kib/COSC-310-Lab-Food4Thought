@@ -65,7 +65,7 @@ def test_real_cart_add_quantity_remove_and_clear(page, live_server, auth_account
     page.get_by_role("link", name="My cart").click()
     expect(page.locator("#cart-items li")).to_have_count(1)
     expect(page.locator("#cart-total")).to_have_text("$12.50")
-    page.get_by_label("Quantity for Vegetable bowl").fill("3")
+    page.get_by_role("spinbutton", name="Quantity for Vegetable bowl").fill("3")
     page.get_by_role("button", name="Update quantity for Vegetable bowl").click()
     expect(page.locator("#cart-total")).to_have_text("$37.50")
     assert json.loads(m2_store_paths["carts"].read_text())[0]["items"][0]["quantity"] == 3
@@ -196,7 +196,7 @@ def test_invalid_cart_quantity_and_api_validation_keep_stored_cart_unchanged(
     page.goto(f"{live_server}/app/cart.html")
     expect(page.locator("#cart-items li")).to_have_count(1)
     original = m2_store_paths["carts"].read_bytes()
-    page.get_by_label("Quantity for Vegetable bowl").fill("0")
+    page.get_by_role("spinbutton", name="Quantity for Vegetable bowl").fill("0")
     page.locator(".cart-line-controls").evaluate(
         "form => form.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}))"
     )
@@ -206,7 +206,7 @@ def test_invalid_cart_quantity_and_api_validation_keep_stored_cart_unchanged(
     page.route("**/customers/me/cart/items/item-001", lambda route: route.fulfill(
         status=422, json={"detail": [{"loc": ["body", "quantity"], "msg": "Invalid value"}]}
     ))
-    page.get_by_label("Quantity for Vegetable bowl").fill("2")
+    page.get_by_role("spinbutton", name="Quantity for Vegetable bowl").fill("2")
     page.get_by_role("button", name="Update quantity for Vegetable bowl").click()
     expect(page.locator("#cart-error")).to_contain_text("Invalid input")
     expect(page.locator("#cart-total")).to_have_text("$12.50")
