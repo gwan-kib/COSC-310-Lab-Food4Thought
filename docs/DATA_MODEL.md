@@ -25,7 +25,7 @@ resolve overrides at construction rather than import time, and keep file I/O out
 of routes/services. The staff repository validates and reads provisioned accounts; provisioning itself
 remains in #107. Session storage, Argon2id password hashing and bearer-token
 identity are implemented as agreed in [AUTH_DESIGN.md](AUTH_DESIGN.md) (#78).
-The [shared fixtures](../tests/conftest.py) isolate both stores in tests. New JSON-array stores read and save through `app/core/json_file.py` (#96), which gives exact integers of any length, the store's own error for missing or corrupt files, and atomic replacement that leaves no temporary file on failure; the customer, session, staff and cart repositories use it, and the order and restaurant repositories can adopt it.
+The [shared fixtures](../tests/conftest.py) isolate both stores in tests. New JSON-array stores read and save through `app/core/json_file.py` (#96), which gives exact integers of any length, strict UTF-8, the store's own error for missing, corrupt or wrongly encoded files, and atomic replacement that removes its temporary file on failure (reporting it if even that deletion fails); the customer, session, staff and cart repositories use it, and the order and restaurant repositories can adopt it.
 
 Feature PRs must initialize deliberately empty new stores and explain first-run
 configuration in both setup guides when implemented. Once configured, a missing,

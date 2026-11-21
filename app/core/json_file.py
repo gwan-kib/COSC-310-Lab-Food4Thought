@@ -1,7 +1,8 @@
 """Read and atomically replace Food4Thought's JSON-array store files in one place.
 Account, session, staff and cart repositories share these guarantees: integers of any
-length round-trip exactly, a missing or corrupt file is the store's own error, and a
-failed write leaves the previous file intact with no temporary file behind.
+length round-trip exactly, files must be UTF-8, a missing or corrupt file is the store's
+own error, and a failed write leaves the previous file intact and removes its temporary file
+(unless the filesystem refuses even that deletion, which is reported with the failure).
 """
 
 import json
@@ -20,7 +21,13 @@ def _exact_int(text: str) -> int:
 
 
 def loads_exact(data: bytes | str) -> Any:
-    """Parse JSON with exact integers of any length (cart quantities can be huge)."""
+    """Parse JSON with exact integers of any length (cart quantities can be huge).
+
+    Bytes must be UTF-8: json.loads would otherwise auto-detect UTF-16/32 and silently
+    accept a wrongly encoded store. A decoding failure is a ValueError (UnicodeDecodeError).
+    """
+    if isinstance(data, (bytes, bytearray)):
+        data = bytes(data).decode("utf-8")
     return json.loads(data, parse_int=_exact_int)
 
 
@@ -46,6 +53,11 @@ def write_json_array(path: Path, records: list[Any], error: type[Exception]) -> 
             temporary_file.write(content)
         os.replace(temporary_path, path)
     except Exception as exc:  # any failure: keep the old file and remove our temporary
+        message = f"Could not save {path}: {exc}"
         if temporary_path is not None:
-            temporary_path.unlink(missing_ok=True)
-        raise error(f"Could not save {path}: {exc}") from exc
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError as cleanup_exc:
+                # The store's error must still win; say the temporary file may remain.
+                message += f" (temporary file {temporary_path} may remain: {cleanup_exc})"
+        raise error(message) from exc
