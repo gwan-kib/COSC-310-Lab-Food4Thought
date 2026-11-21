@@ -162,10 +162,12 @@ def test_stale_refresh_cannot_reactivate_profile_after_deactivation(
     page.locator("#deactivate-form button[type=submit]").click()
     expect(page.locator("#account-state")).to_contain_text("inactive")
     expect(page.locator("#profile-form")).to_be_hidden()
+    expect(page.locator("#refresh-status")).to_be_empty()
 
     stale = auth_accounts.accounts["customer_a"].record.public().model_dump(mode="json")
     held[0].fulfill(status=200, json=stale)
     page.wait_for_timeout(250)
+    expect(page.locator("#refresh-status")).to_be_empty()
     expect(page.locator("#account-state")).to_contain_text("inactive")
     expect(page.locator("#profile-form")).to_be_hidden()
     assert page.page_errors == []

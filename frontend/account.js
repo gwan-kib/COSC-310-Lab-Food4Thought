@@ -243,7 +243,10 @@ function authFailure(result, errors, action) {
 }
 
 function lockAccountWrites(locked) {
-  if (locked) ++profileReadVersion; // A GET issued before this write is stale.
+  if (locked) {
+    ++profileReadVersion; // A GET issued before this write is stale.
+    feedback("refresh").status.textContent = "";
+  }
   accountWriting = locked;
   profileForm.querySelector("fieldset").disabled = locked;
   deactivateForm.querySelector("fieldset").disabled = locked;

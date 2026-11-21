@@ -68,3 +68,14 @@ def require_active_customer(principal: Annotated[Principal, Depends(require_cust
 
 CurrentCustomer = Annotated[Principal, Depends(require_customer)]
 ActiveCustomer = Annotated[Principal, Depends(require_active_customer)]
+
+def require_restaurant_user(principal: Annotated[Principal, Depends(get_current_principal)]) -> Principal:
+    if principal.role != "restaurant_user":
+        raise HTTPException(403, "Operation not permitted")
+    return principal
+
+
+def require_administrator(principal: Annotated[Principal, Depends(get_current_principal)]) -> Principal:
+    if principal.role != "administrator":
+        raise HTTPException(403, "Operation not permitted")
+    return principal
