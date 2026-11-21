@@ -200,8 +200,14 @@ is the included `data/orders.json`, initially an empty JSON array. For manual
 repository experiments, copy that file to a writable temporary directory and
 set `ORDERS_DATA_PATH` to the copy. A configured missing or invalid file is a
 storage error. The focused checkout tests select their own disposable files:
-`python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`.
-Checkout is currently available at the service layer only.
+`python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py tests/test_checkout_api.py`.
+
+To try checkout in `/docs`, use the disposable stores below and authorize as an active
+customer. Create a cart and add an item. In `POST /customers/me/checkout`, send the
+latest cart response's `id` as `cart_id` and its `revision` as `cart_revision`.
+The first purchase returns 201 with the saved order. Repeating the same request
+returns 200 with the original order. If `cart_reset_pending` is true, repeat that
+request to finish clearing the purchased revision.
 
 Order details are available through HTTP. In `/docs`, sign in with `POST /auth/login`,
 click **Authorize** and paste the returned token, then call
@@ -210,7 +216,7 @@ IDs both return `404 Order not found`; staff receive 403 and absent/invalid toke
 receive 401. No fixture order or customer is seeded into committed data. Use
 `python -m pytest -q tests/test_order_details.py` for the isolated, reproducible
 registration/login/cart/checkout-service/detail example. It verifies saved prices
-and address after live changes; it does not imply the checkout HTTP route exists.
+and address after live changes.
 
 Customer accounts, sign-in sessions and provisioned staff accounts use `data/customers.json`
 (`CUSTOMERS_DATA_PATH`), `data/sessions.json` (`SESSIONS_DATA_PATH`) and `data/staff.json`
@@ -225,7 +231,7 @@ returns 401, staff roles return 403, and an unavailable order store returns a
 generic 500 rather than an empty history. Reads leave carts and snapshots unchanged.
 Run `python -m pytest -q tests/test_order_history_api.py` for real-auth history
 and purchase-to-history integration checks using temporary stores. The purchase
-step uses the real checkout service; a checkout HTTP route is not included here.
+step in that suite uses the real checkout service directly.
 
 **HTTP experiments (restaurants, accounts, carts, orders)**
 
