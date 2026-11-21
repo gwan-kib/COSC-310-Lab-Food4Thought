@@ -442,3 +442,36 @@ def test_quantity_patch_dangling_menu_reference_preserves_cart(
 
     assert (response.status_code, response.json()) == (500, {"detail": "Cart data is unavailable"})
     assert m2_store_paths["carts"].read_bytes() == before
+
+
+# --- #86/#90 with real menu availability (#94, merged in #109) -------------------------------
+
+def test_unavailable_line_stays_visible_priced_and_counted_through_the_real_store(
+    client, m2_store_paths, auth_accounts, ada
+):
+    # M2 contract: viewing an existing unavailable item shows `available: false` and its
+    # current price and still counts in totals; adding it again is 409 with no write.
+    client.put("/customers/me/cart", headers=ada)
+    client.post("/customers/me/cart/items", headers=ada, json=ADD)  # item-001 x2 at 12.50
+    client.post("/customers/me/cart/items", headers=ada,
+                json={"restaurant_id": "restaurant-001", "item_id": "item-002", "quantity": 1})
+    disabled = client.patch("/restaurants/restaurant-001/menu/items/item-001",
+                            headers=auth_accounts.headers("restaurant_user"), json={"available": False})
+    assert disabled.status_code == 200
+    before = m2_store_paths["carts"].read_bytes()
+
+    read = client.get("/customers/me/cart", headers=ada)
+
+    assert read.status_code == 200
+    lines = {line["item_id"]: line for line in read.json()["items"]}
+    assert (lines["item-001"]["available"], lines["item-001"]["quantity"]) == (False, 2)
+    assert (lines["item-001"]["unit_price"], lines["item-001"]["line_total"]) == ("12.50", "25.00")
+    assert lines["item-002"]["available"] is True
+    assert (read.json()["subtotal"], read.json()["total"]) == ("39.00", "39.00")
+    # A fresh application and stores give the same view, and reading never writes.
+    assert TestClient(app).get("/customers/me/cart", headers=ada).json() == read.json()
+    assert m2_store_paths["carts"].read_bytes() == before
+
+    again = client.post("/customers/me/cart/items", headers=ada, json=ADD)
+    assert (again.status_code, again.json()) == (409, {"detail": "Menu item is unavailable"})
+    assert m2_store_paths["carts"].read_bytes() == before
