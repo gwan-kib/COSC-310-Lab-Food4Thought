@@ -216,7 +216,7 @@ function renderMenu(menu, restaurantId) {
     name.textContent = menuItem.name;
     const price = document.createElement("span");
     price.className = "price";
-    price.textContent = `${menuItem.price}`;
+    price.textContent = "$" + menuItem.price;
     heading.append(name, price);
     const description = document.createElement("p");
     description.textContent = menuItem.description;
