@@ -838,7 +838,43 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
 - Student review status: Pending confirmation by responsible students.
 
-### Entry 65: Staff account provisioning command
+### Entry 65: Menu availability and legacy compatibility (#94)
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu schemas, restaurant service and routes, availability and regression tests, API/data contract and setup guides on the #94 branch.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Implement the catalog portion of #94. Thomas chose to materialize omitted legacy flags on a successful full-store save.
+- Influence: Codex wrote the implementation, tests and documentation. Explicit flag changes use an injected restaurant permission check pending the shared staff identity implementation.
+- Validation: In the isolated worktree, 407 baseline tests passed. The initial new test run had 6 expected failures and 7 passes. After implementation all 13 focused tests passed. Compilation passed and the full browser-required suite passed 420 tests with committed data intact. Real staff login, cart and checkout integration and cross-workflow locking are pending.
+- PR or commit: Initial catalog implementation at `0f55371`, [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Implementation review and peer feedback pending.
+
+### Entry 66: Integrate menu availability with authentication, cart and checkout
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu authentication, restaurant service, catalog adapter, API and integration tests, regression fixtures, setup guides, API contract and M2 evidence.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Integrate #94 with the shared staff, cart and checkout implementation from main.
+- Influence: Codex resolved the documentation conflicts, connected bearer identity and staff ownership to menu writes, applied the shared workflow lock, and wrote the integration tests and documentation.
+- Validation: After merging main, 9 of 18 focused tests failed before the integration. The final focused run passed 19, including a concurrent disable and checkout. The complete browser-required suite passed 636 tests. Compilation and committed-data checks passed.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible student walkthrough and human review pending.
+
+### Entry 67: Restaurant management authorization review fixes
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner. Gwantana Kiboigo supplied the [requested changes](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109#pullrequestreview-6002389649).
+- Artifact: Restaurant route and service authorization, staff role dependencies, regression and browser tests, setup and API documentation.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Address the unprotected restaurant create/edit operations and make the service’s staff store injectable.
+- Influence: Codex wrote the fixes and tests. The reviewer identified the policy gaps and dependency change.
+- Validation: Before implementation the new policy tests produced 17 failures and 4 passes. The authorization and availability tests subsequently passed together (40 tests). The browser-required full suite passed 657 tests using isolated data.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible-student validation and teammate re-review of the fixes pending.
+
+### Entry 68: Staff account provisioning command
 
 - Student(s): Sreeram Nara (`SreeramNara`), assignee of #107.
 - Artifact: `app/scripts/create_staff_account.py`, `app/scripts/__init__.py`, `app/services/staff.py`, the write methods in `app/repositories/staff.py`, `tests/test_staff_provisioning.py`, and staff-account instructions in `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md` and `README.md`.
