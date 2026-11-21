@@ -39,7 +39,7 @@ The [agent-submitted GitHub review](https://github.com/gwan-kib/COSC-310-Lab-Foo
 
 - [x] Hosted CI on PR #119 revision `8811eea`: [`validate` succeeded](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44858630232/job/136706602018). This is evidence for that revision, not a new test run for the subsequent documentation correction.
 - [x] Synchronize current main `9474129`, retaining both sides' setup, milestone and provenance additions. Adapt the historical-snapshot integration test to sign in as the restaurant manager before protected menu/restaurant edits. The merged tree initially produced 1 failed / 30 passed detail cases (401 on anonymous menu edit); after the test update, all 31 passed. Compilation and the complete required-browser suite passed: 735 tests, no skips or warnings. Existing order-detail application code is unchanged.
-- [ ] Verify hosted CI on the synchronized PR revision before re-review; the previous run does not certify the merged tree. Current check results belong in the PR.
+- Hosted CI for the current revision is recorded in [PR #119 checks](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/119/checks). Verify that revision before re-review; the older successful run does not certify the synchronized tree.
 - [ ] Independent human peer review and approval of the implementation and documentation; responsible-student understanding confirmation. The agent-submitted reviews do not satisfy this gate.
 - [ ] Complete HTTP checkout-to-detail integration in #91/#101. The implemented test uses the real checkout service; no checkout HTTP endpoint is added by this PR.
 - [ ] Merge and final issue-completion checks. PR #119 references #93 without closing it.
