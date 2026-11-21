@@ -50,10 +50,10 @@ The Edit restaurant browser tests in `tests/browser/test_edit_restaurant_browser
 
 ### M2 contract handoff support
 
-`tests/contracts/` checks the [proposed M2 contract](M2_API_CONTRACT.md) and
+`tests/contracts/` checks the original [M2 contract baseline](M2_API_CONTRACT.md) and
 [example bundle](examples/m2.json). Run `python -m pytest -q tests/contracts`.
-Its models and in-memory customer/catalog/cart/order doubles support independent
-feature development. They do not implement production checkout or authorization
+Its models and in-memory customer/catalog/cart/order doubles originally supported independent
+feature development. They are **contract test aids**, not the production checkout or authorization implementations
 and must not be imported by application code. Each test automatically
 receives temporary restaurant, customer, cart, order, staff and session paths.
 Only customers, carts, staff and sessions are created as empty JSON files by
@@ -63,7 +63,7 @@ ordinary order-repository tests deliberately exercise the missing-file case.
 The session guard snapshots files under `data/`; the CI guard additionally
 detects untracked and ignored files. Feature owners still need real
 save/reload, failure, authorization and service/API tests. Final #95/#101
-integration tests must use the real implementations, not these doubles.
+integration tests must use the real implementations, not these doubles. See the [M2 source-to-test/PR matrix](milestones/M2.md#m2-submission-readiness-audit-issue-104) for the separately implemented route and integration suites, and their remaining merge gates.
 
 Run `python -m pytest -q tests/test_order_repository.py tests/test_checkout_service.py`
 for #91. These tests use a temporary order file, reopen the repository for retry,
