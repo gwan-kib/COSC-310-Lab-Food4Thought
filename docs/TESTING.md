@@ -213,4 +213,4 @@ git status --porcelain --untracked-files=all --ignored -- data/
 ```
 
 These are verification commands, not claims that a particular execution passed.
-See PR #136 for hosted results; #100 / PR #133 is now merged.
+PR #136's earlier stacked revision `ec2e271` passed [hosted CI run 44877877769](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/44877877769). The branch was subsequently synchronized with current `main` after #100 / PR #133 merged; validate the new integration revision separately before merging.
