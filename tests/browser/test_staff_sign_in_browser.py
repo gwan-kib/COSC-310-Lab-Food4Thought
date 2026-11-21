@@ -21,10 +21,12 @@ def login(page, live_server, account, next_page="create-restaurant.html"):
     with page.expect_response("**/auth/login") as response:
         page.get_by_role("button", name="Sign in").click()
     assert response.value.status == 200
-    token = response.value.json()["access_token"]
     assert "access_token" not in response.value.url
     page.wait_for_url(f"**/app/{next_page}")
-    assert page.evaluate("sessionStorage.getItem('food4thought.staff.token')") == token
+    # The form navigates immediately on success, so Chromium may discard the
+    # login response body. Read the token from the destination tab instead.
+    token = page.evaluate("sessionStorage.getItem('food4thought.staff.token')")
+    assert isinstance(token, str) and token
     return token
 
 
