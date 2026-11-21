@@ -139,17 +139,17 @@ With the server running, the currently implemented HTTP surfaces are:
 | `GET /app/edit-restaurant.html?id=restaurant-001` | Management frontend: edit an existing restaurant's name, cuisine, or description through GET and PATCH. |
 | `GET /openapi.json` | Raw generated OpenAPI schema. |
 
-A simple browser check is enough for the GET operations. To try `POST /restaurants`, use the interactive form at `/docs` with a body such as `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. It writes to the configured JSON file, so use a disposable copy through `RESTAURANTS_DATA_PATH` when experimenting.
+Browse restaurant and menu GETs directly. For writes, use disposable stores and sign in through `POST /auth/login` with a provisioned staff account (create one with the [staff-account commands](#disposable-data-for-manual-experiments)). In Swagger UI (`/docs`), choose **Authorize** and enter the returned bearer token.
 
-With a disposable data copy configured, open `/app/` and follow **Create restaurant**. Fill all three fields and submit; confirm the success message, then follow **View restaurant** to see the saved details. Restart with the same data path and verify that the restaurant remains in the list. Whitespace-only values show backend validation feedback; errors keep the form values. Correct a rejected field to a nonblank value and confirm its error clears before submitting again. A stalled request times out after 15 seconds and restores the controls. If creation cannot be confirmed because the connection or response failed or timed out, check **Browse restaurants** before trying again to avoid duplicates.
+An administrator can call `POST /restaurants` with `{"name":"New Cafe","cuisine":"Cafe","description":"Fresh food"}`. The 201 response contains its stable ID. Creating a restaurant does not assign a manager. For edits, sign in as a restaurant user assigned to the selected restaurant and switch tokens in Swagger. Anonymous writes return 401. A caller with the wrong role or an unassigned manager receives 403. A manager editing a missing restaurant with a valid body receives 404.
 
-To use the editor instead of Swagger, open `/app/`, choose a restaurant, and follow **Edit restaurant**. Existing fields load automatically; change one or more and save. An unchanged form does not send a PATCH. The page reports validation and server errors while preserving edits. If a save times out or the response is lost, check the details page before retrying, because the update may already have been saved.
+The Create and Edit pages load in a browser. Their authenticated submission workflow depends on [staff sign-in #108](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/108). Use Swagger for manual write checks on this branch.
 
 For `PATCH /restaurants/{restaurant_id}`, use an ID from `GET /restaurants` and a body such as `{"description":"Seasonal bowls and noodles"}` in `/docs`, also with a disposable data copy. Supply at least one of `name`, `cuisine`, or `description`; supplied values must be nonblank strings. Nulls and unsupported fields are rejected. Re-list restaurants to check the saved result. See the [API contract](M1_API_CONTRACT.md#responses-and-failure-precedence) for the full update/error behavior.
 
-With that disposable data copy configured, try the add-menu-item operation in `/docs` using an existing restaurant ID and `{"name":"Soup","description":"Hot soup","price":"4.50"}`. It returns HTTP 201 with a generated item ID. Fetch that restaurant's menu to see the appended item; restart the server with the same data path and fetch it again to verify persistence. Unknown restaurants return 404 and invalid item bodies return 422. Create/update prices must be decimal strings from `0` through `999.00` inclusive; `"999.00"` is accepted and `"999.01"` returns 422.
+With the disposable stores configured, sign in through `POST /auth/login` as a provisioned restaurant user assigned to the selected restaurant. In Swagger UI use **Authorize** with the returned bearer token, then try the add-menu-item operation in `/docs` using an existing restaurant ID and `{"name":"Soup","description":"Hot soup","price":"4.50"}`. It returns HTTP 201 with a generated item ID. Fetch that restaurant's menu to see the appended item; restart the server with the same data path and fetch it again to verify persistence. Unknown restaurants return 404 and invalid item bodies return 422. Create/update prices must be decimal strings from `0` through `999.00` inclusive; `"999.00"` is accepted and `"999.01"` returns 422.
 
-To update that item, use its returned ID and the same restaurant ID in `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` with `{"price":"7.5"}`. The response contains the complete saved item with price `"7.50"`; its ID, name, and description remain unchanged. Fetch the menu after restarting with the same disposable data path to verify the update persisted. Supply at least one of `name`, `description`, or `price`; nulls and unsupported fields are rejected. See the [API contract](M1_API_CONTRACT.md#pydantic-model-responsibilities) for validation and parent-scoping behavior.
+To update that item, use its returned ID and the same restaurant ID in `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` with `{"price":"7.5"}`. The response contains the complete saved item with price `"7.50"`; its ID, name, and description remain unchanged. Fetch the menu after restarting with the same disposable data path to verify the update persisted. Supply at least one of `name`, `description`, `price`, or `available`. Availability accepts JSON `true` or `false`. Both menu item write operations require the assigned manager’s bearer token. A missing token returns 401, and a customer, administrator or manager assigned to a different existing restaurant receives 403. Omitting it on creation defaults to true, and omitting it on update preserves the saved value. Legacy menu reads return true without writing. A successful restaurant-file save can make that default explicit throughout the file. Nulls and unsupported fields are rejected. See the [API contract](M1_API_CONTRACT.md#pydantic-model-responsibilities) for validation and parent-scoping behavior.
 
 ## Current data configuration
 
@@ -185,7 +185,7 @@ Customer accounts, sign-in sessions and provisioned staff accounts use `data/cus
 
 **HTTP experiments (restaurants, accounts, carts, orders)**
 
-Stop any existing server first. Registering, signing in, editing a cart and changing restaurants all write to `data/`, so point every store at a disposable copy. From the repository root, with the virtual environment active, these commands copy each store that exists into a new temporary directory and set its `*_DATA_PATH` variable (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, `CARTS_DATA_PATH`, `ORDERS_DATA_PATH`). They create a new copy each time; to verify persistence after restarting, keep the same terminal instead of repeating the copy step.
+Stop any existing server first. Registering, signing in, editing a cart and changing restaurants all write to `data/`, so point every store at a disposable copy. From the repository root, with the virtual environment active, these commands copy each store that exists into a new temporary directory and set its `*_DATA_PATH` variable (`RESTAURANTS_DATA_PATH`, `CUSTOMERS_DATA_PATH`, `SESSIONS_DATA_PATH`, `STAFF_DATA_PATH`, `CARTS_DATA_PATH`, `ORDERS_DATA_PATH`). They create a new copy each time; to verify persistence after restarting, keep the same terminal instead of repeating the copy step. The steps below then optionally create staff accounts, start the server, and finally clear the overrides; follow them in order.
 
 Windows PowerShell:
 
@@ -199,7 +199,6 @@ foreach ($store in 'restaurants', 'customers', 'sessions', 'staff', 'carts', 'or
     }
 }
 Write-Output $manualDataDir
-python -m uvicorn app.main:app --reload
 ```
 
 macOS/Linux:
@@ -213,12 +212,47 @@ for store in restaurants customers sessions staff carts orders; do
   fi
 done
 printf '%s\n' "$manual_data_dir"
+```
+
+**Optional: staff accounts.** There is no public sign-up for restaurant users or
+administrators; create them with the provisioning command, in the **same terminal** while the
+overrides above are set, so it writes to the copies and not to `data/staff.json`. It asks for
+the password twice with a hidden prompt and stores only its hash. Run these before starting the
+server; if the server is already running, stop it with `Ctrl+C` first (keep the terminal and its
+overrides), run them, then start the server again. The same commands work in PowerShell.
+
+Create a demo manager for `restaurant-001`:
+
+```sh
+python -m app.scripts.create_staff_account create --name "Cedar Bowl Manager" --email manager@cedarbowl.invalid --role restaurant_user --restaurant restaurant-001
+```
+
+Create an administrator (administrators manage no restaurants):
+
+```sh
+python -m app.scripts.create_staff_account create --name "Platform Admin" --email admin@food4thought.invalid --role administrator
+```
+
+Give an existing manager another restaurant:
+
+```sh
+python -m app.scripts.create_staff_account assign --email manager@cedarbowl.invalid --restaurant restaurant-002
+```
+
+Emails must be unused by any customer or staff account, and unknown restaurant IDs are rejected
+without writing anything. The command and a running server share a lock file beside the customer
+store (for example `.customers.json.lock` in the temporary directory), so they never accept the
+same email at once.
+
+**Start the server** in the same terminal:
+
+```sh
 python -m uvicorn app.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000/app/create-restaurant.html` or `/docs` and use the POST/PATCH examples above, or register with `POST /customers`, sign in with `POST /auth/login`, and click **Authorize** with the returned token. Confirm saved values with GET, stop with `Ctrl+C`, then run the same Uvicorn command in the same terminal to verify persistence. All experiments in that server use the copies.
+Open `http://127.0.0.1:8000/app/create-restaurant.html` or `/docs` and use the POST/PATCH examples above, or register with `POST /customers`, sign in with `POST /auth/login` (customers, or the staff accounts created above; the response's `role` is `customer`, `restaurant_user` or `administrator`), and click **Authorize** with the returned token. Confirm saved values with GET, stop with `Ctrl+C`, then run the same Uvicorn command in the same terminal to verify persistence. All experiments in that server use the copies.
 
-After stopping the experiment server, clear the overrides before returning to normal sample-data use:
+**Finish:** only after stopping the experiment server, clear the overrides before returning to normal sample-data use:
 
 ```powershell
 foreach ($store in 'restaurants', 'customers', 'sessions', 'staff', 'carts', 'orders') {

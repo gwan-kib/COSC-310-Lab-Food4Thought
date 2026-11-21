@@ -838,7 +838,92 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
 - Student review status: Pending confirmation by responsible students.
 
-### Entry 65: Share exact pricing across cart views and checkout (#97)
+### Entry 65: Menu availability and legacy compatibility (#94)
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu schemas, restaurant service and routes, availability and regression tests, API/data contract and setup guides on the #94 branch.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Implement the catalog portion of #94. Thomas chose to materialize omitted legacy flags on a successful full-store save.
+- Influence: Codex wrote the implementation, tests and documentation. Explicit flag changes use an injected restaurant permission check pending the shared staff identity implementation.
+- Validation: In the isolated worktree, 407 baseline tests passed. The initial new test run had 6 expected failures and 7 passes. After implementation all 13 focused tests passed. Compilation passed and the full browser-required suite passed 420 tests with committed data intact. Real staff login, cart and checkout integration and cross-workflow locking are pending.
+- PR or commit: Initial catalog implementation at `0f55371`, [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Implementation review and peer feedback pending.
+
+### Entry 66: Integrate menu availability with authentication, cart and checkout
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner.
+- Artifact: Menu authentication, restaurant service, catalog adapter, API and integration tests, regression fixtures, setup guides, API contract and M2 evidence.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Integrate #94 with the shared staff, cart and checkout implementation from main.
+- Influence: Codex resolved the documentation conflicts, connected bearer identity and staff ownership to menu writes, applied the shared workflow lock, and wrote the integration tests and documentation.
+- Validation: After merging main, 9 of 18 focused tests failed before the integration. The final focused run passed 19, including a concurrent disable and checkout. The complete browser-required suite passed 636 tests. Compilation and committed-data checks passed.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible student walkthrough and human review pending.
+
+### Entry 67: Restaurant management authorization review fixes
+
+- Student(s): Thomas Chen (`Tc2006415`), issue owner. Gwantana Kiboigo supplied the [requested changes](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109#pullrequestreview-6002389649).
+- Artifact: Restaurant route and service authorization, staff role dependencies, regression and browser tests, setup and API documentation.
+- Label: `AI-GENERATED`
+- AI tool: Codex.
+- Purpose: Address the unprotected restaurant create/edit operations and make the service’s staff store injectable.
+- Influence: Codex wrote the fixes and tests. The reviewer identified the policy gaps and dependency change.
+- Validation: Before implementation the new policy tests produced 17 failures and 4 passes. The authorization and availability tests subsequently passed together (40 tests). The browser-required full suite passed 657 tests using isolated data.
+- PR or commit: [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109).
+- Student review status: Responsible-student validation and teammate re-review of the fixes pending.
+
+### Entry 68: Shared JSON-array store helper (architectural improvement)
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #96.
+- Artifact: `app/core/json_file.py`, `app/repositories/cart.py`, the reader in `app/repositories/order.py`, `tests/test_json_file.py`, two monkeypatch targets in `tests/test_cart_repository.py` and `tests/test_cart_service.py`, and a convention sentence in `docs/DATA_MODEL.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Remove a design weakness exposed by Sreeram's M2 work and its reviews: each repository had its own copy of JSON reading and atomic saving, and defects found by Thomas Chen in PR #113 (a temporary file left after a serialization failure, and integers past Python's 4300-digit text limit) had to be fixed separately in the cart and order repositories while the shared helper used by customers, sessions and staff still had the integer defect.
+- Influence: Claude proposed consolidating on one helper rather than a generic repository base class (larger change across owners) or leaving per-repository copies (the cause of the repeated defects). It made `app/core/json_file.py` read with exact integers and write with Pydantic's serializer, cleaning up on any failure; moved the cart repository's read and save onto it; and made the order reader use the shared `loads_exact` instead of its own copy. The order write path and the restaurant repository were left to their owner.
+- Validation: Before the change, the existing cart, customer, order and checkout-integration tests passed (120, characterization) and the new helper test for a 5,001-digit integer failed. After the change, `tests/test_json_file.py` and the same suites passed (128). `pyflakes` reported no unused imports. The diff removes 57 lines and adds 32 in `app/`.
+- PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116), branch `feature/96-shared-json-store`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #116. Claude wrote failing regressions, then made `loads_exact` decode bytes strictly as UTF-8 (so a UTF-16 or UTF-32 store is the store's error instead of being silently accepted and later rewritten), and made `write_json_array` raise the store's error even when deleting its temporary file also fails, noting in the message that the temporary file may remain. The branch was first synced with `main` after #115 merged; the final merge later incorporated #109 and renumbered this disclosure to avoid overwriting the existing entry 66.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 69: Integrate shared JSON helper with merged menu availability
+- Student(s): Gwantana Kiboigo (`gwan-kib`), integration requester; Sreeram Nara remains the owner of the #96 implementation.
+- Artifact: Merge resolution of [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116) into the current `main` after [PR #109](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/109); `docs/DATA_MODEL.md` and `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Preserve PR #109's restaurant authorization/menu availability and provenance entries while integrating the reviewed JSON helper improvement.
+- Influence: ChatGPT reconciled the two documentation files, retained main's entries 65–67, numbered Sreeram's original #96 disclosure 68, and constructed the integration merge commit with the unchanged feature code and current main as parents.
+- Validation: Inspected the compared file lists and overlapping documentation changes; CI and final merge outcome are checked separately, and no student code-understanding claim is made.
+- PR or commit: [PR #116](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/116).
+- Student review status: Pending responsible-student confirmation.
+
+### Entry 70: Staff account provisioning command
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #107.
+- Artifact: `app/scripts/create_staff_account.py`, `app/scripts/__init__.py`, `app/services/staff.py`, the write methods in `app/repositories/staff.py`, `tests/test_staff_provisioning.py`, and staff-account instructions in `docs/FIRST_TIME_SETUP.md`, `docs/QUICK_SETUP.md` and `README.md`.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Let the team create restaurant users and administrators, which have no public sign-up, so staff can sign in for the M2 demo and menu-availability work (#94).
+- Influence: Claude wrote the tests first, then a provisioning service and an argparse command (`create`, `assign`) that reads the password twice with a hidden prompt, applies the customer password and email rules, stores only an Argon2id hash, rejects unknown restaurants and administrators with restaurants, keeps emails unique across customers and staff under the shared account-email lock, and never prints the password.
+- Validation: `tests/test_staff_provisioning.py` first failed with `No module named 'app.scripts'`; after implementation its 13 tests passed. The real command was also run through `python -m` on disposable copies of the data files: it created a manager for `restaurant-001`, `POST /auth/login` returned 200 with role `restaurant_user`, and `data/` was unchanged. The PowerShell form of the commands was not run.
+- PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117), branch `feature/107-staff-provisioning`.
+- Review follow-up: Gwantana Kiboigo (`gwan-kib`) requested changes on PR #117. Claude wrote two regressions that run a second process holding the account lock (`tests/account_lock_holder.py`); with a thread-only lock both failed (a duplicate email was accepted, and a concurrent assignment was lost). Claude then replaced the in-process `ACCOUNT_EMAIL_LOCK` with `app/core/account_lock.py`, a thread lock plus a `filelock` lock file beside the customer store (new pinned dependency `filelock==3.20.0`), held by every customer write and every staff write; made `assign` read, check and update the latest stored record in one locked step (`StaffRepository.update_by_email`); and reordered the first-time setup guide so staff accounts are created while the disposable overrides are set, before starting the server, with the overrides cleared last. The reordered shell commands were run on disposable copies (manager login 200 `restaurant_user`, a customer registration with the administrator's email 409, `data/` unchanged); the PowerShell commands were checked by reading only.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 71: Integrate staff provisioning with merged JSON helper
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and integrator; Sreeram Nara (`SreeramNara`) remains responsible for the #107 implementation.
+- Artifact: Conflict resolution for [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117) on `feature/107-staff-provisioning`, including `docs/DATA_MODEL.md`, `docs/PROVENANCE.md` and the merge of shared JSON helper changes from `main`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Integrate reviewed staff account provisioning with the merged shared JSON-array helper (#96) and menu authorization (#94), without dropping either team's work.
+- Influence: ChatGPT constructed a merge tree retaining PR #117's implementation and the latest `main` source changes, combined non-overlapping data-model edits, preserved the existing provenance entries 65–69, retained Sreeram's entry 70, and added this integration entry. No application business logic was rewritten as part of conflict resolution.
+- Validation: Compared both branches against their common ancestor and verified the overlapping documentation edits; subsequent CI and merge outcome are verified separately, and this does not claim student understanding.
+- PR or commit: [PR #117](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/117).
+- Student review status: Pending responsible-student confirmation.
+
+### Entry 72: Share exact pricing across cart views and checkout (#97)
 
 - Student: Thomas Chen (`Tc2006415`), issue owner.
 - Artifact: `app/core/pricing.py`, cart and order schemas, cart and checkout services, test imports, the pricing characterization in `tests/test_cart_api.py`, and [M2.1 receipt evidence](milestones/M2.md#decision-receipt-m21--shared-cart-and-checkout-pricing-97).
@@ -846,5 +931,6 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - AI tool: Codex (OpenAI).
 - Purpose and influence: Codex inspected the implementation and alternatives. Thomas chose the behavior-preserving arithmetic extraction and the cart repricing and receipt replay scenario. Codex wrote the test, extracted the shared type and calculations, updated consumers, and drafted the decision evidence.
 - Validation: On Python 3.12, `python -m pytest -q tests/test_cart_api.py::test_cart_and_checkout_reprice_but_retry_keeps_the_saved_order tests/test_cart_service.py tests/test_cart_checkout_integration.py tests/test_checkout_service.py tests/test_order_repository.py` passed 73 tests before and after extraction. `python -m compileall app` succeeded. With `REQUIRE_BROWSER_TESTS=1`, `python -m pytest -q` passed all 618 tests. `git status --porcelain --untracked-files=all --ignored -- data/` returned no entries. The sorted generated OpenAPI JSON had the same SHA-256 before and after.
-- PR or commit: Local branch `feature/97-shared-pricing` for [issue #97](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/97). PR and peer review pending.
+- PR or commit: [PR #121](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/121) for [issue #97](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/97).
+- Review follow-up: In response to [Gwantana’s review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/121#pullrequestreview-6002501869), Codex integrated main at `aaca156`, preserved entries through 71, and scoped the receipt wording to #97. The pricing characterization initially failed with `AuthenticationRequired` after integration. Codex switched its menu edits to authenticated restaurant-manager PATCH requests. The focused scenario then passed, `python -m compileall -q app` succeeded, and `python -m pytest -q` passed all 685 tests with Chromium required.
 - Student review status: Thomas confirmed the design and test scenario. Review of the implementation and student understanding are pending.

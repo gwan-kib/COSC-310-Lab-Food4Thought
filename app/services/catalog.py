@@ -44,7 +44,6 @@ class RestaurantCatalog:
         return {
             item.id: CatalogItem(id=item.id, name=item.name, description=item.description,
                                  price=item.price,
-                                 # Menu availability (#94) adds this field; legacy items are orderable.
-                                 available=getattr(item, "available", True))
+                                 available=item.available)
             for item in record.menu_items
         }

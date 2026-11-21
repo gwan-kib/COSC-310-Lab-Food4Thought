@@ -15,15 +15,12 @@ from app.main import app
 from app.repositories.cart import CartRepository
 from app.repositories.customer import CustomerRepository
 from app.repositories.order import OrderRepository
-from app.repositories.restaurant import RestaurantRepository
 from app.schemas.customer import Principal
 from app.schemas.order import CheckoutRequest
-from app.schemas.restaurant import MenuItemUpdate
 from app.services.cart import CartService
 from app.services.checkout import CheckoutService
 from app.services.catalog import RestaurantCatalog
 from app.services.customer import CustomerInactiveError, CustomerService
-from app.services.restaurant import RestaurantService
 from contracts.auth import FIXED_NOW
 from contracts.m2 import CatalogItem, FakeCatalog
 
@@ -284,11 +281,17 @@ def test_active_customer_resolver_returns_the_stored_customer_for_checkout(auth_
     assert (customer.id, customer.delivery_address) == ("customer-001", "101 Example Street, Kelowna, BC")
 
 
-def test_cart_and_checkout_reprice_but_retry_keeps_the_saved_order(client, ada):
-    menu = RestaurantService(RestaurantRepository())
+def test_cart_and_checkout_reprice_but_retry_keeps_the_saved_order(client, ada, auth_accounts):
     restaurant = "restaurant-001"
-    menu.update_menu_item(restaurant, "item-001", MenuItemUpdate(name="Soup", price="10.00"))
-    menu.update_menu_item(restaurant, "item-002", MenuItemUpdate(name="Bread", price="3.25"))
+    manager = auth_accounts.headers("restaurant_user")
+
+    def update_menu_item(item_id, **changes):
+        response = client.patch(f"/restaurants/{restaurant}/menu/items/{item_id}",
+                                headers=manager, json=changes)
+        assert response.status_code == 200, response.text
+
+    update_menu_item("item-001", name="Soup", price="10.00")
+    update_menu_item("item-002", name="Bread", price="3.25")
     assert client.put("/customers/me/cart", headers=ada).status_code == 201
     for item, quantity in [("item-001", 2), ("item-002", 1)]:
         added = client.post("/customers/me/cart/items", headers=ada, json={
@@ -300,7 +303,7 @@ def test_cart_and_checkout_reprice_but_retry_keeps_the_saved_order(client, ada):
     assert (cart["subtotal"], cart["total"]) == ("23.25", "23.25")
     request = CheckoutRequest(cart_id=cart["id"], cart_revision=cart["revision"])
 
-    menu.update_menu_item(restaurant, "item-001", MenuItemUpdate(price="11.50"))
+    update_menu_item("item-001", price="11.50")
     refreshed = client.get("/customers/me/cart", headers=ada).json()
     assert [line["line_total"] for line in refreshed["items"]] == ["23.00", "3.25"]
     assert (refreshed["subtotal"], refreshed["total"]) == ("26.25", "26.25")
@@ -313,7 +316,7 @@ def test_cart_and_checkout_reprice_but_retry_keeps_the_saved_order(client, ada):
     ]
     assert (order.subtotal, order.total) == ("26.25", "26.25")
 
-    menu.update_menu_item(restaurant, "item-001", MenuItemUpdate(price="14.00"))
+    update_menu_item("item-001", price="14.00")
     retry = _real_checkout().checkout(ADA_PRINCIPAL, request)
     assert not retry.created
     assert retry.response.order == order
