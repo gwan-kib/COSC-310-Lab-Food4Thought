@@ -1155,7 +1155,7 @@ its pending-auth and local-only status.
 ### Entry 84: M2 handoff documentation audit and #104 backlog coordination
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), issue coordinator and requesting student; responsible-student review is pending.
-- Artifact: [Issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/DATA_MODEL.md`, `docs/milestones/M2.md`, and this provenance entry.
+- Artifact: [Issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), `README.md`, `docs/FIRST_TIME_SETUP.md`, `docs/DATA_MODEL.md`, `docs/milestones/M2.md`, `docs/AUTH_DESIGN.md`, `docs/M2_API_CONTRACT.md`, `docs/TESTING.md`, and this provenance entry.
 - Label: `AI-GENERATED`.
 - AI tool: ChatGPT.
 - Purpose: Translate the M2 integration/release backlog into an evidence-based documentation audit, correct stale setup/status text, and build a source-to-issue/test/PR handoff checklist.
