@@ -50,6 +50,7 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 | Page | URL |
 | --- | --- |
 | Customer: list, cuisine filter, details, menu | [Customer frontend](http://127.0.0.1:8000/app/) |
+| Management: Staff sign-in | [Staff sign-in](http://127.0.0.1:8000/app/staff-sign-in.html) |
 | Management: Create restaurant | [Create restaurant](http://127.0.0.1:8000/app/create-restaurant.html) |
 | Management: Edit restaurant | Select a restaurant in the [customer frontend](http://127.0.0.1:8000/app/) and follow **Edit restaurant** |
 | Interactive API documentation | [Swagger UI](http://127.0.0.1:8000/docs) |
@@ -57,7 +58,7 @@ The server starts at `http://127.0.0.1:8000`; stop it with `Ctrl+C`.
 
 The root URL redirects to the customer page. Select a restaurant to view its details and menu; selection is retained in the URL. A menu-loading failure leaves successfully loaded details visible; selecting the restaurant again retries.
 
-Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. To edit an existing restaurant, select it on the customer page and follow **Edit restaurant**. The form loads the current name, cuisine, and description, sends only changed fields with `PATCH /restaurants/{restaurant_id}`, and links back to the updated details. Validation errors preserve input. If the response is lost, check the details page before retrying. Authentication is outside this M1 slice.
+Follow **Create restaurant**, enter name, cuisine, and description, then submit. Success offers **View restaurant**. Validation/server errors preserve entered values. If creation times out or its response is lost, check **Browse restaurants** before submitting again: the server may have saved the record, and retrying can create duplicates. The form does not retry automatically. To edit an existing restaurant, select it on the customer page and follow **Edit restaurant**. The form loads the current name, cuisine, and description, sends only changed fields with `PATCH /restaurants/{restaurant_id}`, and links back to the updated details. Validation errors preserve input. If the response is lost, check the details page before retrying. Management forms now use a staff sign-in page. First provision a staff account using the documented command and disposable data paths. Open **Staff sign-in**, enter the account credentials, then continue to Create or Edit restaurant. The returned bearer token stays in this browser tab (sessionStorage), not in a URL; it is sent on restaurant and menu-management writes. Administrators can create restaurants, while assigned restaurant users can edit their restaurants and toggle menu-item availability. The backend checks every request: a missing/expired token gives a sign-in-again message, and an unauthorized role or unassigned restaurant gives a not-permitted message. Signing in again replaces the tab's stored staff token. The token remains valid on the server until its 24-hour expiry even when browser storage is cleared. This does not change customer-account sign-in or public restaurant browsing.
 
 ## API endpoints
 
@@ -117,7 +118,7 @@ app/services/           Restaurant/menu rules and checkout orchestration
 app/repositories/       JSON loading, validation, and persistence
 app/schemas/            Pydantic request, response, and persistence models
 app/core/config.py      Configurable restaurant and order data paths
-frontend/               Customer, Create restaurant, and Edit restaurant pages and shared styles
+frontend/               Customer, staff sign-in, Create/Edit restaurant pages and shared styles
 data/restaurants.json   Representative restaurant/menu data
 data/orders.json        Empty order store for the checkout service
 tests/                  Backend/API tests; tests/browser/ for customer and management pages
