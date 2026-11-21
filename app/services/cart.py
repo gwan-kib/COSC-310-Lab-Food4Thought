@@ -1,6 +1,6 @@
-"""Apply Food4Thought cart rules for create/read, add, quantity updates and removal.
-Edits hold the shared workflow lock, recheck current customer status, and price
-the response from current menu data before saving.
+"""Apply Food4Thought cart rules for creation, reads, item additions, quantity edits,
+removal and clearing. Changes check current customer status under the shared workflow
+lock and build backend-priced responses before saving.
 """
 
 from typing import Protocol
@@ -168,6 +168,29 @@ class CartService:
             updated = CartRecord(id=cart.id, customer_id=cart.customer_id, revision=cart.revision + 1,
                                  restaurant_id=cart.restaurant_id if items else None, items=items)
             view = self._view(updated, menu)  # validate remaining references before the write
+            self.carts.save_cart(updated)
+            return view
+
+    def clear_cart(self, customer_id: str) -> CartView:
+        """Empty an owned cart once; an already empty cart keeps its revision without a save."""
+        with workflow_lock:
+            self._require_active(customer_id)
+            cart = self.carts.get_cart(customer_id)
+            if cart is None:
+                raise CartNotFoundError(customer_id)
+            if self._receipt_for(cart) is not None:
+                raise CheckoutRecoveryRequiredError(cart.id)
+
+            # Unavailable items may be cleared, but invalid stored references stay errors.
+            current = self._view(cart)
+            if not cart.items:
+                return current
+            updated = CartRecord(id=cart.id, customer_id=cart.customer_id,
+                                 revision=cart.revision + 1, restaurant_id=None, items=[])
+            view = self._view(updated)
+            if view.checkout_order_id is not None:
+                # Mismatched backups must not reuse a revision already recorded in orders.
+                raise CartDataError(f"Next revision of cart {cart.id} was already purchased")
             self.carts.save_cart(updated)
             return view
 

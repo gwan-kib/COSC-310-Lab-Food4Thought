@@ -234,6 +234,33 @@ cross-customer isolation, failure and checkout recovery. Availability tests use
 the existing shared cart service/repository; Thomas's live issue assignment takes
 precedence over the earlier workstream ownership table for this capability.
 
+### Implemented cart clear (#89)
+
+`DELETE /customers/me/cart/items` requires an active customer bearer identity and
+no body. The route passes only the authenticated customer ID to
+`CartService.clear_cart`; client-supplied owner/cart IDs cannot select another cart.
+Within the shared workflow lock, the service reloads customer status and the owned
+cart, checks the real order receipt, and validates current stored references.
+Unavailable items may be cleared; missing restaurant/item references remain 500
+data errors. A never-created cart returns 404 without creating one.
+
+A nonempty clear saves one complete empty record: unchanged cart/customer IDs,
+revision incremented once, null restaurant, no lines. The 200 `CartView` has
+`subtotal: "0.00"`, `total: "0.00"`, and `checkout_order_id: null`. Clearing an already
+empty cart returns the same view/revision without saving. The service builds the
+response before saving through the existing atomic cart repository; a failed save
+returns a generic 500 and preserves the original lines. No stored schema changes.
+If mismatched backups leave an order receipt for the proposed next revision,
+clear returns a generic 500 without writing instead of reusing that purchased revision.
+
+Missing/invalid/expired identity is 401, wrong role or inactive customer is 403,
+and a saved order for the current revision is 409 `Cart checkout recovery required`.
+Ordinary clear never invokes checkout's conditional `reset_after_order` and never
+edits orders. Real checkout-service replay recovers that revision before normal
+mutations resume; the checkout HTTP route is not yet wired in this base checkout.
+The generated OpenAPI and [clear tests](../tests/test_clear_cart.py) cover the
+route, errors, no-op semantics, persistence and recovery integration.
+
 ### Concrete examples
 
 The machine-readable [example bundle](examples/m2.json) contains registration,

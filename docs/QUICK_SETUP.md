@@ -86,6 +86,13 @@ without a body. Expect 200 with current totals; the last removal empties the car
 releases its restaurant while retaining IDs. GET after restarting with the same
 disposable paths verifies persistence. [Removal details](M2_API_CONTRACT.md#implemented-item-removal-88).
 
+For cart clear, authorize as an active customer in `/docs`, create/add to the cart,
+then call `DELETE /customers/me/cart/items` without a body. Expect 200, the same ID,
+empty items, null restaurant and `"0.00"` totals. Repeating it keeps the revision
+without saving; GET after restart preserves the empty state. Missing carts return
+404 and purchased revisions awaiting checkout recovery return 409. See the
+[clear contract](M2_API_CONTRACT.md#implemented-cart-clear-89).
+
 Menu reads include `available`. For manual writes, sign in with a provisioned staff account through `POST /auth/login` and use **Authorize** in `/docs`. Restaurant creation requires an administrator. Editing a restaurant or writing its menu requires a restaurant user assigned to it. For the management forms, use **Staff sign-in** first. The browser keeps its bearer token in sessionStorage for that tab and sends it on create, edit, and menu-availability PATCH requests. A 401 means sign in again; a 403 means the backend rejected the requested operation. The browser never decides management permissions by itself.
 
 Stop the server with `Ctrl+C`.

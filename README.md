@@ -83,6 +83,7 @@ Management forms now use a staff sign-in page. First provision a staff account u
 | `PUT /customers/me/cart` | Create the cart (201) or return the existing one (200) |
 | `GET /customers/me/cart` | Cart items with backend-calculated subtotal and total |
 | `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
+| `DELETE /customers/me/cart/items` | Clear all lines and release the restaurant; preserve the cart ID, return zero totals; repeat is a no-op |
 | `DELETE /customers/me/cart/items/{item_id}` | Remove an owned line; return current totals and release restaurant binding when empty |
 | `GET /customers/me/orders/{order_id}` | Read an owned saved order, including original items, prices and address; inactive owners retain access |
 | `PATCH /customers/me/cart/items/{item_id}` | Set an existing available line to the supplied positive integer `quantity` and return the repriced cart |

@@ -1,6 +1,6 @@
-"""Expose the signed-in customer's cart, quantities, removal and current totals.
-Every route requires a customer token; mutations also require an active account.
-Business rules stay in CartService.
+"""Expose the signed-in customer's cart, item additions, quantity edits, removal,
+clearing and backend-calculated totals. Routes require customer authentication, with
+active accounts for changes, and delegate cart rules to CartService.
 """
 
 from typing import Annotated
@@ -132,5 +132,22 @@ def remove_item(item_id: str, principal: ActiveCustomer, service: Service) -> Ca
     """
     try:
         return service.remove_item(principal.account_id, item_id)
+    except HANDLED as error:
+        raise _http_error(error) from None
+
+
+@router.delete("/items", response_model=CartView, summary="Clear my shopping cart",
+               responses={**ERRORS,
+                          404: {"model": ErrorResponse, "description": "Cart not found"},
+                          409: {"model": ErrorResponse, "description": "Cart checkout recovery required"}})
+def clear_cart(principal: ActiveCustomer, service: Service) -> CartView:
+    """Clear all lines, release the restaurant and return zero subtotal/total.
+
+    Preserve cart/customer IDs and increment revision once for a nonempty cart.
+    Repeating a clear on an empty cart returns the same view without saving.
+    Purchased revisions pending checkout recovery must be recovered through checkout.
+    """
+    try:
+        return service.clear_cart(principal.account_id)
     except HANDLED as error:
         raise _http_error(error) from None

@@ -79,6 +79,14 @@ service with real stores, changes profile/menu values, and retrieves the origina
 snapshot through the detail API. It is not an HTTP checkout test: that route remains
 #91 work, and history integration is #92. All participating files are isolated.
 
+For #89, run `python -m pytest -q tests/test_clear_cart.py`. These tests use real
+authentication, cart/customer/catalog/order services and temporary JSON stores to
+check clear/repeat, restaurant release, restart, active ownership, generic storage
+failures and unchanged state on failed save. The checkout recovery scenario calls
+the real checkout service (its HTTP route is not yet wired), blocks ordinary clear
+after an order save/reset failure, then replays the receipt and permits later clear
+without changing historical orders. No frontend clear workflow is claimed.
+
 ### Test-first cycle
 
 **Team convention:** use a test-first cycle for new or changed behaviour and bug fixes. Tests come before the implementation code they verify.
