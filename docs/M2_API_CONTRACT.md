@@ -70,7 +70,9 @@ framework or an alternative persistence implementation.
 The proposed service boundaries return validated snapshots or `None` for absence;
 storage failures remain exceptions, not absence. `CustomerAccess.get_customer(id)`
 reloads identity/status. `CatalogAccess.get_restaurant(id)` and
-`get_item(restaurant_id, item_id)` distinguish parent/item absence.
+`get_item(restaurant_id, item_id)` distinguish parent/item absence;
+`get_menu(restaurant_id)` returns every item of one restaurant from a single read, and
+carts and checkout price all lines from that one snapshot.
 `CartAccess.get_cart(customer_id)` returns the stored ID/revision/items;
 `reset_after_order(customer_id, cart_id, expected_revision)` returns true on a
 matching reset, false when it no longer matches, and raises on storage failure.

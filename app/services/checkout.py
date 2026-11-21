@@ -2,7 +2,7 @@
 The saved snapshot is the receipt used to recover a failed or interrupted reset.
 """
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Protocol
 from uuid import uuid4
@@ -52,7 +52,8 @@ class CatalogItem(Protocol):
 
 class CatalogAccess(Protocol):
     def get_restaurant(self, restaurant_id: str) -> Restaurant | None: ...
-    def get_item(self, restaurant_id: str, item_id: str) -> CatalogItem | None: ...
+    # Every item of one restaurant from a single read, so all lines share one menu state.
+    def get_menu(self, restaurant_id: str) -> Mapping[str, CatalogItem] | None: ...
 
 
 class CartNotFound(Exception):
@@ -128,7 +129,11 @@ class CheckoutService[Principal]:
         restaurant = self.catalog.get_restaurant(cart.restaurant_id)
         if restaurant is None or restaurant.id != cart.restaurant_id:
             raise CheckoutDataError()
-        items = [self._purchase_line(restaurant.id, line) for line in cart.items]
+        # One menu read prices every line, so a concurrent menu update cannot mix states.
+        menu = self.catalog.get_menu(restaurant.id)
+        if menu is None:
+            raise CheckoutDataError()
+        items = [self._purchase_line(menu, line) for line in cart.items]
         total = money(sum(cents(item.line_total) for item in items))
         order_id = str(uuid4())
         while self.orders.get_order(order_id) is not None:
@@ -140,8 +145,8 @@ class CheckoutService[Principal]:
             status="placed", items=items, subtotal=total, total=total,
         )
 
-    def _purchase_line(self, restaurant_id: str, line: CartLine) -> PurchasedItem:
-        item = self.catalog.get_item(restaurant_id, line.item_id)
+    def _purchase_line(self, menu: Mapping[str, CatalogItem], line: CartLine) -> PurchasedItem:
+        item = menu.get(line.item_id)
         if item is None or item.id != line.item_id:
             raise CheckoutDataError()
         if type(line.quantity) is not int or line.quantity <= 0 or type(item.available) is not bool:

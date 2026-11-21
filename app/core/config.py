@@ -21,3 +21,35 @@ def get_orders_data_path() -> Path:
     if override:
         return Path(override)
     return Path(__file__).resolve().parents[2] / "data" / "orders.json"
+
+
+def get_customers_data_path() -> Path:
+    """Resolve customer account storage when constructing the repository."""
+    override = os.getenv("CUSTOMERS_DATA_PATH")
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parents[2] / "data" / "customers.json"
+
+
+def get_sessions_data_path() -> Path:
+    """Resolve sign-in session storage when constructing the repository."""
+    override = os.getenv("SESSIONS_DATA_PATH")
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parents[2] / "data" / "sessions.json"
+
+
+def get_staff_data_path() -> Path:
+    """Resolve provisioned staff-account storage (#107) when resolving staff sessions."""
+    override = os.getenv("STAFF_DATA_PATH")
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parents[2] / "data" / "staff.json"
+
+
+def get_carts_data_path() -> Path:
+    """Resolve cart storage when constructing the repository."""
+    override = os.getenv("CARTS_DATA_PATH")
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parents[2] / "data" / "carts.json"

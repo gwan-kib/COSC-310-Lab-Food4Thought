@@ -273,6 +273,17 @@ Facts checked against the pinned FastAPI with a probe app (results in PR #106):
   error, such as a whole-model validator, every submitted password is replaced with
   `[redacted]` wherever it appears in `msg` or `ctx`. Custom messages about other fields are
   kept. Regression tests cover both validator kinds.
+- **Cross-field follow-up (#102)** uses passwords from the parsed request body to
+  scrub `msg` and `ctx` even when Pydantic reports only the other field as `input`.
+  The [review finding](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106#pullrequestreview-5984850396)
+  has a [regression test](../tests/test_credential_redaction.py) that preserves the
+  email diagnostic and removes the password from both fields.
+- **PR #110 follow-up** redacts a reported input value if it contains a submitted
+  password, even when the error points to another field. Custom diagnostics and
+  context redact literal and Python `repr` forms of the password. Fixed built-in
+  messages and string length diagnostics retain their standard wording.
+  [First review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985133060)
+  · [Second review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/110#pullrequestreview-5985366789)
 - Committed data has no hashes or tokens: `data/` gets no seeded accounts. Demo staff
   accounts are provisioned locally. Example and fixture passwords are labelled dummies.
 - Passwords are never sent in URLs or query strings.

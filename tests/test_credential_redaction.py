@@ -1,12 +1,13 @@
 """Check that Food4Thought's shared 422 handler never echoes submitted passwords.
 Registration and login (#79/#80) reuse this handler, so these checks use test-only
-routes, including custom validators that put submitted values in their messages.
+routes, including validators that put passwords in field and model diagnostics.
 """
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
+from pydantic_core import PydanticCustomError
 
 from app.api.errors import request_validation_error
 
@@ -24,14 +25,21 @@ class CredentialRequest(BaseModel):
 class LeakyValidatorRequest(BaseModel):
     """Custom validators that wrongly put submitted values in their error messages."""
 
-    email: str
     password: str
+    email: str
 
     @field_validator("email")
     @classmethod
-    def email_has_at_sign(cls, value: str) -> str:
+    def validate_email(cls, value: str, info: ValidationInfo) -> str:
         if "@" not in value:
             raise ValueError(f"email {value!r} needs an @")
+        password = info.data.get("password")
+        if password and password.endswith(value):
+            raise PydanticCustomError(
+                "email_matches_password_suffix",
+                "Email {email} matches the end of password {submitted}",
+                {"email": value, "submitted": password},
+            )
         return value
 
     @field_validator("password")
@@ -145,3 +153,66 @@ def test_custom_messages_for_other_fields_are_kept():
     assert error["loc"] == ["body", "email"]
     assert error["msg"] == "Value error, email 'no-at-sign' needs an @"
     assert error["input"] == "no-at-sign"
+
+
+def test_password_in_another_fields_message_and_context_is_redacted():
+    email = "a@example.invalid"
+    password = f"unique-password-ending-in-{email}"
+
+    response = _client().post("/leaky", json={"email": email, "password": password})
+
+    assert response.status_code == 422
+    assert password not in response.text
+    [error] = response.json()["detail"]
+    assert error["loc"] == ["body", "email"]
+    assert error["input"] == email
+    assert error["msg"] == f"Email {email} matches the end of password {REDACTED}"
+    assert error["ctx"] == {"email": email, "submitted": REDACTED}
+
+
+def test_rejected_input_equal_to_the_password_is_redacted():
+    password = "same-value@example.invalid"
+
+    response = _client().post("/leaky", json={"email": password, "password": password})
+
+    assert response.status_code == 422
+    [error] = response.json()["detail"]
+    assert error["loc"] == ["body", "email"]
+    assert error["input"] == REDACTED
+    assert password not in response.text
+
+
+def test_rejected_input_containing_the_password_is_redacted():
+    password = "pasted-password-with-trailing-space"
+    response = _client().post("/leaky", json={"email": password + " ", "password": password})
+
+    assert response.status_code == 422
+    [error] = response.json()["detail"]
+    assert error["loc"] == ["body", "email"]
+    assert error["input"] == REDACTED
+    assert password not in response.text
+
+
+def test_short_password_does_not_change_builtin_diagnostics():
+    response = _client().post("/credentials", json={"email": 7, "password": "a"})
+
+    assert response.status_code == 422
+    errors = {tuple(error["loc"]): error for error in response.json()["detail"]}
+    assert errors[("body", "email")]["msg"] == "Input should be a valid string"
+    assert errors[("body", "password")]["msg"] == "String should have at least 12 characters"
+    assert errors[("body", "password")]["input"] == REDACTED
+
+
+def test_repr_formatted_password_is_redacted_in_message_and_context():
+    email = "a@example.invalid"
+    password = email + "\\path\nwith'quotes\""
+
+    response = _client().post("/leaky", json={"email": email, "password": password})
+
+    assert response.status_code == 422
+    [error] = response.json()["detail"]
+    assert error["loc"] == ["body"]
+    assert error["input"] == {"email": email, "password": REDACTED}
+    diagnostic = f"password '{REDACTED}' must not start with the email"
+    assert error["msg"] == f"Value error, {diagnostic}"
+    assert error["ctx"] == {"error": diagnostic}

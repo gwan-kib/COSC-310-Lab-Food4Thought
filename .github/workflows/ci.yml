@@ -1,7 +1,7 @@
 # Check Food4Thought's application and tests on pushes and pull requests to main
 # using Python 3.12 and pinned dependencies. Require Chromium browser tests
-# alongside backend checks and reject changes to committed data so unavailable
-# browser coverage or unsafe test writes cannot pass silently.
+# alongside backend checks and reject changes or new files under data/ so
+# unavailable browser coverage or unsafe test writes cannot pass silently.
 
 name: CI
 
@@ -35,5 +35,11 @@ jobs:
           # Fail, rather than skip, if the browser tests cannot run.
           REQUIRE_BROWSER_TESTS: "1"
         run: python -m pytest
-      - name: Confirm tests left committed data unchanged
-        run: git diff --exit-code -- data/
+      - name: Confirm tests left application data unchanged
+        if: ${{ !cancelled() }}
+        run: |
+          changes=$(git status --porcelain --untracked-files=all --ignored -- data/)
+          if [ -n "$changes" ]; then
+            printf '%s\n' "$changes"
+            exit 1
+          fi
