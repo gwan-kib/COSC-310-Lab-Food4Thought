@@ -1,9 +1,9 @@
-# Proposed M2 API and persistence contract
+# M2 API and persistence contract (design baseline)
 
 ## Status, sources, and limits
 
 Prepared for [#77](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/77)
-on 2026-11-03. **Proposed interface contract for M2 implementation.**
+on 2026-11-03. **This file preserves the original proposed interface, followed by implemented-feature notes.** Since that baseline was written, authentication, customer/cart/order routes and six-store persistence have been merged. Use the [current README](../README.md#api-endpoints), [data model](DATA_MODEL.md), actual routes and tests, and the [M2 release gate](milestones/M2.md#m2-submission-readiness-audit-issue-104) to distinguish implemented behavior from still-open end-to-end/OpenAPI review. The historical words “proposed” below describe decisions at that earlier stage; they do not mean all M2 features remain unimplemented.
 [Thomas's review](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/105#pullrequestreview-5791463356) on 2026-11-05 identified the checkout lock ordering,
 adoption criteria and source traceability changes. See the
 [adoption checklist](#contract-adoption) for the decisions still to record.
@@ -15,7 +15,7 @@ Source review:
   authentication, cart, checkout and order scope; §4 cross-subsystem rules;
   §6 persistence; §7 tests; §8 API documentation. The live course page could not
   be verified for this revision.
-- Current `main`, `87ce91c1a28648f849063a46620a7321a6d2e637`:
+- Historical `main` snapshot inspected on 2026-11-03, `87ce91c1a28648f849063a46620a7321a6d2e637`:
   [routes](../app/api/routes/restaurants.py), [schemas](../app/schemas/restaurant.py),
   [services](../app/services/restaurant.py), [repository](../app/repositories/restaurant.py),
   [configuration](../app/core/config.py), [frontend](../frontend/app.js), and
@@ -48,11 +48,10 @@ The repository contains the brief's summary. Exact required profile/address
 fields, sign-in mechanism, role permissions and restaurant ownership assignment
 were reconciled against the project brief in
 [#78](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/78); see the
-proposed [authentication and authorization design](AUTH_DESIGN.md), which is
-awaiting review. It grants no reactivation capability.
-Paths, status literals, transport, quantity semantics, money policy and retry
-details remain proposed design choices. Keep the contract, examples, test
-doubles and feature implementations aligned through review.
+[adopted authentication and authorization design](AUTH_DESIGN.md) and merged [PR #106](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/106). No reactivation capability was added.
+The initial paths, status literals, transport, quantity semantics, money policy and retry
+rules were design choices; check the implemented routes/tests and unresolved
+integration gates before asserting the complete system matches every detail.
 
 ## Ownership and parallel work
 
