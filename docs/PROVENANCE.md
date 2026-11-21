@@ -812,6 +812,32 @@ Historical entries below transfer the disclosures previously in `CONTRIBUTING.md
 - PR or commit: [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114), following merged [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113).
 - Student review status: Pending confirmation by the responsible students.
 
+### Entry 63: Deactivate account and protected cart routes
+
+- Student(s): Sreeram Nara (`SreeramNara`), assignee of #83, #84, #85, #86 and #90.
+- Artifact: `app/api/routes/carts.py`, the deactivate route in `app/api/routes/customers.py`, `CustomerService.deactivate` in `app/services/customer.py`, router registration in `app/main.py`, `tests/test_cart_api.py`, and cart/deactivate lines in `README.md` and `docs/FIRST_TIME_SETUP.md`. The branch combines PRs #113 and #114, which it builds on.
+- Label: `AI-GENERATED`
+- AI tool: Claude (Anthropic), via claude.ai.
+- Purpose: Connect the cart service (#113) to customer sign-in (#114) so the cart works through the API, and add account deactivation, for the M2 customer-to-cart workflow.
+- Influence: Claude wrote the API tests first, then: `POST /customers/me/deactivate` (sets inactive under the workflow lock, keeps ID/cart/orders, repeat is 200); `PUT /customers/me/cart` (201 new / 200 existing), `GET /customers/me/cart` (never creates; inactive customers may read) and `POST /customers/me/cart/items`, wired to the real customer, cart, restaurant-catalog and order-receipt stores; customer-role checks on all of them and active-customer pre-checks on writes, so an old token cannot change the cart after deactivation, even with an invalid body; and one mapping from cart-service outcomes to the contract's 401/403/404/409/500 messages.
+- Validation: The 25 tests in `tests/test_cart_api.py` failed before the routes existed and passed after. The unavailable-item case overrides the catalog dependency because menu availability (#94) is not on `main` yet. With Python 3.12, `REQUIRE_BROWSER_TESTS=1 python -m pytest -q` passed 581 tests with the committed-data guard.
+- PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115); branch `feature/83-84-cart-routes`.
+- Review follow-up: Thomas Chen (`Tc2006415`) requested changes on PR #115. Claude added failing regression tests and then: priced every cart line, and validated added items, from one restaurant menu snapshot (`get_menu`, also added to the contract's `FakeCatalog`), so concurrent menu updates cannot mix prices in one response; declared `CartView` as the 201 body of `PUT /customers/me/cart`; and merged the #113 and #114 review fixes (order reader, staff roles, staff login, setup guides). A cross-service test keeps customer and cart IDs and the saved order snapshot unchanged after a profile update, and a staff record claiming the customer role cannot reach the cart (it already passed with the #114 fix). #83, #86 and #90 stay open: checkout-route denial needs Thomas's checkout route, and real-store unavailable-item tests need #109. Gwantana's PR #110 had used entries 55–57, so these entries were renumbered 60–62.
+- Second review follow-up: Gwantana Kiboigo (`gwan-kib`) reviewed revision `cadef88`. Claude wrote failing regressions, then added `CustomerService.active_customer_for`, the resolver the checkout route must pass to `CheckoutService`: it returns the stored customer (with `id` and `delivery_address`) and raises `CustomerInactiveError` for an inactive account, inside checkout's workflow lock. A test signs in, fills the cart, deactivates, and checks that checkout with the old principal is refused with customer, cart and order files unchanged; the cross-service test now uses the same resolver. Checkout now prices every order line from one `get_menu` snapshot (contract text and `CatalogAccess` updated), with a changing-menu regression showing one menu read and one consistent total. The HTTP 403 from a real checkout request still needs Thomas's checkout route, so #83 stays open.
+- Student review status: Pending. Sreeram has not yet confirmed he has read and can explain this code.
+
+### Entry 64: Integrate PR #115 with merged account and cart foundation
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), requester and integrator; original PR #115 implementation and its validation remain credited to Sreeram Nara (`SreeramNara`).
+- Artifact: Integration of PR #115 on `feature/83-84-cart-routes`, `docs/DATA_MODEL.md`, and `docs/PROVENANCE.md`.
+- Label: `AI-GENERATED`
+- AI tool: ChatGPT (OpenAI).
+- Purpose: Combine the reviewed account-deactivation and protected-cart features with already merged PRs #113 and #114 without undoing either implementation.
+- Influence: ChatGPT constructed a merge tree retaining the current `main` store configuration and account documentation while adding the cart HTTP routes, checkout customer resolver, menu snapshot fixes, regression tests and feature documentation from PR #115. The two different provenance entry 62s were preserved by renumbering this PR's entry to 63; this entry records the integration.
+- Validation: The file differences and preserved tree paths were inspected prior to integration. Passing CI and merge outcome are verified separately; no student understanding or manual testing is claimed.
+- PR or commit: [PR #115](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/115) following [PR #113](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/113) and [PR #114](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/114).
+- Student review status: Pending confirmation by responsible students.
+
 ### Entry 65: Staff account provisioning command
 
 - Student(s): Sreeram Nara (`SreeramNara`), assignee of #107.

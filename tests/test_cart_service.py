@@ -313,3 +313,57 @@ def test_repeated_add_across_the_int_text_limit_saves_and_reloads_exactly(m2_sto
     assert view.items[0].quantity == 10**4300
     assert CartRepository().get_cart("customer-001").items[0].quantity == 10**4300
     assert _service().get_cart("customer-001") == view
+
+
+# --- PR #115 review regressions -----------------------------------------------------
+
+class ChangingMenuCatalog:
+    """Each read returns the menu after one more concurrent price update, like a live store."""
+
+    def __init__(self):
+        self.reads = 0
+        self.restaurant = RestaurantCatalog().get_restaurant("restaurant-001")
+
+    def _menu_now(self):
+        self.reads += 1
+        bump = self.reads  # item-002 always costs exactly 10.00 more than item-001
+        return {"item-001": CatalogItem(id="item-001", name="Bowl", description="d",
+                                        price=f"{10 + bump}.00", available=True),
+                "item-002": CatalogItem(id="item-002", name="Udon", description="d",
+                                        price=f"{20 + bump}.00", available=True)}
+
+    def get_restaurant(self, restaurant_id):
+        return self.restaurant if restaurant_id == "restaurant-001" else None
+
+    def get_item(self, restaurant_id, item_id):
+        return self._menu_now().get(item_id) if restaurant_id == "restaurant-001" else None
+
+    def get_menu(self, restaurant_id):
+        return self._menu_now() if restaurant_id == "restaurant-001" else None
+
+
+def test_one_cart_read_prices_every_line_from_one_menu_state(m2_store_paths):
+    cart, _ = CartRepository().create_cart("customer-001")
+    CartRepository().save_cart(CartRecord(
+        id=cart.id, customer_id="customer-001", revision=1, restaurant_id="restaurant-001",
+        items=[CartItem(item_id="item-001", quantity=1), CartItem(item_id="item-002", quantity=1)]))
+
+    view = _service(catalog=ChangingMenuCatalog()).get_cart("customer-001")
+
+    first, second = (cents(line.unit_price) for line in view.items)
+    assert second - first == 1000, "lines were priced from different menu states"
+    assert cents(view.total) == first + second
+
+
+def test_add_validates_and_prices_from_the_same_menu_state(m2_store_paths):
+    catalog = ChangingMenuCatalog()
+    service = _service(catalog=catalog)
+    service.create_or_get_cart("customer-001")
+    service.add_item("customer-001", _add(item_id="item-002", quantity=1))
+    reads_before = catalog.reads
+
+    view = service.add_item("customer-001", _add(item_id="item-001", quantity=1))
+
+    assert catalog.reads - reads_before == 1
+    first, second = sorted(cents(line.unit_price) for line in view.items)
+    assert second - first == 1000

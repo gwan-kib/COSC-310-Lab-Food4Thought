@@ -149,6 +149,7 @@ class CustomerAccess(Protocol):
 class CatalogAccess(Protocol):
     def get_restaurant(self, restaurant_id: str) -> Restaurant | None: ...
     def get_item(self, restaurant_id: str, item_id: str) -> CatalogItem | None: ...
+    def get_menu(self, restaurant_id: str) -> dict[str, CatalogItem] | None: ...
 
 
 class CartAccess(Protocol):
@@ -193,6 +194,13 @@ class FakeCatalog:
 
     def get_item(self, restaurant_id: str, item_id: str) -> CatalogItem | None:
         return deepcopy(self.items.get((restaurant_id, item_id)))
+
+    def get_menu(self, restaurant_id: str) -> dict[str, CatalogItem] | None:
+        """All of one restaurant's items from a single read (carts price from one snapshot)."""
+        if restaurant_id not in self.restaurants:
+            return None
+        return {item_id: deepcopy(item) for (owner, item_id), item in self.items.items()
+                if owner == restaurant_id}
 
 
 class FakeCartAccess:

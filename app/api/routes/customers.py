@@ -1,5 +1,5 @@
 """Expose Food4Thought's customer account endpoints: register (#79), sign in (#80),
-and read or update the signed-in customer's own profile (#81/#82). Routes translate
+read or update the signed-in customer's own profile (#81/#82), and deactivate it (#83). Routes translate
 service outcomes to HTTP; account rules live in the customer and auth services.
 """
 
@@ -87,5 +87,18 @@ def update_my_profile(principal: ActiveCustomer, request: CustomerProfileUpdate,
         raise authentication_required() from None
     except CustomerInactiveError:
         raise HTTPException(403, "Customer is inactive") from None
+    except StorageFailure:
+        raise HTTPException(500, CUSTOMER_DATA_ERROR) from None
+
+
+@router.post("/customers/me/deactivate", response_model=Customer, summary="Deactivate my account",
+             responses=AUTH_ERRORS)
+def deactivate_my_account(principal: CurrentCustomer, service: Service) -> Customer:
+    """Set the account inactive. The ID, cart and orders are kept; there is no reactivation.
+    An inactive customer can still sign in and read, but cannot change the cart or check out."""
+    try:
+        return service.deactivate(principal.account_id)
+    except CustomerNotFoundError:
+        raise authentication_required() from None
     except StorageFailure:
         raise HTTPException(500, CUSTOMER_DATA_ERROR) from None

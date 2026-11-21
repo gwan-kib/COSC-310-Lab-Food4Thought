@@ -75,6 +75,10 @@ Follow **Create restaurant**, enter name, cuisine, and description, then submit.
 | `POST /auth/login` | Sign in; returns a bearer token valid for 24 hours |
 | `GET /customers/me` | Read the signed-in customer's profile (`Authorization: Bearer <token>`) |
 | `PATCH /customers/me` | Update the signed-in customer's name and/or delivery address |
+| `POST /customers/me/deactivate` | Deactivate the signed-in account (it can still sign in and read, but not change the cart) |
+| `PUT /customers/me/cart` | Create the cart (201) or return the existing one (200) |
+| `GET /customers/me/cart` | Cart items with backend-calculated subtotal and total |
+| `POST /customers/me/cart/items` | Add `restaurant_id`, `item_id`, `quantity`; one restaurant per cart |
 
 In `/docs`, sign in with `POST /auth/login`, then click **Authorize** and paste the `access_token` to call the `/customers/me` endpoints. The [authentication design](docs/AUTH_DESIGN.md) explains tokens, roles and errors. Restaurant users and administrators are created with `python -m app.scripts.create_staff_account` (see [staff accounts](docs/FIRST_TIME_SETUP.md#staff-accounts-for-manual-experiments)).
 
