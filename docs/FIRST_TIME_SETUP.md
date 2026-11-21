@@ -85,7 +85,7 @@ With the virtual environment active:
 python -m pip install -r requirements.txt
 ```
 
-The pinned application dependencies include FastAPI, Uvicorn, Pydantic, pwdlib with Argon2 (used for application password hashing), pytest and httpx. For Chromium browser tests, also install `requirements-dev.txt` and Playwright's Chromium browser as shown below.
+The pinned application dependencies include FastAPI, Uvicorn, Pydantic, pwdlib with Argon2 (used for application password hashing), pytest and httpx2. For Chromium browser tests, also install `requirements-dev.txt` and Playwright's Chromium browser as shown below.
 
 ## 6. Verify the test suite
 
