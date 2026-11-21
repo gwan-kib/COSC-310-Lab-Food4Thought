@@ -2,7 +2,7 @@
 
 Use this guide when setting up Food4Thought on a machine for the first time.
 
-This document describes the application as it exists now. The repository currently contains a FastAPI backend serving customer discovery, account, cart/checkout, create-restaurant, and edit-restaurant pages, JSON restaurant data, and a pytest test suite. It does not require a database, frontend build step, API keys, or other secrets.
+This guide describes the implemented FastAPI backend and customer discovery, account, cart/checkout, staff sign-in, create-restaurant and edit-restaurant pages. The backend uses six JSON stores (restaurants, customers, sessions, staff, carts and orders), and the repository includes pytest and real-browser tests. It does not require a database, frontend build step, API keys, or other secrets.
 
 For later sessions on a machine that is already configured, use [Quick Setup](QUICK_SETUP.md).
 
@@ -85,7 +85,7 @@ With the virtual environment active:
 python -m pip install -r requirements.txt
 ```
 
-The current dependency file installs FastAPI, Uvicorn, Pydantic, pwdlib with Argon2 (password hashing; currently used by the authentication test fixtures), pytest, and httpx2.
+The pinned application dependencies include FastAPI, Uvicorn, Pydantic, pwdlib with Argon2 (used for application password hashing), pytest and httpx2. For Chromium browser tests, also install `requirements-dev.txt` and Playwright's Chromium browser as shown below.
 
 ## 6. Verify the test suite
 
@@ -93,7 +93,7 @@ The current dependency file installs FastAPI, Uvicorn, Pydantic, pwdlib with Arg
 python -m pytest
 ```
 
-The tests use a temporary restaurant-data copy and disposable M2 store paths. Customers, carts, staff and sessions are initialized per test; orders are initialized only when a test requests `m2_store_paths`. See [test isolation](TESTING.md#one-default-for-file-isolation).
+The tests use isolated temporary paths for all six stores; each test initializes the records it needs (including optional order fixtures). See [test isolation](TESTING.md#one-default-for-file-isolation).
 
 The real-browser frontend tests in `tests/browser/` skip if Playwright or Chromium is unavailable locally. CI always runs them. To run them locally as well:
 
