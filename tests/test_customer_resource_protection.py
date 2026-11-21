@@ -30,8 +30,10 @@ CUSTOMER_ENDPOINTS = [
     ("GET", "/customers/me/orders", None),
     ("GET", "/customers/me/orders/order-x", None),
 ]
+# Every write a deactivated customer is refused: profile edits, all cart changes and checkout.
+# Reads stay allowed, and repeating deactivation is an allowed no-op (it changes nothing).
 WRITES_DENIED_WHEN_INACTIVE = [e for e in CUSTOMER_ENDPOINTS
-                               if e[1].startswith("/customers/me/c") and e[0] != "GET"]
+                               if e[0] != "GET" and e[1] != "/customers/me/deactivate"]
 
 
 @pytest.fixture
@@ -80,13 +82,20 @@ def test_deactivated_customer_keeps_records_but_every_write_is_refused(client, m
     assert (deactivated.json()["id"], deactivated.json()["status"]) == ("customer-001", "inactive")
     before = _bytes(m2_store_paths)
 
-    # The old token can no longer change the cart or check out, even with valid bodies.
+    # The old token can no longer edit the profile, change the cart or check out, even with
+    # valid bodies.
     checkout = client.post("/customers/me/checkout", headers=old_token,
                            json={"cart_id": cart["id"], "cart_revision": cart["revision"]})
     assert (checkout.status_code, checkout.json()) == (403, {"detail": "Customer is inactive"})
     for method, path, body in WRITES_DENIED_WHEN_INACTIVE:
         response = _call(client, method, path, body, old_token)
         assert (response.status_code, response.json()) == (403, {"detail": "Customer is inactive"}), path
+    assert _bytes(m2_store_paths) == before
+
+    assert {(m, p) for m, p, _ in WRITES_DENIED_WHEN_INACTIVE} >= {
+        ("PATCH", "/customers/me"), ("POST", "/customers/me/checkout"), ("PUT", "/customers/me/cart")}
+    repeated = client.post("/customers/me/deactivate", headers=old_token)
+    assert (repeated.status_code, repeated.json()["status"]) == (200, "inactive")
     assert _bytes(m2_store_paths) == before
 
     # Nothing was deleted: the same account, cart and order are still readable.
