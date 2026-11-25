@@ -1266,11 +1266,11 @@ its pending-auth and local-only status.
 ### Entry 93: Food4Thought logo, illustrations and spacing (#140)
 
 - Student(s): Gwantana Kiboigo (gwan-kib), issue assignee and requesting student.
-- Artifact: Frontend templates, shared styles and presentation helpers, logo, illustration assets and Material Symbols sprite.
+- Artifact: Frontend templates, shared styles and presentation helpers, logo, illustration assets, Material Symbols sprite and two existing Chromium tests.
 - Label: AI-GENERATED.
 - AI tool: OpenAI Codex.
 - Purpose: Apply a Food4Thought logo, Google Material Symbols, restaurant-specific SVG illustrations and consistent spacing to the redesign.
-- Influence: Codex drew the original brand mark and illustrations, assembled the sprite from the upstream Material Symbols Outlined SVGs and updated the templates and styles. Restaurant illustrations attach to stable IDs, and the default storefront symbol covers other restaurants. Browser actions and accessibility labels keep their original meaning.
+- Influence: Codex drew the original brand mark and illustrations, assembled the sprite from the upstream Material Symbols Outlined SVGs and updated the templates and styles. Restaurant illustrations attach to stable IDs, and the default storefront symbol covers other restaurants. Browser actions and accessibility labels keep their original meaning. Two browser tests compare the number of images before and after submitting user text so the brand mark can coexist with the existing checks for injected images.
 - Validation: Checked JavaScript syntax, four SVG files, the shared logo on all six pages, and references to the Material Symbols and restaurant illustrations. The 120 focused repository and service tests passed. The local Windows environment blocked loopback during Uvicorn startup, so Chromium verification is tracked on PR #142.
 - PR: [#142](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/142).
 - Student review status: Pending.
