@@ -35,7 +35,7 @@ form.addEventListener("submit", async event => {
   fieldset.disabled = true;
   form.setAttribute("aria-busy", "true");
   errors.textContent = "";
-  status.textContent = "Signing in…";
+  setStatus(status, "Signing in…", "loading");
   const submittedPassword = password.value;
   try {
     const response = await requestJson("/auth/login", {

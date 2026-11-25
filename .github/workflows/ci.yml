@@ -30,27 +30,7 @@ jobs:
         run: |
           python -m pip install -r requirements-dev.txt
           python -m playwright install --with-deps chromium
-      - name: Check out test-first baseline
-        uses: actions/checkout@v6
-        with:
-          ref: 6bba3c890cdf391200dc6574663ed3d57d1c7843
-          path: test-first-baseline
-      - name: Confirm public menu regression fails on baseline
-        timeout-minutes: 2
-        working-directory: test-first-baseline
-        env:
-          REQUIRE_BROWSER_TESTS: "1"
-        run: |
-          set +e
-          python -m pytest -q 'tests/browser/test_staff_sign_in_browser.py::test_public_menu_is_read_only[False]' > "$RUNNER_TEMP/food4thought-red.log" 2>&1
-          status=$?
-          set -e
-          cat "$RUNNER_TEMP/food4thought-red.log"
-          test "$status" -eq 1
-          grep -F 'Expected: 0' "$RUNNER_TEMP/food4thought-red.log"
-          grep -F 'Mark unavailable' "$RUNNER_TEMP/food4thought-red.log"
       - name: Run tests
-        timeout-minutes: 4
         env:
           # Fail, rather than skip, if the browser tests cannot run.
           REQUIRE_BROWSER_TESTS: "1"

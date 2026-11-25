@@ -80,7 +80,7 @@ form.addEventListener("submit", async event => {
   submitting = true;
   fieldset.disabled = true;
   form.setAttribute("aria-busy", "true");
-  status.textContent = "Creating restaurant…";
+  setStatus(status, "Creating restaurant…", "loading");
   let focusAfter = null;
 
   try {

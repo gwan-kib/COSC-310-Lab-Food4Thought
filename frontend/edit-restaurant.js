@@ -113,7 +113,7 @@ async function loadRestaurant() {
   returnLink.hidden = true;
   retryLoad.hidden = true;
   clearFieldErrors();
-  editStatus.textContent = "Loading restaurant…";
+  setStatus(editStatus, "Loading restaurant…", "loading");
 
   try {
     const { ok, status, body } = await requestJson(
@@ -165,7 +165,7 @@ editForm.addEventListener("submit", async event => {
   saving = true;
   editFields.disabled = true;
   editForm.setAttribute("aria-busy", "true");
-  editStatus.textContent = "Saving changes…";
+  setStatus(editStatus, "Saving changes…", "loading");
   let focusAfter = null;
 
   try {

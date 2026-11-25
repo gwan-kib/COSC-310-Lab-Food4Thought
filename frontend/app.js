@@ -72,7 +72,7 @@ function restaurantHash(restaurantId) {
 async function loadRestaurants(cuisine) {
   const request = ++listRequest;
   const query = cuisine ? `?cuisine=${encodeURIComponent(cuisine)}` : "";
-  setStatus(listStatus, "Loading restaurants…");
+  setStatus(listStatus, "Loading restaurants…", "loading");
   restaurantList.replaceChildren();
 
   try {
@@ -175,7 +175,7 @@ async function showDetails(selection, focusHeading = false) {
   }
 
   const path = `/restaurants/${encodeURIComponent(restaurantId)}`;
-  setStatus(detailsStatus, "Loading restaurant…");
+  setStatus(detailsStatus, "Loading restaurant…", "loading");
 
   // Start both requests together, but handle them separately: the details are
   // the core requirement, so a menu failure must not hide them.
@@ -214,7 +214,7 @@ function renderRestaurant(restaurant) {
   editRestaurantLink.href = `edit-restaurant.html?id=${encodeURIComponent(restaurant.id)}`;
   editRestaurantLink.hidden = !staffToken();
   menuList.replaceChildren();
-  setStatus(menuStatus, "Loading menu…");
+  setStatus(menuStatus, "Loading menu…", "loading");
   setStatus(detailsStatus, "");
   detailsContent.hidden = false;
 }
@@ -255,7 +255,7 @@ function renderMenu(menu, restaurantId) {
         return;
       }
       addButton.disabled = true;
-      setStatus(menuStatus, "Adding to cart…");
+      setStatus(menuStatus, "Adding to cart…", "loading");
       try {
         // The backend requires an explicitly created active cart. PUT returns
         // the same cart when it already exists and never replaces its items.

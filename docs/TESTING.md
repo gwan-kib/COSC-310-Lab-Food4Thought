@@ -48,6 +48,8 @@ The Edit restaurant browser tests in `tests/browser/test_edit_restaurant_browser
 
 The [cart/checkout browser tests](../tests/browser/test_cart_checkout_browser.py) exercise real sign-in and menu/cart interactions, backend persistence of cart updates and checkout receipts, unavailable-item rejection, inactive-customer denial, and a lost checkout response without a duplicate POST. They also mock the cart contract to check request payloads and bearer headers. Every browser case inherits disposable paths for all six stores and the committed-data guard. Run `REQUIRE_BROWSER_TESTS=1 python -m pytest -q tests/browser/test_cart_checkout_browser.py` with Chromium installed.
 
+The staff sign-in browser suite covers read-only public availability, the assigned manager's two availability actions, read-only controls for known restrictions, and feedback after the backend denies an unassigned manager. Run `python -m pytest -q tests/browser/test_staff_sign_in_browser.py` with required Chromium to verify those paths.
+
 ## Write tests before implementation
 
 ### M2 contract handoff support

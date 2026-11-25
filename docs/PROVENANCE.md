@@ -1254,11 +1254,11 @@ its pending-auth and local-only status.
 ### Entry 92: Food4Thought frontend redesign (#140)
 
 - Student(s): Gwantana Kiboigo (`gwan-kib`), issue #140 assignee and requesting student.
-- Artifact: Frontend HTML, CSS, JavaScript, decorative food photography and icons, browser regressions, and this entry.
+- Artifact: Frontend HTML, CSS, JavaScript, decorative food photography and icons, browser regressions, setup and testing documentation, and this entry.
 - Label: `AI-GENERATED`.
 - AI tools: OpenAI Codex and OpenAI ImageGen.
 - Purpose: Give the existing customer and staff flows a consistent green design and make menu availability changes discoverable only in restaurant management.
 - Influence: Codex implemented the shared styles, responsive layouts, feedback and staff controls with the existing frontend modules and REST client. The sign-in role is used for presentation. The existing backend role and restaurant assignment checks remain authoritative. ImageGen produced decorative photos for the hero, representative dishes and fallback imagery. Codex authored the browser test updates.
-- Validation: The browser regressions were committed before the implementation. Local browser setup stalled inside Windows loopback socket creation, so required Chromium verification is tracked in GitHub Actions on the PR.
+- Validation: The test-only commit was added before the implementation. The [focused baseline run](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/45518049034) reproduced the signed-out defect: two availability buttons rendered when the test expected zero. The [implementation CI run](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/45517607903) passed 991 tests with required Chromium and passed the committed-data guard. The [browser capture run](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/45517676214) captured desktop discovery and staff pages and mobile menu and cart pages with isolated data. Local repository/service regression tests passed 58 cases; local Chromium setup stalled because Windows denied loopback connections.
 - PR: [#142](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/142). [Issue #140](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/140).
 - Student review status: Pending responsible-student walkthrough and peer review.

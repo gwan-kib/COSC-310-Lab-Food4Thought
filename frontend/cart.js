@@ -182,7 +182,7 @@ async function refreshCart({ reconcile = true } = {}) {
   cart = null;
   cartContent.hidden = true;
   createButton.hidden = true;
-  message(cartStatus, "Loading cart…");
+  setStatus(cartStatus, "Loading cart…", "loading");
   message(cartError, "");
   try {
     const response = await customerRequest("/customers/me/cart");
@@ -277,7 +277,7 @@ async function mutateCart(method, path, payload, success) {
   if (busy || attempt) return;
   setBusy(true);
   message(cartError, "");
-  message(cartStatus, "Saving cart…");
+  setStatus(cartStatus, "Saving cart…", "loading");
   try {
     const response = await customerRequest(path, { method, payload });
     if (!response.ok) {
@@ -308,7 +308,7 @@ async function mutateCart(method, path, payload, success) {
 async function createCart() {
   if (busy || attempt) return;
   setBusy(true);
-  message(cartStatus, "Creating cart…");
+  setStatus(cartStatus, "Creating cart…", "loading");
   message(cartError, "");
   try {
     const response = await customerRequest("/customers/me/cart", { method: "PUT" });
@@ -335,7 +335,7 @@ async function doCheckout() {
   let revisionChanged = false;
   setBusy(true);
   message(cartError, "");
-  message(cartStatus, "Placing order…");
+  setStatus(cartStatus, "Placing order…", "loading");
   try {
     const response = await customerRequest("/customers/me/checkout", {
       method: "POST",
