@@ -30,7 +30,19 @@ jobs:
         run: |
           python -m pip install -r requirements-dev.txt
           python -m playwright install --with-deps chromium
+      - name: Capture PR #142 browser screenshots
+        timeout-minutes: 2
+        env:
+          REQUIRE_BROWSER_TESTS: "1"
+        run: python -m pytest -q tests/browser/capture_redesign.py
+      - name: Upload PR #142 browser screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: food4thought-pr-142-screenshots
+          path: redesign-screenshots/
+          if-no-files-found: error
       - name: Run tests
+        timeout-minutes: 4
         env:
           # Fail, rather than skip, if the browser tests cannot run.
           REQUIRE_BROWSER_TESTS: "1"
