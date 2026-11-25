@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- Shared outline icons for Food4Thought navigation and search. -->
+  <symbol id="brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 4v5a3 3 0 0 0 6 0V4M8 4v16m10 0v-5m0 0c4-1 4-6 3-10-4 1-7 3-7 6 0 2 2 4 4 4Zm0 0 1-5"/>
+  </symbol>
+  <symbol id="user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <circle cx="12" cy="8" r="3.25"/><path d="M5.5 20v-1.5a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4V20"/>
+  </symbol>
+  <symbol id="bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 8h14l1 12H4L5 8Zm4 2V7a3 3 0 0 1 6 0v3"/>
+  </symbol>
+  <symbol id="search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4 4"/>
+  </symbol>
+</svg>

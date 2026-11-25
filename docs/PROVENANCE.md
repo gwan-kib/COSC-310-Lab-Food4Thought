@@ -1250,3 +1250,15 @@ its pending-auth and local-only status.
 - Validation: Compared the notes with the November 5 and November 21 comments on issue #104 and the linked GitHub merge records. Checked the local documentation targets. The change is documentation only.
 - PR or commit: [Issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), branch `docs/104-m2-scrum-notes`.
 - Student review status: Pending.
+
+### Entry 92: Food4Thought frontend redesign (#140)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #140 assignee and requesting student.
+- Artifact: Frontend HTML, CSS, JavaScript, decorative food photography and icons, browser regressions, and this entry.
+- Label: `AI-GENERATED`.
+- AI tools: OpenAI Codex and OpenAI ImageGen.
+- Purpose: Give the existing customer and staff flows a consistent green design and make menu availability changes discoverable only in restaurant management.
+- Influence: Codex implemented the shared styles, responsive layouts, feedback and staff controls with the existing frontend modules and REST client. The sign-in role is used for presentation. The existing backend role and restaurant assignment checks remain authoritative. ImageGen produced decorative photos for the hero, representative dishes and fallback imagery. Codex authored the browser test updates.
+- Validation: The browser regressions were committed before the implementation. Local browser setup stalled inside Windows loopback socket creation, so required Chromium verification is tracked in GitHub Actions on the PR.
+- PR: [#142](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/142). [Issue #140](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/140).
+- Student review status: Pending responsible-student walkthrough and peer review.

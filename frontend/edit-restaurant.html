@@ -12,40 +12,51 @@ values, validation messages, and navigation back to restaurant details.
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <h1>Food4Thought</h1>
-      <p>Restaurant management</p>
+      <a class="brand" href="./"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="icons.svg#brand"></use></svg></span>Food4Thought</a>
       <nav aria-label="Main navigation">
         <a href="./">Browse restaurants</a>
-        <a id="staff-signin-link" href="staff-sign-in.html?next=edit-restaurant.html">Staff sign in</a>
+        <a href="create-restaurant.html">Create restaurant</a>
+        <a href="staff-sign-in.html" id="staff-signin-link">Staff sign in</a>
       </nav>
     </header>
 
-    <main class="management-layout">
-      <section class="panel" aria-labelledby="edit-heading">
-        <h2 id="edit-heading">Edit restaurant</h2>
-        <p>Update the restaurant information below.</p>
-        <p id="edit-status" class="status" role="status"></p>
-        <div id="edit-errors" class="status error" role="alert"></div>
-        <button id="retry-load" type="button" hidden>Retry loading</button>
+    <main id="main-content" tabindex="-1" class="management-layout editor-layout">
+      <div class="editor-heading">
+        <h1>Edit restaurant</h1>
+        <a id="return-link" class="button-link" hidden>Back to restaurant</a>
+      </div>
+      <p id="edit-access" class="status warning" aria-live="polite"></p>
+      <div class="editor-grid">
+        <section class="panel" aria-labelledby="edit-heading">
+          <h2 id="edit-heading">Restaurant information</h2>
+          <p id="edit-status" class="status" role="status"></p>
+          <div id="edit-errors" class="status error" role="alert"></div>
+          <button id="retry-load" type="button" hidden>Retry loading</button>
 
-        <form id="edit-form">
-          <fieldset id="edit-fields" class="create-fields" disabled>
-            <legend class="visually-hidden">Restaurant information</legend>
-            <label for="restaurant-name">Name</label>
-            <input id="restaurant-name" name="name" type="text" required />
+          <form id="edit-form">
+            <fieldset id="edit-fields" class="create-fields" disabled aria-describedby="edit-access">
+              <legend class="visually-hidden">Restaurant information</legend>
+              <label for="restaurant-name">Name</label>
+              <input id="restaurant-name" name="name" type="text" required />
 
-            <label for="restaurant-cuisine">Cuisine</label>
-            <input id="restaurant-cuisine" name="cuisine" type="text" required />
+              <label for="restaurant-cuisine">Cuisine</label>
+              <input id="restaurant-cuisine" name="cuisine" type="text" required />
 
-            <label for="restaurant-description">Description</label>
-            <textarea id="restaurant-description" name="description" rows="4" required></textarea>
+              <label for="restaurant-description">Description</label>
+              <textarea id="restaurant-description" name="description" rows="4" required></textarea>
 
-            <button type="submit">Save changes</button>
-          </fieldset>
-        </form>
-        <p><a id="return-link" hidden>Back to restaurant</a></p>
-      </section>
+              <button type="submit">Save changes</button>
+            </fieldset>
+          </form>
+        </section>
+        <section id="menu-management" class="panel" aria-labelledby="management-heading" aria-describedby="edit-access" hidden>
+          <h2 id="management-heading">Menu availability</h2>
+          <p id="availability-feedback" class="status" aria-live="polite"></p>
+          <ul id="management-menu" class="management-menu"></ul>
+        </section>
+      </div>
     </main>
 
     <script type="module" src="edit-restaurant.js"></script>

@@ -13,43 +13,63 @@ data through the API.
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <h1>Food4Thought</h1>
-      <p>Find a restaurant and browse its menu.</p>
-      <nav aria-label="Main navigation"><a href="account.html">My account</a> <a href="cart.html">My cart</a> <a href="create-restaurant.html">Create restaurant</a></nav>
+      <a class="brand" href="./"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="icons.svg#brand"></use></svg></span>Food4Thought</a>
+      <nav aria-label="Main navigation">
+        <a href="./" aria-current="page">Browse restaurants</a>
+        <a href="account.html"><svg class="icon" aria-hidden="true"><use href="icons.svg#user"></use></svg> My account</a>
+        <a href="cart.html"><svg class="icon" aria-hidden="true"><use href="icons.svg#bag"></use></svg> My cart</a>
+      </nav>
     </header>
 
-    <main class="layout">
-      <section class="panel" aria-labelledby="list-heading">
-        <h2 id="list-heading">Restaurants</h2>
-
-        <form id="filter-form" class="filter" role="search">
-          <label for="cuisine-input">Cuisine</label>
-          <input id="cuisine-input" name="cuisine" type="search" placeholder="e.g. Japanese" />
-          <button type="submit">Filter</button>
-          <button type="button" id="clear-filter">Clear</button>
-        </form>
-
-        <p id="list-status" class="status" role="status"></p>
-        <ul id="restaurant-list" class="restaurant-list"></ul>
-      </section>
-
-      <section id="restaurant-details" class="panel" aria-labelledby="details-heading" aria-live="polite">
-        <h2 id="details-heading">Restaurant details</h2>
-        <p id="details-status" class="status">Select a restaurant to see its details and menu.</p>
-
-        <div id="details-content" hidden>
-          <h3 id="details-name"></h3>
-          <p class="cuisine" id="details-cuisine"></p>
-          <p id="details-description"></p>
-          <p><a id="edit-restaurant-link" hidden>Edit restaurant</a></p>
-
-          <h4>Menu</h4>
-          <p id="menu-status" class="status"></p>
-          <ul id="menu-list" class="menu-list"></ul>
+    <main id="main-content" tabindex="-1" class="layout">
+      <section id="discovery-hero" class="hero" aria-labelledby="hero-heading">
+        <div class="hero-copy">
+          <h1 id="hero-heading">Find your next<br class="hero-break" /> favourite meal.</h1>
+          <p>Browse restaurant menus and order the food you’re craving.</p>
         </div>
+        <div class="hero-photo" aria-hidden="true"></div>
       </section>
+
+      <div id="discovery-grid" class="discovery-grid">
+        <section class="discovery-list" aria-labelledby="list-heading">
+          <div class="list-heading">
+            <h2 id="list-heading">Restaurants</h2>
+            <form id="filter-form" class="filter" role="search" aria-label="Filter restaurants">
+              <label class="visually-hidden" for="cuisine-input">Cuisine</label>
+              <div class="search-field"><svg class="icon" aria-hidden="true"><use href="icons.svg#search"></use></svg>
+                <input id="cuisine-input" name="cuisine" type="search" placeholder="Filter by cuisine" />
+              </div>
+              <button type="submit">Filter</button>
+              <button type="button" id="clear-filter">Clear</button>
+            </form>
+          </div>
+          <p id="list-status" class="status" role="status"></p>
+          <ul id="restaurant-list" class="restaurant-list"></ul>
+        </section>
+
+        <section id="restaurant-details" class="panel" aria-labelledby="details-heading" hidden>
+          <a class="back-link" href="#">&larr; Back to restaurants</a>
+          <h2 id="details-heading" class="visually-hidden">Restaurant details</h2>
+          <p id="details-status" class="status" role="status"></p>
+          <div id="details-content" hidden>
+            <h2 id="details-name" tabindex="-1"></h2>
+            <p class="badge badge-available" id="details-cuisine"></p>
+            <p id="details-description"></p>
+            <a id="edit-restaurant-link" class="button-link" hidden>Edit restaurant</a>
+            <h3 class="menu-heading">Menu</h3>
+            <p id="menu-status" class="status" role="status"></p>
+            <ul id="menu-list" class="menu-list"></ul>
+          </div>
+        </section>
+      </div>
     </main>
+
+    <footer class="site-footer">
+      <a href="staff-sign-in.html">Staff sign in</a>
+      <a href="create-restaurant.html">Create restaurant</a>
+    </footer>
 
     <script type="module" src="app.js"></script>
   </body>

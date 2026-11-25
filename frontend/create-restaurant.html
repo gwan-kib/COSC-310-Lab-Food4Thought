@@ -12,21 +12,22 @@ places to present API feedback and connect validation messages to inputs.
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <h1>Food4Thought</h1>
-      <p>Restaurant management</p>
+      <a class="brand" href="./"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="icons.svg#brand"></use></svg></span>Food4Thought</a>
       <nav aria-label="Main navigation">
         <a href="./">Browse restaurants</a>
-        <a id="staff-signin-link" href="staff-sign-in.html?next=create-restaurant.html">Staff sign in</a>
+        <a href="create-restaurant.html" aria-current="page">Create restaurant</a>
+        <a href="staff-sign-in.html" id="staff-signin-link">Staff sign in</a>
       </nav>
     </header>
 
-    <main class="management-layout">
+    <main id="main-content" tabindex="-1" class="management-layout">
       <section class="panel" aria-labelledby="create-heading">
-        <h2 id="create-heading">Create restaurant</h2>
-        <p>All fields are required.</p>
+        <h1 id="create-heading">Create restaurant</h1>
+        <p id="create-access" class="status warning" aria-live="polite"></p>
         <form id="create-form">
-          <fieldset id="create-fields" class="create-fields">
+          <fieldset id="create-fields" class="create-fields" disabled aria-describedby="create-access">
             <legend class="visually-hidden">Restaurant information</legend>
             <label for="restaurant-name">Name</label>
             <input id="restaurant-name" name="name" type="text" required />

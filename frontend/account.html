@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Present customer sign-in, registration, and profile forms using the shared design. Account operations are handled by the REST API. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -7,19 +8,23 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <h1>Food4Thought</h1>
-      <p>Customer account</p>
-      <nav aria-label="Main navigation"><a href="./">Browse restaurants</a> <a href="cart.html">My cart</a></nav>
+      <a class="brand" href="./"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="icons.svg#brand"></use></svg></span>Food4Thought</a>
+      <nav aria-label="Main navigation">
+        <a href="./">Browse restaurants</a>
+        <a href="account.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="icons.svg#user"></use></svg> My account</a>
+        <a href="cart.html"><svg class="icon" aria-hidden="true"><use href="icons.svg#bag"></use></svg> My cart</a>
+      </nav>
     </header>
 
-    <main class="management-layout account-layout">
-      <h2>My account</h2>
+    <main id="main-content" tabindex="-1" class="management-layout account-layout">
+      <h1>My account</h1>
       <p id="session-status" class="status" role="status"></p>
 
       <div id="signed-out" class="account-sections">
         <section class="panel" aria-labelledby="signin-heading">
-          <h3 id="signin-heading">Sign in</h3>
+          <h2 id="signin-heading">Sign in</h2>
           <form id="signin-form" method="post">
             <fieldset class="create-fields" disabled>
               <legend class="visually-hidden">Sign-in details</legend>
@@ -35,7 +40,7 @@
         </section>
 
         <section class="panel" aria-labelledby="register-heading">
-          <h3 id="register-heading">Create a customer account</h3>
+          <h2 id="register-heading">Create a customer account</h2>
           <form id="register-form" method="post">
             <fieldset class="create-fields" disabled>
               <legend class="visually-hidden">Registration details</legend>
@@ -57,7 +62,7 @@
 
       <section id="signed-in" class="panel" aria-labelledby="profile-heading" hidden>
         <div class="account-heading">
-          <h3 id="profile-heading">Profile</h3>
+          <h2 id="profile-heading">Profile</h2>
           <button id="signout-button" type="button">Sign out of this tab</button>
         </div>
         <p id="account-state" class="status" role="status"></p>
@@ -98,7 +103,7 @@
         <div id="deactivate-errors" class="status error" role="alert"></div>
       </section>
 
-      <p class="account-note">Sign-in tokens are stored only in this browser tab. Signing out clears this tab's token; it does not revoke the server session, which expires after 24 hours.</p>
+      <p class="account-note">You stay signed in on this tab for up to 24 hours.</p>
     </main>
     <script type="module" src="account.js"></script>
   </body>

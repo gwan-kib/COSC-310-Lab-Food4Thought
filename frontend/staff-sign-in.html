@@ -12,19 +12,20 @@ the permissions for every subsequent management write.
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <h1>Food4Thought</h1>
-      <p>Restaurant management</p>
+      <a class="brand" href="./"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="icons.svg#brand"></use></svg></span>Food4Thought</a>
       <nav aria-label="Main navigation">
         <a href="./">Browse restaurants</a>
         <a href="create-restaurant.html">Create restaurant</a>
+        <a href="staff-sign-in.html" aria-current="page" id="staff-signin-link">Staff sign in</a>
       </nav>
     </header>
 
-    <main class="management-layout">
+    <main id="main-content" tabindex="-1" class="management-layout">
       <section class="panel" aria-labelledby="signin-heading">
-        <h2 id="signin-heading">Staff sign-in</h2>
-        <p>Use your provisioned restaurant or administrator account.</p>
+        <h1 id="signin-heading">Staff sign-in</h1>
+        <p>Use your restaurant manager or administrator account.</p>
         <form id="staff-signin-form">
           <fieldset id="staff-signin-fields" class="create-fields">
             <legend class="visually-hidden">Staff credentials</legend>

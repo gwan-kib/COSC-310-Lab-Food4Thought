@@ -1,6 +1,7 @@
 // Present the backend-priced cart and saved order through authenticated REST calls.
 // Persist only the original checkout attempt for safe receipt lookup and explicit replay;
 // never automatically repeat a POST whose outcome could already be durable.
+import { setStatus } from "./ui.js";
 import { customerToken, customerRequest, customerError } from "./customer-session.js";
 
 const ATTEMPT_KEY = "food4thought.customer.checkout.attempt";
@@ -84,6 +85,7 @@ function renderOrder(order) {
     return;
   }
   orderPanel.hidden = false;
+  el("order-state").hidden = order.status !== "placed";
   el("order-id").textContent = order.id;
   el("order-restaurant").textContent = order.restaurant_name;
   el("order-total").textContent = `$${order.total}`;
@@ -98,7 +100,7 @@ function renderOrder(order) {
 
 function showRecovery(text, canRetry = false, retryLabel = "Retry original checkout") {
   recoveryPanel.hidden = false;
-  message(recoveryStatus, text);
+  setStatus(recoveryStatus, text, "warning");
   retryButton.hidden = !canRetry;
   retryButton.textContent = retryLabel;
   updateControls();
@@ -118,6 +120,7 @@ function renderCart(view) {
       name.textContent = line.name;
       const price = document.createElement("p");
       price.textContent = `$${line.unit_price} each · Line total $${line.line_total}`;
+      details.className = "cart-line-details";
       details.append(name, price);
       if (!line.available) {
         const unavailable = document.createElement("p");
@@ -135,6 +138,7 @@ function renderCart(view) {
       input.required = true;
       input.value = String(line.quantity);
       input.id = `quantity-${view.items.indexOf(line)}`;
+      label.className = "visually-hidden";
       label.htmlFor = input.id;
       label.textContent = `Quantity for ${line.name}`;
       const update = document.createElement("button");
@@ -170,7 +174,7 @@ async function refreshCart({ reconcile = true } = {}) {
     cart = null;
     cartContent.hidden = true;
     createButton.hidden = true;
-    message(cartStatus, "Sign in from My account to view your cart.");
+    setStatus(cartStatus, "Sign in from My account to view your cart.", "warning");
     return;
   }
   setBusy(true);
@@ -193,9 +197,9 @@ async function refreshCart({ reconcile = true } = {}) {
       cart = null;
       cartContent.hidden = true;
       createButton.hidden = Boolean(attempt);
-      message(cartStatus, "No cart yet. Create one or add an item from a restaurant menu.");
+      setStatus(cartStatus, "No cart yet. Create one or add an item from a restaurant menu.", "empty");
     } else if (!response.ok) {
-      message(cartStatus, "");
+      setStatus(cartStatus, "");
       message(cartError, customerError(response.status, response.body));
       if (response.status === 401) orderPanel.hidden = true;
       // Do not return: a pending checkout's saved receipt may still be
@@ -203,8 +207,9 @@ async function refreshCart({ reconcile = true } = {}) {
     } else if (validCart(response.body)) {
       if (attempt && attempt.customer_id !== response.body.customer_id) clearAttempt();
       renderCart(response.body);
-      message(cartStatus, response.body.items.length
-        ? "Cart loaded with current menu prices." : "Your cart is empty.");
+      const hasItems = response.body.items.length > 0;
+      setStatus(cartStatus, hasItems ? "Cart loaded with current menu prices." : "Your cart is empty.",
+        hasItems ? "" : "empty");
       if (!attempt && response.body.checkout_order_id) {
         saveAttempt({ customer_id: response.body.customer_id,
           cart_id: response.body.id, cart_revision: response.body.revision });
@@ -213,7 +218,7 @@ async function refreshCart({ reconcile = true } = {}) {
       message(cartError, "Unexpected cart response. Refresh before changing anything.");
     }
   } catch {
-    message(cartStatus, "");
+    setStatus(cartStatus, "");
     message(cartError, "Could not confirm the current cart. Check your connection and refresh before editing.");
   } finally {
     setBusy(false);
@@ -246,7 +251,7 @@ async function checkOrderStatus() {
       } else if (cart) {
         clearAttempt();
         // A saved receipt is authoritative even when its response was lost.
-        message(cartStatus, "Found your saved order. No second order was submitted.");
+        setStatus(cartStatus, "Found your saved order. No second order was submitted.", "success");
         showRecovery("Found a saved order. No checkout retry is needed.");
       } else {
         // The receipt is durable, but without a cart read we cannot tell if
@@ -277,7 +282,7 @@ async function mutateCart(method, path, payload, success) {
     const response = await customerRequest(path, { method, payload });
     if (!response.ok) {
       message(cartError, customerError(response.status, response.body, method === "PATCH"));
-      message(cartStatus, "");
+      setStatus(cartStatus, "");
       if (response.status === 409 && response.body?.detail === "Cart checkout recovery required") {
         // A saved order prevents normal cart writes until its original attempt is replayed.
         saveAttempt({ customer_id: cart.customer_id, cart_id: cart.id, cart_revision: cart.revision });
@@ -291,7 +296,7 @@ async function mutateCart(method, path, payload, success) {
       return;
     }
     renderCart(response.body);
-    message(cartStatus, success);
+    setStatus(cartStatus, success, "success");
   } catch {
     message(cartError, "Could not confirm the cart update. Refresh before trying again; do not repeat an unconfirmed change.");
     cartContent.hidden = true;
@@ -316,7 +321,7 @@ async function createCart() {
       return;
     }
     renderCart(response.body);
-    message(cartStatus, "Cart ready.");
+    setStatus(cartStatus, "Cart ready.", "success");
   } catch {
     message(cartError, "Could not confirm cart creation. Refresh before trying again.");
   } finally {
@@ -340,14 +345,14 @@ async function doCheckout() {
         validOrder(response.body?.order) &&
         typeof response.body.cart_reset_pending === "boolean") {
       renderOrder(response.body.order);
-      message(cartStatus, "Your saved order was confirmed.");
+      setStatus(cartStatus, "Your saved order was confirmed.", "success");
       if (response.body.cart_reset_pending) {
         showRecovery("Order saved. The cart reset is pending; use Complete cart reset to replay this same purchase.", true, "Complete cart reset");
       } else {
         clearAttempt();
         // Keep the saved receipt visible while fetching the newly reset cart.
         await refreshCart({ reconcile: false });
-        message(cartStatus, "Your saved order was confirmed.");
+        setStatus(cartStatus, "Your saved order was confirmed.", "success");
       }
       return;
     }
@@ -360,7 +365,7 @@ async function doCheckout() {
       revisionChanged = true;
     } else if (response.status >= 400 && response.status < 500) {
       clearAttempt();
-      message(cartStatus, "");
+      setStatus(cartStatus, "");
       message(cartError, customerError(response.status, response.body));
       return;
     } else {
