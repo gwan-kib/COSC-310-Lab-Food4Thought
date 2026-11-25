@@ -5,7 +5,7 @@
 
 import { requestJson } from "./api-client.js";
 import { managementError, staffRequest, staffRestriction, staffSignInHref } from "./staff-session.js";
-import { setStatus, showAvailability } from "./ui.js";
+import { icon, setStatus, showAvailability } from "./ui.js";
 
 document.getElementById("staff-signin-link").href = staffSignInHref();
 const editForm = document.getElementById("edit-form");
@@ -220,7 +220,8 @@ function renderMenuItem(menuItem, menuPath, readOnly) {
   action.hidden = readOnly;
   function render() {
     showAvailability(availability, menuItem.available);
-    action.textContent = menuItem.available ? "Mark unavailable" : "Mark available";
+    const label = menuItem.available ? "Mark unavailable" : "Mark available";
+    action.replaceChildren(icon(menuItem.available ? "block" : "check_circle"), label);
     action.setAttribute("aria-label", action.textContent + " for " + menuItem.name);
   }
   render();

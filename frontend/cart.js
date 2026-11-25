@@ -1,7 +1,7 @@
 // Present the backend-priced cart and saved order through authenticated REST calls.
 // Persist only the original checkout attempt for safe receipt lookup and explicit replay;
 // never automatically repeat a POST whose outcome could already be durable.
-import { setStatus } from "./ui.js";
+import { icon, setStatus } from "./ui.js";
 import { customerToken, customerRequest, customerError } from "./customer-session.js";
 
 const ATTEMPT_KEY = "food4thought.customer.checkout.attempt";
@@ -102,7 +102,7 @@ function showRecovery(text, canRetry = false, retryLabel = "Retry original check
   recoveryPanel.hidden = false;
   setStatus(recoveryStatus, text, "warning");
   retryButton.hidden = !canRetry;
-  retryButton.textContent = retryLabel;
+  retryButton.replaceChildren(icon("replay"), retryLabel);
   updateControls();
 }
 
@@ -143,11 +143,11 @@ function renderCart(view) {
       label.textContent = `Quantity for ${line.name}`;
       const update = document.createElement("button");
       update.type = "submit";
-      update.textContent = "Update quantity";
+      update.replaceChildren(icon("update"), "Update quantity");
       update.setAttribute("aria-label", `Update quantity for ${line.name}`);
       const remove = document.createElement("button");
       remove.type = "button";
-      remove.textContent = "Remove";
+      remove.replaceChildren(icon("delete"), "Remove");
       remove.setAttribute("aria-label", `Remove ${line.name}`);
       form.append(label, input, update, remove);
       form.addEventListener("submit", event => {

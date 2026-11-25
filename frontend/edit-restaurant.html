@@ -9,31 +9,32 @@ values, validation messages, and navigation back to restaurant details.
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Food4Thought – Edit restaurant</title>
+    <link rel="icon" type="image/svg+xml" href="assets/food4thought.svg" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <a class="brand" href="./"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="icons.svg#brand"></use></svg></span>Food4Thought</a>
+      <a class="brand" href="./"><img class="brand-mark" src="assets/food4thought.svg" alt="" width="44" height="44" />Food4Thought</a>
       <nav aria-label="Main navigation">
-        <a href="./">Browse restaurants</a>
-        <a href="create-restaurant.html">Create restaurant</a>
-        <a href="staff-sign-in.html" id="staff-signin-link">Staff sign in</a>
+        <a href="./" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#restaurant"></use></svg> Browse restaurants</a>
+        <a href="create-restaurant.html" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#add_business"></use></svg> Create restaurant</a>
+        <a href="staff-sign-in.html" id="staff-signin-link" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#admin_panel_settings"></use></svg> Staff sign in</a>
       </nav>
     </header>
 
     <main id="main-content" tabindex="-1" class="management-layout editor-layout">
       <div class="editor-heading">
-        <h1>Edit restaurant</h1>
-        <a id="return-link" class="button-link" hidden>Back to restaurant</a>
+        <h1 class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#edit"></use></svg> Edit restaurant</h1>
+        <a id="return-link" class="with-icon button-link" hidden><svg class="icon" aria-hidden="true"><use href="icons.svg#arrow_back"></use></svg> Back to restaurant</a>
       </div>
       <p id="edit-access" class="status warning" aria-live="polite"></p>
       <div class="editor-grid">
         <section class="panel" aria-labelledby="edit-heading">
-          <h2 id="edit-heading">Restaurant information</h2>
+          <h2 id="edit-heading" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#storefront"></use></svg> Restaurant information</h2>
           <p id="edit-status" class="status" role="status"></p>
           <div id="edit-errors" class="status error" role="alert"></div>
-          <button id="retry-load" type="button" hidden>Retry loading</button>
+          <button id="retry-load" type="button" hidden><svg class="icon" aria-hidden="true"><use href="icons.svg#refresh"></use></svg> Retry loading</button>
 
           <form id="edit-form">
             <fieldset id="edit-fields" class="create-fields" disabled aria-describedby="edit-access">
@@ -47,12 +48,12 @@ values, validation messages, and navigation back to restaurant details.
               <label for="restaurant-description">Description</label>
               <textarea id="restaurant-description" name="description" rows="4" required></textarea>
 
-              <button type="submit">Save changes</button>
+              <button type="submit"><svg class="icon" aria-hidden="true"><use href="icons.svg#save"></use></svg> Save changes</button>
             </fieldset>
           </form>
         </section>
         <section id="menu-management" class="panel" aria-labelledby="management-heading" aria-describedby="edit-access" hidden>
-          <h2 id="management-heading">Menu availability</h2>
+          <h2 id="management-heading" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#menu_book"></use></svg> Menu availability</h2>
           <p id="availability-feedback" class="status" aria-live="polite"></p>
           <ul id="management-menu" class="management-menu"></ul>
         </section>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- Drawings for the two representative restaurants, referenced by their stable IDs. -->
+  <symbol id="restaurant-001" viewBox="0 0 520 220">
+    <path fill="#E5F3DB" d="M0 0h520v220H0z"/>
+    <circle cx="260" cy="105" r="78" fill="#D2E9C8"/>
+    <path fill="#C6E2B9" d="M0 177c90-25 178-24 260-6 86 19 171 17 260-7v56H0z"/>
+    <path d="M19 195h482m-401-12h318" stroke="#9BBE91" stroke-width="2" stroke-linecap="round"/>
+    <g stroke="#286341" stroke-width="2.5" stroke-linejoin="round">
+      <path fill="#75AD73" d="m119 69-29 54h15l-24 37h76l-23-37h14Z"/>
+      <path fill="#75AD73" d="m403 88-23 41h12l-19 31h60l-18-31h11Z"/>
+      <path d="M119 158v24m284-22v22" stroke-linecap="round"/>
+    </g>
+    <g stroke="#174A34" stroke-width="3" stroke-linejoin="round">
+      <path fill="#FBF7E8" d="M181 97h157v85H181z"/>
+      <path fill="#42845C" d="m169 103 31-28h119l31 28Z"/>
+      <path fill="#A2D89A" d="M181 103h157v18H181z"/>
+      <path fill="#C9E4BE" d="M193 133h48v36h-48zm86 0h46v36h-46z"/>
+      <path fill="#FAF4DA" d="M245 130h29v52h-29z"/>
+      <path d="M217 134v34m85-34v34m-109-17h48m38 0h46m-61 7h2" fill="none" stroke-linecap="round"/>
+      <circle cx="260" cy="88" r="20" fill="#005B32"/>
+      <path d="M248 89h24c-2 7-6 11-12 11s-10-4-12-11Zm7-9 10 6m-1-9 6 7" fill="none" stroke="#F5FAF5" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+    <path d="M131 183h258" stroke="#286341" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="restaurant-002" viewBox="0 0 520 220">
+    <path fill="#FAEEDC" d="M0 0h520v220H0z"/>
+    <circle cx="260" cy="103" r="78" fill="#F5DFAC"/>
+    <path fill="#D0E7D7" d="M0 167c74-15 151-16 227 1 99 22 198 21 293-2v54H0z"/>
+    <g fill="none" stroke="#78A991" stroke-width="2.5" stroke-linecap="round">
+      <path d="M30 191q11-8 22 0t22 0t22 0m43 15q11-8 22 0t22 0t22 0m98 0q11-8 22 0t22 0t22 0m44-17q11-8 22 0t22 0t22 0"/>
+    </g>
+    <g stroke="#205B43" stroke-width="2.8" stroke-linejoin="round">
+      <path fill="#F6C676" d="M83 164h58l-10 14H97z"/>
+      <path fill="#F5FAF5" d="m112 123 24 36h-24z"/>
+      <path d="M112 121v40" stroke-linecap="round"/>
+      <path d="M394 118v54m-13 0h26m-21-42h15l-3-10h-9z" fill="#F6C676" stroke-linecap="round"/>
+    </g>
+    <g stroke="#654532" stroke-width="3" stroke-linejoin="round">
+      <path fill="#FFEBCB" d="M183 98h154v84H183z"/>
+      <path fill="#C87552" d="M180 91h160v17H180z"/>
+      <path fill="#E9A183" d="M180 107h160l8 18H172z"/>
+      <path d="m201 108-4 16m25-16-2 16m20-16v16m20-16v16m20-16v16m20-16 2 16m20-16 4 16" stroke="#FFF2D5"/>
+      <path fill="#BBDCC0" d="M194 138h46v31h-46zm85 0h47v31h-47z"/>
+      <path fill="#FFF3DD" d="M245 135h30v47h-30z"/>
+      <path d="M218 139v29m85-29v29m-107-15h43m42 0h44m-59 7h2" fill="none" stroke-linecap="round"/>
+      <circle cx="260" cy="90" r="20" fill="#005B32" stroke="#005B32"/>
+      <path d="M250 96c5 4 13 4 20-2l-11-14Z" fill="#F6C676" stroke="#FFF3DD" stroke-width="2"/>
+      <circle cx="259" cy="92" r="1.7" fill="#B54C35" stroke="none"/>
+    </g>
+    <path d="M135 183h250" stroke="#205B43" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+</svg>

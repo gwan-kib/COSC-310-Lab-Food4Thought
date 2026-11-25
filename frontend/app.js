@@ -6,7 +6,7 @@
 import { requestJson } from "./api-client.js";
 import { customerToken, customerRequest, customerError } from "./customer-session.js";
 import { staffToken } from "./staff-session.js";
-import { setStatus, showAvailability } from "./ui.js";
+import { icon, setStatus, showAvailability } from "./ui.js";
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -109,8 +109,12 @@ function renderRestaurants(restaurants, cuisine) {
     cuisineLabel.textContent = restaurant.cuisine;
     const cover = document.createElement("span");
     cover.className = "restaurant-cover";
-    cover.dataset.photo = restaurant.cuisine.trim().toLowerCase();
     cover.setAttribute("aria-hidden", "true");
+    const illustration = icon(restaurant.id, "assets/restaurant-art.svg");
+    illustration.classList.replace("icon", "restaurant-illustration");
+    illustration.setAttribute("viewBox", "0 0 520 220");
+    illustration.setAttribute("preserveAspectRatio", "xMidYMid slice");
+    cover.append(icon("storefront"), illustration);
     const summary = document.createElement("span");
     summary.className = "restaurant-summary";
     const description = document.createElement("span");
@@ -118,7 +122,7 @@ function renderRestaurants(restaurants, cuisine) {
     description.textContent = restaurant.description;
     const next = document.createElement("span");
     next.className = "restaurant-next";
-    next.textContent = "View menu \u2192";
+    next.append("View menu", icon("arrow_forward"));
     next.setAttribute("aria-hidden", "true");
     button.setAttribute("aria-label", restaurant.name + ", " + restaurant.cuisine);
     summary.append(name, cuisineLabel, description, next);
@@ -209,7 +213,7 @@ async function showDetails(selection, focusHeading = false) {
 
 function renderRestaurant(restaurant) {
   detailsName.textContent = restaurant.name;
-  detailsCuisine.textContent = restaurant.cuisine;
+  detailsCuisine.replaceChildren(icon("restaurant"), restaurant.cuisine);
   detailsDescription.textContent = restaurant.description;
   editRestaurantLink.href = `edit-restaurant.html?id=${encodeURIComponent(restaurant.id)}`;
   editRestaurantLink.hidden = !staffToken();
@@ -246,7 +250,7 @@ function renderMenu(menu, restaurantId) {
     const availability = document.createElement("span");
     const addButton = document.createElement("button");
     addButton.type = "button";
-    addButton.textContent = "Add to cart";
+    addButton.replaceChildren(icon("add_shopping_cart"), "Add to cart");
     addButton.setAttribute("aria-label", `Add ${menuItem.name} to cart`);
     addButton.addEventListener("click", async () => {
       if (addButton.disabled) return;
@@ -293,18 +297,16 @@ function renderMenu(menu, restaurantId) {
     });
     const body = document.createElement("div");
     body.className = "menu-item-body";
-    const photo = document.createElement("span");
-    photo.className = "menu-photo";
-    photo.setAttribute("aria-hidden", "true");
-    const dish = menuItem.name.toLowerCase().match(/\b(pizza|bowl)\b/);
-    if (dish) photo.dataset.photo = dish[1];
+    const art = document.createElement("span");
+    art.className = "menu-art";
+    art.append(icon("restaurant"));
     showAvailability(availability, menuItem.available);
     addButton.disabled = !menuItem.available;
     addButton.className = "primary-action";
     item.classList.toggle("unavailable", !menuItem.available);
     controls.append(availability, addButton);
     body.append(heading, description, controls);
-    item.append(photo, body);
+    item.append(art, body);
     menuList.append(item);
   }
 }

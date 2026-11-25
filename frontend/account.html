@@ -5,26 +5,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Food4Thought – Customer account</title>
+    <link rel="icon" type="image/svg+xml" href="assets/food4thought.svg" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <a class="brand" href="./"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="icons.svg#brand"></use></svg></span>Food4Thought</a>
+      <a class="brand" href="./"><img class="brand-mark" src="assets/food4thought.svg" alt="" width="44" height="44" />Food4Thought</a>
       <nav aria-label="Main navigation">
-        <a href="./">Browse restaurants</a>
-        <a href="account.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="icons.svg#user"></use></svg> My account</a>
-        <a href="cart.html"><svg class="icon" aria-hidden="true"><use href="icons.svg#bag"></use></svg> My cart</a>
+        <a href="./" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#restaurant"></use></svg> Browse restaurants</a>
+        <a href="account.html" aria-current="page" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#person"></use></svg> My account</a>
+        <a href="cart.html" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#shopping_bag"></use></svg> My cart</a>
       </nav>
     </header>
 
     <main id="main-content" tabindex="-1" class="management-layout account-layout">
-      <h1>My account</h1>
+      <h1 class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#person"></use></svg> My account</h1>
       <p id="session-status" class="status" role="status"></p>
 
       <div id="signed-out" class="account-sections">
         <section class="panel" aria-labelledby="signin-heading">
-          <h2 id="signin-heading">Sign in</h2>
+          <h2 id="signin-heading" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#login"></use></svg> Sign in</h2>
           <form id="signin-form" method="post">
             <fieldset class="create-fields" disabled>
               <legend class="visually-hidden">Sign-in details</legend>
@@ -32,7 +33,7 @@
               <input id="signin-email" name="email" type="email" autocomplete="username" required />
               <label for="signin-password">Password</label>
               <input id="signin-password" name="password" type="password" autocomplete="current-password" required />
-              <button type="submit">Sign in</button>
+              <button type="submit"><svg class="icon" aria-hidden="true"><use href="icons.svg#login"></use></svg> Sign in</button>
             </fieldset>
           </form>
           <p id="signin-status" class="status" role="status"></p>
@@ -40,7 +41,7 @@
         </section>
 
         <section class="panel" aria-labelledby="register-heading">
-          <h2 id="register-heading">Create a customer account</h2>
+          <h2 id="register-heading" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#person_add"></use></svg> Create a customer account</h2>
           <form id="register-form" method="post">
             <fieldset class="create-fields" disabled>
               <legend class="visually-hidden">Registration details</legend>
@@ -52,7 +53,7 @@
               <textarea id="register-address" name="delivery_address" autocomplete="street-address" rows="2" required></textarea>
               <label for="register-password">Password (8–128 characters)</label>
               <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required />
-              <button type="submit">Register</button>
+              <button type="submit"><svg class="icon" aria-hidden="true"><use href="icons.svg#person_add"></use></svg> Register</button>
             </fieldset>
           </form>
           <p id="register-status" class="status" role="status"></p>
@@ -62,8 +63,8 @@
 
       <section id="signed-in" class="panel" aria-labelledby="profile-heading" hidden>
         <div class="account-heading">
-          <h2 id="profile-heading">Profile</h2>
-          <button id="signout-button" type="button">Sign out of this tab</button>
+          <h2 id="profile-heading" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#person"></use></svg> Profile</h2>
+          <button id="signout-button" type="button"><svg class="icon" aria-hidden="true"><use href="icons.svg#logout"></use></svg> Sign out of this tab</button>
         </div>
         <p id="account-state" class="status" role="status"></p>
         <dl id="profile-details" class="account-details" hidden>
@@ -71,7 +72,7 @@
           <dt>Saved name</dt><dd id="saved-name"></dd>
           <dt>Saved delivery address</dt><dd id="saved-address"></dd>
         </dl>
-        <button type="button" id="refresh-profile">Check saved profile</button>
+        <button type="button" id="refresh-profile"><svg class="icon" aria-hidden="true"><use href="icons.svg#refresh"></use></svg> Check saved profile</button>
         <p id="refresh-status" class="status" role="status"></p>
         <div id="refresh-errors" class="status error" role="alert"></div>
 
@@ -82,7 +83,7 @@
             <input id="profile-name" name="name" required />
             <label for="profile-address">Delivery address</label>
             <textarea id="profile-address" name="delivery_address" rows="2" required></textarea>
-            <button type="submit">Save changes</button>
+            <button type="submit"><svg class="icon" aria-hidden="true"><use href="icons.svg#save"></use></svg> Save changes</button>
           </fieldset>
         </form>
         <p id="profile-status" class="status" role="status"></p>
@@ -96,7 +97,7 @@
               <input id="confirm-deactivate" name="confirm" type="checkbox" required />
               I understand that this account will become inactive.
             </label>
-            <button type="submit">Deactivate my account</button>
+            <button type="submit"><svg class="icon" aria-hidden="true"><use href="icons.svg#person_off"></use></svg> Deactivate my account</button>
           </fieldset>
         </form>
         <p id="deactivate-status" class="status" role="status"></p>

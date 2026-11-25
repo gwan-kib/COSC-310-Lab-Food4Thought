@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 378">
+  <!-- Food4Thought discovery illustration with a bowl, pizza and table setting. -->
+  <path fill="#DCEFD4" d="M0 0h560v378H0z"/>
+  <circle cx="316" cy="189" r="162" fill="#CDE8C2"/>
+  <path fill="#A6D49A" d="M560 0v378h-37c31-131 29-257-17-378z" opacity=".48"/>
+  <g fill="none" stroke="#90BC84" stroke-linecap="round" stroke-width="2.5">
+    <path d="M80 120q25-20 34-64m-18 48-13-23m20 5 28-8m-22-5 24-16M469 264q11 26 47 40m-32-20 6-20m4 26 30-4"/>
+    <path d="M126 260h14m-7-7v14m330-155h16m-8-8v16M334 30h14m-7-7v14"/>
+  </g>
+  <ellipse cx="321" cy="294" fill="#ACD2A3" opacity=".6" rx="155" ry="29"/>
+  <g stroke="#174A34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m410 56-171 95m181-77-172 91" fill="none" stroke="#3D7850" stroke-width="5"/>
+    <circle cx="220" cy="193" r="96" fill="#F5FAF5"/>
+    <circle cx="220" cy="193" r="78" fill="#A8D69B"/>
+    <path d="M170 164q45-38 100 2m-105 14q47-38 113 1m-114 14q57-35 114 0" fill="none" stroke="#F6EDB5" stroke-width="9"/>
+    <path d="M159 217q39-13 60 24-43 7-60-24Zm98 25q-11-37 35-41-4 35-35 41Z" fill="#419864"/>
+    <path d="M186 236q-17-34 24-35 14 24-24 35Zm43 13q-21-33 20-39 17 26-20 39Z" fill="#F7CB73" stroke="#855D34"/>
+    <circle cx="376" cy="228" r="82" fill="#FAF6E7"/>
+    <circle cx="376" cy="228" r="67" fill="#E7AA57" stroke="#996B35"/>
+    <circle cx="376" cy="228" r="57" fill="#FAE7A3" stroke="#C98054"/>
+    <path d="M376 171v114m-57-57h114m-97-40 80 80" fill="none" stroke="#E0AD64" stroke-width="2"/>
+    <path d="M360 190q13 4 13 18-16 2-18-11Zm48 24q6 15-10 22-9-13 0-20Zm-54 35q13-9 25 2-8 14-22 7Z" fill="#398453" stroke="#398453"/>
+    <g fill="#CA7357" stroke="none">
+      <circle cx="388" cy="197" r="7"/><circle cx="346" cy="224" r="7"/>
+      <circle cx="388" cy="253" r="7"/><circle cx="402" cy="244" r="5"/>
+    </g>
+    <path d="m470 155 28-37m-15-4-6 8a8 8 0 0 0 13 10l7-8m-8-8-10 14" fill="none" stroke="#3D7850" stroke-width="4"/>
+  </g>
+</svg>
