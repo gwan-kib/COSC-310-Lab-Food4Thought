@@ -165,13 +165,13 @@ button, .button-link {
   cursor: pointer;
 }
 button:hover:not(:disabled), .button-link:hover { background: var(--green-wash); border-color: var(--forest); }
-.primary-action, .create-fields button, .filter button[type="submit"] {
+.primary-action, .create-fields button[type="submit"], .filter button[type="submit"] {
   color: var(--surface);
   background: var(--forest);
   border-color: var(--forest);
 }
 .primary-action:hover:not(:disabled),
-.create-fields button:hover:not(:disabled),
+.create-fields button[type="submit"]:hover:not(:disabled),
 .filter button[type="submit"]:hover { background: #034629; }
 button:disabled, input:disabled, textarea:disabled {
   color: #53675a;
@@ -359,6 +359,9 @@ button.restaurant[aria-current="true"] { background: var(--green-wash); border-c
 .create-fields input, .create-fields textarea { margin-bottom: var(--space-2); }
 .create-fields button { justify-self: start; margin-top: var(--space-2); }
 .create-fields button:disabled { color: #53675a; background: #edf3ee; border-color: var(--border); }
+.demo-accounts { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--border); }
+.demo-accounts h3 { margin: 0; font-size: .9rem; }
+.demo-account-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .editor-grid, .account-sections, .cart-content { display: grid; align-items: start; gap: var(--space-5); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .editor-grid, .cart-content { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
 .editor-heading, .account-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); margin-bottom: var(--space-5); }

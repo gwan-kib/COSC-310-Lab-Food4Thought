@@ -127,6 +127,14 @@ the real account/cart/checkout-service/detail integration.
 
 To sign in as a restaurant user or administrator, create the account after setting the disposable data paths and **before** clearing them, in the same terminal with the server stopped: `python -m app.scripts.create_staff_account create --name "Cedar Bowl Manager" --email manager@cedarbowl.invalid --role restaurant_user --restaurant restaurant-001`, then start the server again. The [disposable-data steps](FIRST_TIME_SETUP.md#disposable-data-for-manual-experiments) show the full order, administrators and assigning restaurants.
 
+## Start the local demo
+
+```sh
+python -m app.scripts.run_demo
+```
+
+Open [My account](http://127.0.0.1:8000/app/account.html), choose **Demo customer**, **Demo manager**, or **Demo administrator**, then click **Sign in**. Run the same command after stopping the demo to reuse `.demo-data/`. See [first-time demo setup](FIRST_TIME_SETUP.md#run-with-reusable-demo-accounts) for role destinations and signup rehearsal.
+
 ## Short version
 
 For a normal returning session, the sequence is:

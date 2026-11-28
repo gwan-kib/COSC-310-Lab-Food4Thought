@@ -1,7 +1,8 @@
-// Customer account forms use the agreed M2 REST contract. The backend owns identity,
-// validation and authorization; this page only presents results and submits bearer tokens.
+// Customer account forms use the M2 REST contract. The local demo server can
+// provide sign-in presets, and the backend still decides every account's role.
 import { setStatus } from "./ui.js";
 import { requestJson } from "./api-client.js";
+import { saveStaffToken } from "./staff-session.js";
 
 const TOKEN_KEY = "food4thought.customer.token";
 const signedOut = document.getElementById("signed-out");
@@ -18,6 +19,7 @@ const pendingForms = new Set();
 let token = sessionStorage.getItem(TOKEN_KEY);
 let customer = null;
 let accountWriting = false;
+let demoAccounts = null;
 // Compare edits to the actual values shown in the controls (some inputs normalize text).
 let profileBaseline = null;
 // Each write, logout, and newer read invalidates older in-flight profile reads.
@@ -264,6 +266,41 @@ for (const [form, elements] of [
   [profileForm, profile], [deactivateForm, deactivate],
 ]) wireFieldCorrection(form, elements.errors);
 
+async function loadDemoAccounts() {
+  try {
+    const result = await requestJson("/demo-accounts");
+    if (!result.ok) return;
+    const group = document.getElementById("demo-accounts");
+    demoAccounts = result.body;
+    for (const button of group.querySelectorAll("[data-demo-role]")) {
+      const preset = demoAccounts?.[button.dataset.demoRole];
+      if (typeof preset?.email !== "string" || typeof preset.password !== "string") continue;
+      button.addEventListener("click", () => {
+        signInForm.elements.namedItem("email").value = preset.email;
+        signInForm.elements.namedItem("password").value = preset.password;
+        resetErrors(signInForm, signin.errors);
+        setStatus(signin.status, "Demo credentials filled. Select Sign in to continue.");
+      });
+      button.hidden = false;
+      group.hidden = false;
+    }
+  } catch {
+    // Manual sign-in remains available if the optional demo data cannot load.
+  }
+}
+
+function openDemoStaffPage(body, email) {
+  const preset = demoAccounts?.[body.role];
+  if (preset?.email !== email.toLowerCase()) return false;
+  const destination = body.role === "administrator"
+    ? "create-restaurant.html"
+    : `edit-restaurant.html?id=${encodeURIComponent(preset.restaurant_id)}`;
+  saveStaffToken(body.access_token, body.role);
+  signInForm.reset();
+  window.location.assign(destination);
+  return true;
+}
+
 signInForm.addEventListener("submit", async event => {
   event.preventDefault();
   await submitOnce(signInForm, signin, "Signing in…", async values => {
@@ -283,6 +320,7 @@ signInForm.addEventListener("submit", async event => {
         return;
       }
       if (body.role !== "customer") {
+        if (openDemoStaffPage(body, values.email)) return;
         signin.errors.textContent = "This page is for customer accounts. Use the staff interface for a staff account.";
         return;
       }
@@ -421,3 +459,4 @@ registerForm.querySelector("fieldset").disabled = false;
 showSession();
 if (token) void loadProfile(true);
 else sessionStatus.textContent = "Sign in or create an account below.";
+void loadDemoAccounts();
