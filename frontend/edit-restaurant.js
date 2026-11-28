@@ -1,10 +1,11 @@
 // Load Food4Thought's selected restaurant through the API and send only changed
 // fields with PATCH. Compare against values displayed by the form controls, preserve
-// edits on failures, and require user verification after an uncertain save instead
-// of automatically retrying.
+// edits on failures, and manage the selected restaurant's menu availability.
+// The backend decides whether the signed-in staff member may change the restaurant.
 
 import { requestJson } from "./api-client.js";
-import { managementError, staffRequest, staffSignInHref } from "./staff-session.js";
+import { managementError, staffRequest, staffRestriction, staffSignInHref } from "./staff-session.js";
+import { icon, setStatus, showAvailability } from "./ui.js";
 
 document.getElementById("staff-signin-link").href = staffSignInHref();
 const editForm = document.getElementById("edit-form");
@@ -13,6 +14,10 @@ const editStatus = document.getElementById("edit-status");
 const editErrors = document.getElementById("edit-errors");
 const returnLink = document.getElementById("return-link");
 const retryLoad = document.getElementById("retry-load");
+const menuPanel = document.getElementById("menu-management");
+const menuList = document.getElementById("management-menu");
+const menuFeedback = document.getElementById("availability-feedback");
+const accessFeedback = document.getElementById("edit-access");
 
 const fieldLabels = { name: "Name", cuisine: "Cuisine", description: "Description" };
 const editableFields = Object.fromEntries(
@@ -23,6 +28,24 @@ const uncertainUpdate = "Could not confirm whether changes were saved. Check the
 let original = null;
 let loading = false;
 let saving = false;
+let denied = "";
+
+function updateAccess() {
+  const restriction = denied || staffRestriction("restaurant_user");
+  accessFeedback.textContent = restriction;
+  editFields.disabled = Boolean(restriction) || !original || saving;
+  if (restriction) {
+    for (const action of menuList.querySelectorAll("button")) action.hidden = true;
+  }
+  return restriction;
+}
+
+function recordDenial(status) {
+  if (status === 403) {
+    denied = "Operation not permitted. Only a manager assigned to this restaurant can make changes.";
+  }
+  updateAccess();
+}
 
 function clearFieldErrors() {
   editErrors.replaceChildren();
@@ -90,7 +113,7 @@ async function loadRestaurant() {
   returnLink.hidden = true;
   retryLoad.hidden = true;
   clearFieldErrors();
-  editStatus.textContent = "Loading restaurant…";
+  setStatus(editStatus, "Loading restaurant…", "loading");
 
   try {
     const { ok, status, body } = await requestJson(
@@ -109,8 +132,9 @@ async function loadRestaurant() {
     populateFields(body);
     returnLink.href = `./#/restaurants/${encodeURIComponent(requestedId)}`;
     returnLink.hidden = false;
-    editFields.disabled = false;
+    updateAccess();
     editStatus.textContent = "";
+    loadMenu();
   } catch (error) {
     editStatus.textContent = "";
     editErrors.textContent = `Could not load restaurant: ${error.message || "Could not reach the server."}`;
@@ -124,7 +148,7 @@ retryLoad.addEventListener("click", loadRestaurant);
 
 editForm.addEventListener("submit", async event => {
   event.preventDefault();
-  if (saving || loading || !original || !editForm.reportValidity()) return;
+  if (editFields.disabled || !editForm.reportValidity()) return;
 
   clearFieldErrors();
   // Sending an empty PATCH is invalid under the adopted API contract.
@@ -141,7 +165,7 @@ editForm.addEventListener("submit", async event => {
   saving = true;
   editFields.disabled = true;
   editForm.setAttribute("aria-busy", "true");
-  editStatus.textContent = "Saving changes…";
+  setStatus(editStatus, "Saving changes…", "loading");
   let focusAfter = null;
 
   try {
@@ -159,6 +183,7 @@ editForm.addEventListener("submit", async event => {
       } else {
         const detail = managementError(status, body);
         editErrors.textContent = `Could not save restaurant: ${detail}`;
+        recordDenial(status);
       }
       return;
     }
@@ -170,18 +195,88 @@ editForm.addEventListener("submit", async event => {
     }
 
     populateFields(body);
-    editStatus.textContent = "Changes saved.";
+    setStatus(editStatus, "Changes saved.", "success");
   } catch {
     editStatus.textContent = "";
     editErrors.textContent = uncertainUpdate;
   } finally {
     saving = false;
-    editFields.disabled = false;
+    updateAccess();
     editForm.removeAttribute("aria-busy");
     focusAfter?.focus();
   }
 });
 
+function renderMenuItem(menuItem, menuPath, readOnly) {
+  const row = document.createElement("li");
+  const name = document.createElement("strong");
+  const controls = document.createElement("div");
+  const availability = document.createElement("span");
+  const action = document.createElement("button");
+
+  name.textContent = menuItem.name;
+  controls.className = "management-menu-controls";
+  action.type = "button";
+  action.hidden = readOnly;
+  function render() {
+    showAvailability(availability, menuItem.available);
+    const label = menuItem.available ? "Mark unavailable" : "Mark available";
+    action.replaceChildren(icon(menuItem.available ? "block" : "check_circle"), label);
+    action.setAttribute("aria-label", action.textContent + " for " + menuItem.name);
+  }
+  render();
+
+  action.addEventListener("click", async () => {
+    if (action.disabled || updateAccess()) return;
+    action.disabled = true;
+    setStatus(menuFeedback, "Saving availability.", "loading");
+    const uncertain = "Could not confirm availability. Reload the menu before trying again.";
+    try {
+      const response = await staffRequest(menuPath + "/items/" + encodeURIComponent(menuItem.id), {
+        method: "PATCH", payload: { available: !menuItem.available },
+      });
+      if (!response.ok) {
+        setStatus(menuFeedback, managementError(response.status, response.body), "error");
+        recordDenial(response.status);
+        action.disabled = false;
+        return;
+      }
+      const item = response.body;
+      if (response.status !== 200 || item?.id !== menuItem.id || typeof item.available !== "boolean") {
+        throw new Error(uncertain);
+      }
+      menuItem.available = item.available;
+      render();
+      action.disabled = false;
+      setStatus(menuFeedback, "Availability saved.", "success");
+    } catch {
+      // A write may have reached the server before the response failed.
+      setStatus(menuFeedback, uncertain, "error");
+    }
+  });
+  controls.append(availability, action);
+  row.append(name, controls);
+  return row;
+}
+
+async function loadMenu() {
+  const menuPath = "/restaurants/" + encodeURIComponent(requestedId) + "/menu";
+  menuPanel.hidden = false;
+  setStatus(menuFeedback, "Loading menu.", "loading");
+  try {
+    const { ok, body } = await requestJson(menuPath);
+    if (!ok || !Array.isArray(body?.items)) {
+      throw new Error(typeof body?.detail === "string" ? body.detail : "The menu could not be read.");
+    }
+    const readOnly = Boolean(updateAccess());
+    menuList.replaceChildren(...body.items.map(item => renderMenuItem(item, menuPath, readOnly)));
+    setStatus(menuFeedback, body.items.length ? "" : "This restaurant has no menu items yet.", "empty");
+  } catch (error) {
+    setStatus(menuFeedback, "Could not load the menu: " + error.message, "error");
+  }
+}
+
+updateAccess();
 if (!requestedId) {
   editErrors.textContent = "Select a restaurant from the list before editing.";
 } else {

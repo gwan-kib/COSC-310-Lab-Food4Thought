@@ -298,9 +298,10 @@ def test_unexpected_success_payload_does_not_claim_save(page, live_server):
 def test_edited_text_is_safe_and_form_fits_phone(page, live_server):
     page.set_viewport_size({"width": 390, "height": 800})
     open_editor(page, live_server)
+    image_count = page.locator("img").count()
     page.get_by_label("Name", exact=True).fill("<img src=x onerror=alert(1)>")
     page.get_by_role("button", name="Save changes").click()
     expect(page.get_by_role("status")).to_contain_text("saved")
-    assert page.locator("img").count() == 0
+    expect(page.locator("img")).to_have_count(image_count)
     assert page.evaluate("document.documentElement.scrollWidth") <= 390
     assert page.page_errors == []

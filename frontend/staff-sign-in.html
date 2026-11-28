@@ -9,22 +9,24 @@ the permissions for every subsequent management write.
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Food4Thought – Staff sign-in</title>
+    <link rel="icon" type="image/svg+xml" href="assets/food4thought.svg" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <h1>Food4Thought</h1>
-      <p>Restaurant management</p>
+      <a class="brand" href="./"><img class="brand-mark" src="assets/food4thought.svg" alt="" width="44" height="44" />Food4Thought</a>
       <nav aria-label="Main navigation">
-        <a href="./">Browse restaurants</a>
-        <a href="create-restaurant.html">Create restaurant</a>
+        <a href="./" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#restaurant"></use></svg> Browse restaurants</a>
+        <a href="create-restaurant.html" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#add_business"></use></svg> Create restaurant</a>
+        <a href="staff-sign-in.html" aria-current="page" id="staff-signin-link" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#admin_panel_settings"></use></svg> Staff sign in</a>
       </nav>
     </header>
 
-    <main class="management-layout">
+    <main id="main-content" tabindex="-1" class="management-layout">
       <section class="panel" aria-labelledby="signin-heading">
-        <h2 id="signin-heading">Staff sign-in</h2>
-        <p>Use your provisioned restaurant or administrator account.</p>
+        <h1 id="signin-heading" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#admin_panel_settings"></use></svg> Staff sign-in</h1>
+        <p>Use your restaurant manager or administrator account.</p>
         <form id="staff-signin-form">
           <fieldset id="staff-signin-fields" class="create-fields">
             <legend class="visually-hidden">Staff credentials</legend>
@@ -32,7 +34,7 @@ the permissions for every subsequent management write.
             <input id="staff-email" name="email" type="email" autocomplete="username" required />
             <label for="staff-password">Password</label>
             <input id="staff-password" name="password" type="password" autocomplete="current-password" required />
-            <button type="submit">Sign in</button>
+            <button type="submit"><svg class="icon" aria-hidden="true"><use href="icons.svg#login"></use></svg> Sign in</button>
           </fieldset>
         </form>
         <p id="staff-signin-status" class="status" role="status"></p>

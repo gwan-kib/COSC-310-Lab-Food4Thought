@@ -1,5 +1,6 @@
 // Customer account forms use the agreed M2 REST contract. The backend owns identity,
 // validation and authorization; this page only presents results and submits bearer tokens.
+import { setStatus } from "./ui.js";
 import { requestJson } from "./api-client.js";
 
 const TOKEN_KEY = "food4thought.customer.token";
@@ -104,7 +105,7 @@ async function submitOnce(form, elements, progress, operation) {
   const fieldset = form.querySelector("fieldset");
   fieldset.disabled = true;
   form.setAttribute("aria-busy", "true");
-  elements.status.textContent = progress;
+  setStatus(elements.status, progress, "loading");
   resetErrors(form, elements.errors);
   try {
     await operation(payload);
@@ -144,7 +145,7 @@ function clearAccountView() {
     [profileForm, profile], [deactivateForm, deactivate],
     [null, feedback("refresh")],
   ]) {
-    elements.status.textContent = "";
+    setStatus(elements.status, "");
     resetErrors(form, elements.errors);
   }
   for (const id of ["profile-email", "saved-name", "saved-address"]) {
@@ -288,7 +289,7 @@ signInForm.addEventListener("submit", async event => {
       clearAccountView(); // Never carry another session's data or consent forward.
       token = body.access_token;
       sessionStorage.setItem(TOKEN_KEY, token);
-      sessionStatus.textContent = "Signed in.";
+      setStatus(sessionStatus, "Signed in.", "success");
       showSession();
       await loadProfile(true);
     } catch {
@@ -305,7 +306,7 @@ registerForm.addEventListener("submit", async event => {
       const result = await requestJson("/customers", {
         method: "POST", payload: values,
       });
-      register.status.textContent = "";
+      setStatus(register.status, "");
       if (!result.ok) {
         showErrors(registerForm, register.errors, result.status, result.body, "register");
         return;
@@ -317,10 +318,10 @@ registerForm.addEventListener("submit", async event => {
       const email = registerForm.elements.namedItem("email").value;
       registerForm.reset();
       signInForm.elements.namedItem("email").value = email;
-      register.status.textContent = "Account created. Sign in using your email and password.";
+      setStatus(register.status, "Account created. Sign in using your email and password.", "success");
       signInForm.elements.namedItem("password").focus();
     } catch {
-      register.status.textContent = "";
+      setStatus(register.status, "");
       register.errors.textContent = "Could not confirm registration. Try signing in to verify before registering again. Your entries are preserved.";
     }
   });
@@ -346,7 +347,7 @@ profileForm.addEventListener("submit", async event => {
         const result = await protectedRequest("/customers/me", {
           method: "PATCH", payload: changes,
         });
-        profile.status.textContent = "";
+        setStatus(profile.status, "");
         if (authFailure(result, profile.errors, "save profile")) return;
         if (!result.ok) {
           showErrors(profileForm, profile.errors, result.status, result.body, "save profile");
@@ -357,9 +358,9 @@ profileForm.addEventListener("submit", async event => {
           return;
         }
         displayCustomer(result.body, true);
-        profile.status.textContent = "Profile updated.";
+        setStatus(profile.status, "Profile updated.", "success");
       } catch {
-        profile.status.textContent = "";
+        setStatus(profile.status, "");
         profile.errors.textContent = "Could not confirm the update. Check saved profile before submitting again. Your edits are preserved.";
       }
     });
@@ -378,7 +379,7 @@ deactivateForm.addEventListener("submit", async event => {
     await submitOnce(deactivateForm, deactivate, "Deactivating account…", async () => {
       try {
         const result = await protectedRequest("/customers/me/deactivate", { method: "POST" });
-        deactivate.status.textContent = "";
+        setStatus(deactivate.status, "");
         if (authFailure(result, deactivate.errors, "deactivate account")) return;
         if (!result.ok) {
           showErrors(deactivateForm, deactivate.errors, result.status, result.body, "deactivate account");
@@ -391,9 +392,9 @@ deactivateForm.addEventListener("submit", async event => {
         displayCustomer(result.body, false);
         document.getElementById("account-state").textContent =
           "Account deactivated. You can still view your profile, but cannot edit it or place orders.";
-        deactivate.status.textContent = "Account deactivated.";
+        setStatus(deactivate.status, "Account deactivated.", "success");
       } catch {
-        deactivate.status.textContent = "";
+        setStatus(deactivate.status, "");
         deactivate.errors.textContent = "Could not confirm deactivation. Check saved profile before trying again.";
       }
     });

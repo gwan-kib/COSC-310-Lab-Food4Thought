@@ -3,7 +3,8 @@
 // input on failures; an unconfirmed POST is never retried automatically because the
 // server may already have saved it.
 
-import { managementError, staffRequest, staffSignInHref } from "./staff-session.js";
+import { setStatus } from "./ui.js";
+import { managementError, staffRequest, staffRestriction, staffSignInHref } from "./staff-session.js";
 
 document.getElementById("staff-signin-link").href = staffSignInHref();
 const form = document.getElementById("create-form");
@@ -16,6 +17,14 @@ const fields = Object.fromEntries(
   Object.keys(labels).map(name => [name, form.elements.namedItem(name)])
 );
 let submitting = false;
+
+function updateAccess() {
+  const restriction = staffRestriction("administrator");
+  document.getElementById("create-access").textContent = restriction;
+  fieldset.disabled = Boolean(restriction) || submitting;
+}
+
+updateAccess();
 
 // A lost POST response does not tell us whether the server saved the record.
 const uncertainOutcome = "Could not confirm creation. Check the restaurant list before trying again to avoid creating a duplicate.";
@@ -55,7 +64,7 @@ for (const [name, field] of Object.entries(fields)) {
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
-  if (submitting || !form.reportValidity()) return;
+  if (fieldset.disabled || !form.reportValidity()) return;
 
   errors.replaceChildren();
   createdLink.hidden = true;
@@ -71,7 +80,7 @@ form.addEventListener("submit", async event => {
   submitting = true;
   fieldset.disabled = true;
   form.setAttribute("aria-busy", "true");
-  status.textContent = "Creating restaurant…";
+  setStatus(status, "Creating restaurant…", "loading");
   let focusAfter = null;
 
   try {
@@ -95,7 +104,7 @@ form.addEventListener("submit", async event => {
       return;
     }
     createdLink.href = `./#/restaurants/${encodeURIComponent(body.id)}`;
-    status.textContent = `Created restaurant: ${body.name}.`;
+    setStatus(status, `Created restaurant: ${body.name}.`, "success");
     createdLink.hidden = false;
     form.reset();
     focusAfter = fields.name;
@@ -104,7 +113,7 @@ form.addEventListener("submit", async event => {
     errors.textContent = uncertainOutcome;
   } finally {
     submitting = false;
-    fieldset.disabled = false;
+    updateAccess();
     form.removeAttribute("aria-busy");
     focusAfter?.focus();
   }

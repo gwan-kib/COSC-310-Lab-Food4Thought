@@ -238,6 +238,7 @@ def test_pending_submission_prevents_duplicate_posts(page, live_server, isolated
 def test_api_text_is_safe_and_form_works_by_keyboard_on_phone(page, live_server):
     page.set_viewport_size({"width": 390, "height": 844})
     open_form(page, live_server)
+    image_count = page.locator("img").count()
     name = '<img src=x onerror="window.injected=true">' + "店" * 100
     page.get_by_label("Name", exact=True).focus()
     page.keyboard.insert_text(name)
@@ -249,7 +250,7 @@ def test_api_text_is_safe_and_form_works_by_keyboard_on_phone(page, live_server)
     expect(page.get_by_role("button", name="Create restaurant", exact=True)).to_be_focused()
     page.keyboard.press("Enter")
     expect(page.get_by_role("status")).to_contain_text(name)
-    assert page.locator("img").count() == 0
+    expect(page.locator("img")).to_have_count(image_count)
     assert page.evaluate("window.injected") is None
     assert page.evaluate("document.documentElement.scrollWidth") <= 390
     assert page.page_errors == []

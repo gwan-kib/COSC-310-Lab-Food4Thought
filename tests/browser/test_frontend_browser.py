@@ -47,9 +47,13 @@ def test_list_details_and_menu_load(page, live_server):
     page.goto(f"{live_server}/app/")
     expect(_restaurant_buttons(page)).to_have_count(2)
 
-    _restaurant_buttons(page).filter(has_text="Cedar Bowl").click()
+    card = _restaurant_buttons(page).filter(has_text="Cedar Bowl")
+    card.focus()
+    assert card.evaluate("el => el.matches(':focus-visible')")
+    card.press("Enter")
 
     expect(page.locator("#details-name")).to_have_text("Cedar Bowl")
+    expect(page.locator("#details-name")).to_be_focused()
     expect(page.locator("#menu-list li")).to_have_count(2)
     assert page.page_errors == []
 

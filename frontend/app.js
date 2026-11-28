@@ -5,7 +5,8 @@
 
 import { requestJson } from "./api-client.js";
 import { customerToken, customerRequest, customerError } from "./customer-session.js";
-import { managementError, staffRequest } from "./staff-session.js";
+import { staffToken } from "./staff-session.js";
+import { icon, setStatus, showAvailability } from "./ui.js";
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -36,6 +37,9 @@ const filterForm = document.getElementById("filter-form");
 const cuisineInput = document.getElementById("cuisine-input");
 const clearFilter = document.getElementById("clear-filter");
 
+const hero = document.getElementById("discovery-hero");
+const discoveryGrid = document.getElementById("discovery-grid");
+const detailsPanel = document.getElementById("restaurant-details");
 const detailsStatus = document.getElementById("details-status");
 const detailsContent = document.getElementById("details-content");
 const detailsName = document.getElementById("details-name");
@@ -48,11 +52,6 @@ const menuList = document.getElementById("menu-list");
 // Ignore responses from requests that a newer request has already replaced.
 let listRequest = 0;
 let detailsRequest = 0;
-
-function setStatus(element, message, isError = false) {
-  element.textContent = message;
-  element.classList.toggle("error", isError);
-}
 
 // Read the selection from the URL. A hand-typed link such as "#/restaurants/%"
 // is not valid percent-encoding, so report it instead of letting it throw.
@@ -73,7 +72,7 @@ function restaurantHash(restaurantId) {
 async function loadRestaurants(cuisine) {
   const request = ++listRequest;
   const query = cuisine ? `?cuisine=${encodeURIComponent(cuisine)}` : "";
-  setStatus(listStatus, "Loading restaurants…");
+  setStatus(listStatus, "Loading restaurants…", "loading");
   restaurantList.replaceChildren();
 
   try {
@@ -82,13 +81,13 @@ async function loadRestaurants(cuisine) {
     renderRestaurants(restaurants, cuisine);
   } catch (error) {
     if (request !== listRequest) return;
-    setStatus(listStatus, `Could not load restaurants: ${error.message}`, true);
+    setStatus(listStatus, `Could not load restaurants: ${error.message}`, "error");
   }
 }
 
 function renderRestaurants(restaurants, cuisine) {
   if (restaurants.length === 0) {
-    setStatus(listStatus, cuisine ? `No restaurants serve "${cuisine}".` : "No restaurants yet.");
+    setStatus(listStatus, cuisine ? `No restaurants serve "${cuisine}".` : "No restaurants yet.", "empty");
     return;
   }
 
@@ -108,7 +107,26 @@ function renderRestaurants(restaurants, cuisine) {
     const cuisineLabel = document.createElement("span");
     cuisineLabel.className = "cuisine";
     cuisineLabel.textContent = restaurant.cuisine;
-    button.append(name, cuisineLabel);
+    const cover = document.createElement("span");
+    cover.className = "restaurant-cover";
+    cover.setAttribute("aria-hidden", "true");
+    const illustration = icon(restaurant.id, "assets/restaurant-art.svg");
+    illustration.classList.replace("icon", "restaurant-illustration");
+    illustration.setAttribute("viewBox", "0 0 520 220");
+    illustration.setAttribute("preserveAspectRatio", "xMidYMid slice");
+    cover.append(icon("storefront"), illustration);
+    const summary = document.createElement("span");
+    summary.className = "restaurant-summary";
+    const description = document.createElement("span");
+    description.className = "restaurant-description";
+    description.textContent = restaurant.description;
+    const next = document.createElement("span");
+    next.className = "restaurant-next";
+    next.append("View menu", icon("arrow_forward"));
+    next.setAttribute("aria-hidden", "true");
+    button.setAttribute("aria-label", restaurant.name + ", " + restaurant.cuisine);
+    summary.append(name, cuisineLabel, description, next);
+    button.append(cover, summary);
 
     button.addEventListener("click", () => {
       const hash = restaurantHash(restaurant.id);
@@ -137,18 +155,22 @@ function markSelected(restaurantId) {
   }
 }
 
-async function showDetails(selection) {
+async function showDetails(selection, focusHeading = false) {
   // Every selection change, including clearing it, invalidates older requests,
   // so a slow response can never redisplay a restaurant that is no longer selected.
   const request = ++detailsRequest;
   const restaurantId = selection.id;
+  const showMenu = !selection.valid || restaurantId !== null;
+  hero.hidden = showMenu;
+  discoveryGrid.classList.toggle("has-selection", showMenu);
+  detailsPanel.hidden = !showMenu;
   markSelected(restaurantId);
   detailsContent.hidden = true;
   editRestaurantLink.hidden = true;
   editRestaurantLink.removeAttribute("href");
 
   if (!selection.valid) {
-    setStatus(detailsStatus, "That restaurant link isn't valid.", true);
+    setStatus(detailsStatus, "That restaurant link isn't valid.", "error");
     return;
   }
   if (restaurantId === null) {
@@ -157,7 +179,7 @@ async function showDetails(selection) {
   }
 
   const path = `/restaurants/${encodeURIComponent(restaurantId)}`;
-  setStatus(detailsStatus, "Loading restaurant…");
+  setStatus(detailsStatus, "Loading restaurant…", "loading");
 
   // Start both requests together, but handle them separately: the details are
   // the core requirement, so a menu failure must not hide them.
@@ -172,11 +194,12 @@ async function showDetails(selection) {
     if (request !== detailsRequest) return;
     const message =
       error.status === 404 ? "That restaurant doesn't exist." : `Could not load restaurant: ${error.message}`;
-    setStatus(detailsStatus, message, true);
+    setStatus(detailsStatus, message, "error");
     return;
   }
   if (request !== detailsRequest) return;
   renderRestaurant(restaurant);
+  if (focusHeading) detailsName.focus();
 
   try {
     const menu = await menuPromise;
@@ -184,18 +207,18 @@ async function showDetails(selection) {
     renderMenu(menu, restaurantId);
   } catch (error) {
     if (request !== detailsRequest) return;
-    setStatus(menuStatus, `Could not load the menu: ${error.message}`, true);
+    setStatus(menuStatus, `Could not load the menu: ${error.message}`, "error");
   }
 }
 
 function renderRestaurant(restaurant) {
   detailsName.textContent = restaurant.name;
-  detailsCuisine.textContent = restaurant.cuisine;
+  detailsCuisine.replaceChildren(icon("restaurant"), restaurant.cuisine);
   detailsDescription.textContent = restaurant.description;
   editRestaurantLink.href = `edit-restaurant.html?id=${encodeURIComponent(restaurant.id)}`;
-  editRestaurantLink.hidden = false;
+  editRestaurantLink.hidden = !staffToken();
   menuList.replaceChildren();
-  setStatus(menuStatus, "Loading menu…");
+  setStatus(menuStatus, "Loading menu…", "loading");
   setStatus(detailsStatus, "");
   detailsContent.hidden = false;
 }
@@ -203,7 +226,7 @@ function renderRestaurant(restaurant) {
 function renderMenu(menu, restaurantId) {
   menuList.replaceChildren();
   if (menu.items.length === 0) {
-    setStatus(menuStatus, "This restaurant has no menu items yet.");
+    setStatus(menuStatus, "This restaurant has no menu items yet.", "empty");
     return;
   }
   setStatus(menuStatus, "");
@@ -227,27 +250,27 @@ function renderMenu(menu, restaurantId) {
     const availability = document.createElement("span");
     const addButton = document.createElement("button");
     addButton.type = "button";
-    addButton.textContent = "Add to cart";
+    addButton.replaceChildren(icon("add_shopping_cart"), "Add to cart");
     addButton.setAttribute("aria-label", `Add ${menuItem.name} to cart`);
     addButton.addEventListener("click", async () => {
       if (addButton.disabled) return;
       if (!customerToken()) {
-        setStatus(menuStatus, "Sign in through My account before adding to your cart.", true);
+        setStatus(menuStatus, "Sign in through My account before adding to your cart.", "error");
         return;
       }
       addButton.disabled = true;
-      setStatus(menuStatus, "Adding to cart…");
+      setStatus(menuStatus, "Adding to cart…", "loading");
       try {
         // The backend requires an explicitly created active cart. PUT returns
         // the same cart when it already exists and never replaces its items.
         const created = await customerRequest("/customers/me/cart", { method: "PUT" });
         if (selectionVersion !== detailsRequest) return;
         if (!created.ok) {
-          setStatus(menuStatus, customerError(created.status, created.body), true);
+          setStatus(menuStatus, customerError(created.status, created.body), "error");
           return;
         }
         if (typeof created.body?.id !== "string" || !Array.isArray(created.body.items)) {
-          setStatus(menuStatus, "Cart response was unexpected. Open My cart to verify before retrying.", true);
+          setStatus(menuStatus, "Cart response was unexpected. Open My cart to verify before retrying.", "error");
           return;
         }
         const result = await customerRequest("/customers/me/cart/items", {
@@ -255,68 +278,35 @@ function renderMenu(menu, restaurantId) {
         });
         if (selectionVersion !== detailsRequest) return;
         if (!result.ok) {
-          setStatus(menuStatus, customerError(result.status, result.body), true);
+          setStatus(menuStatus, customerError(result.status, result.body), "error");
           return;
         }
         if (typeof result.body?.id !== "string" || !Array.isArray(result.body.items)) {
-          setStatus(menuStatus, "Item addition could not be confirmed. Open My cart and refresh before retrying.", true);
+          setStatus(menuStatus, "Item addition could not be confirmed. Open My cart and refresh before retrying.", "error");
           return;
         }
-        setStatus(menuStatus, `Added ${menuItem.name} to your cart. Open My cart to review it.`);
+        setStatus(menuStatus, `Added ${menuItem.name} to your cart. Open My cart to review it.`, "success");
       } catch {
         if (selectionVersion === detailsRequest) {
           // A request can reach the server even when its response is lost.
-          setStatus(menuStatus, "Could not confirm item addition. Open My cart and refresh before trying again.", true);
+          setStatus(menuStatus, "Could not confirm item addition. Open My cart and refresh before trying again.", "error");
         }
       } finally {
         addButton.disabled = !menuItem.available;
       }
     });
-    const button = document.createElement("button");
-    button.type = "button";
-    function displayAvailability() {
-      availability.textContent = menuItem.available ? "Available" : "Unavailable";
-      addButton.disabled = !menuItem.available;
-      button.textContent = menuItem.available ? "Mark unavailable" : "Mark available";
-      button.setAttribute("aria-label", `${button.textContent} for ${menuItem.name}`);
-    }
-    displayAvailability();
-
-    // Display the action without guessing the caller's role or assignments:
-    // permission checks live on the backend and may return 401 or 403.
-    button.addEventListener("click", async () => {
-      if (button.disabled) return;
-      button.disabled = true;
-      setStatus(menuStatus, "Saving availability…");
-      const path = `/restaurants/${encodeURIComponent(restaurantId)}/menu/items/${encodeURIComponent(menuItem.id)}`;
-      try {
-        const { ok, status, body } = await staffRequest(path, {
-          method: "PATCH", payload: { available: !menuItem.available },
-        });
-        if (selectionVersion !== detailsRequest) return;
-        if (!ok) {
-          setStatus(menuStatus, managementError(status, body), true);
-          button.disabled = false;
-          return;
-        }
-        if (status !== 200 || body?.id !== menuItem.id || typeof body.available !== "boolean") {
-          setStatus(menuStatus, "Could not confirm availability. Reload the menu before trying again.", true);
-          return;
-        }
-        menuItem.available = body.available;
-        displayAvailability();
-        setStatus(menuStatus, "Availability saved.");
-        button.disabled = false;
-      } catch {
-        if (selectionVersion !== detailsRequest) return;
-        // A PATCH may have succeeded even if its response was lost. Do not
-        // retry blindly or claim the displayed availability is current.
-        setStatus(menuStatus, "Could not confirm availability. Reload the menu before trying again.", true);
-      }
-    });
-
-    controls.append(availability, addButton, button);
-    item.append(heading, description, controls);
+    const body = document.createElement("div");
+    body.className = "menu-item-body";
+    const art = document.createElement("span");
+    art.className = "menu-art";
+    art.append(icon("restaurant"));
+    showAvailability(availability, menuItem.available);
+    addButton.disabled = !menuItem.available;
+    addButton.className = "primary-action";
+    item.classList.toggle("unavailable", !menuItem.available);
+    controls.append(availability, addButton);
+    body.append(heading, description, controls);
+    item.append(art, body);
     menuList.append(item);
   }
 }
@@ -332,7 +322,13 @@ clearFilter.addEventListener("click", () => {
   loadRestaurants(null);
 });
 
-window.addEventListener("hashchange", () => showDetails(readSelection()));
+document.querySelector(".skip-link").addEventListener("click", event => {
+  // The hash stores the selected restaurant, so skipping should only move focus.
+  event.preventDefault();
+  document.getElementById("main-content").focus();
+});
+
+window.addEventListener("hashchange", () => showDetails(readSelection(), true));
 
 loadRestaurants(null);
 showDetails(readSelection());

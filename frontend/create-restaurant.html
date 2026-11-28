@@ -9,24 +9,26 @@ places to present API feedback and connect validation messages to inputs.
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Food4Thought – Create restaurant</title>
+    <link rel="icon" type="image/svg+xml" href="assets/food4thought.svg" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <h1>Food4Thought</h1>
-      <p>Restaurant management</p>
+      <a class="brand" href="./"><img class="brand-mark" src="assets/food4thought.svg" alt="" width="44" height="44" />Food4Thought</a>
       <nav aria-label="Main navigation">
-        <a href="./">Browse restaurants</a>
-        <a id="staff-signin-link" href="staff-sign-in.html?next=create-restaurant.html">Staff sign in</a>
+        <a href="./" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#restaurant"></use></svg> Browse restaurants</a>
+        <a href="create-restaurant.html" aria-current="page" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#add_business"></use></svg> Create restaurant</a>
+        <a href="staff-sign-in.html" id="staff-signin-link" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#admin_panel_settings"></use></svg> Staff sign in</a>
       </nav>
     </header>
 
-    <main class="management-layout">
+    <main id="main-content" tabindex="-1" class="management-layout">
       <section class="panel" aria-labelledby="create-heading">
-        <h2 id="create-heading">Create restaurant</h2>
-        <p>All fields are required.</p>
+        <h1 id="create-heading" class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#add_business"></use></svg> Create restaurant</h1>
+        <p id="create-access" class="status warning" aria-live="polite"></p>
         <form id="create-form">
-          <fieldset id="create-fields" class="create-fields">
+          <fieldset id="create-fields" class="create-fields" disabled aria-describedby="create-access">
             <legend class="visually-hidden">Restaurant information</legend>
             <label for="restaurant-name">Name</label>
             <input id="restaurant-name" name="name" type="text" required />
@@ -37,12 +39,12 @@ places to present API feedback and connect validation messages to inputs.
             <label for="restaurant-description">Description</label>
             <textarea id="restaurant-description" name="description" rows="4" required></textarea>
 
-            <button type="submit">Create restaurant</button>
+            <button type="submit"><svg class="icon" aria-hidden="true"><use href="icons.svg#add_business"></use></svg> Create restaurant</button>
           </fieldset>
         </form>
         <p id="create-status" class="status" role="status"></p>
         <div id="create-errors" class="status error" role="alert"></div>
-        <a id="created-link" hidden>View restaurant</a>
+        <a id="created-link" hidden class="with-icon"><svg class="icon" aria-hidden="true"><use href="icons.svg#arrow_forward"></use></svg> View restaurant</a>
       </section>
     </main>
 

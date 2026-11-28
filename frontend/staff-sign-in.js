@@ -1,6 +1,7 @@
 // Sign staff into Food4Thought through the shared role-aware login API.
- // Redirect only to known local management pages; never place credentials or
- // tokens in the URL or expose backend authorization decisions in the browser.
+// Redirect only to known local management pages; never place credentials or
+// tokens in the URL or expose backend authorization decisions in the browser.
+import { setStatus } from "./ui.js";
 import { requestJson } from "./api-client.js";
 import { saveStaffToken } from "./staff-session.js";
 
@@ -34,7 +35,7 @@ form.addEventListener("submit", async event => {
   fieldset.disabled = true;
   form.setAttribute("aria-busy", "true");
   errors.textContent = "";
-  status.textContent = "Signing in…";
+  setStatus(status, "Signing in…", "loading");
   const submittedPassword = password.value;
   try {
     const response = await requestJson("/auth/login", {
@@ -53,7 +54,7 @@ form.addEventListener("submit", async event => {
       errors.textContent = "Sign-in response was unexpected. Try signing in again.";
       return;
     }
-    saveStaffToken(body.access_token);
+    saveStaffToken(body.access_token, body.role);
     status.textContent = "Signed in. Opening restaurant management…";
     window.location.assign(returnTarget());
   } catch {

@@ -1250,3 +1250,27 @@ its pending-auth and local-only status.
 - Validation: Compared the notes with the November 5 and November 21 comments on issue #104 and the linked GitHub merge records. Checked the local documentation targets. The change is documentation only.
 - PR or commit: [Issue #104](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/104), branch `docs/104-m2-scrum-notes`.
 - Student review status: Pending.
+
+### Entry 92: Food4Thought frontend redesign (#140)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue #140 assignee and requesting student.
+- Artifact: Frontend HTML, CSS, JavaScript, decorative food photography and icons, browser regressions, setup and testing documentation, and this entry.
+- Label: `AI-GENERATED`.
+- AI tools: OpenAI Codex and OpenAI ImageGen.
+- Purpose: Give the existing customer and staff flows a consistent green design and make menu availability changes discoverable only in restaurant management.
+- Influence: Codex implemented the shared styles, responsive layouts, feedback and staff controls with the existing frontend modules and REST client. The sign-in role is used for presentation. The existing backend role and restaurant assignment checks remain authoritative. ImageGen produced decorative photos for the hero, representative dishes and fallback imagery. Codex authored the browser test updates.
+- Validation: The test-only commit was added before the implementation. The [focused baseline run](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/45518049034) reproduced the signed-out defect: two availability buttons rendered when the test expected zero. The [implementation CI run](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/45517607903) passed 991 tests with required Chromium and passed the committed-data guard. The [browser capture run](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/actions/runs/45517676214) captured desktop discovery and staff pages and mobile menu and cart pages with isolated data. Local repository/service regression tests passed 58 cases; local Chromium setup stalled because Windows denied loopback connections.
+- PR: [#142](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/142). [Issue #140](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/140).
+- Student review status: Pending responsible-student walkthrough and peer review.
+
+### Entry 93: Food4Thought logo, illustrations and spacing (#140)
+
+- Student(s): Gwantana Kiboigo (gwan-kib), issue assignee and requesting student.
+- Artifact: Frontend templates, shared styles and presentation helpers, logo, illustration assets, Material Symbols sprite and two existing Chromium tests.
+- Label: AI-GENERATED.
+- AI tool: OpenAI Codex.
+- Purpose: Apply a Food4Thought logo, Google Material Symbols, restaurant-specific SVG illustrations and consistent spacing to the redesign.
+- Influence: Codex drew the original brand mark and illustrations, assembled the sprite from the upstream Material Symbols Outlined SVGs and updated the templates and styles. Restaurant illustrations attach to stable IDs, and the default storefront symbol covers other restaurants. Browser actions and accessibility labels keep their original meaning. Two browser tests compare the number of images before and after submitting user text so the brand mark can coexist with the existing checks for injected images.
+- Validation: Checked JavaScript syntax, four SVG files, the shared logo on all six pages, and references to the Material Symbols and restaurant illustrations. The 120 focused repository and service tests passed. The local Windows environment blocked loopback during Uvicorn startup, so Chromium verification is tracked on PR #142.
+- PR: [#142](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/142).
+- Student review status: Pending.
