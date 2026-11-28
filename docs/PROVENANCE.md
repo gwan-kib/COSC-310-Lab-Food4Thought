@@ -1274,3 +1274,15 @@ its pending-auth and local-only status.
 - Validation: Checked JavaScript syntax, four SVG files, the shared logo on all six pages, and references to the Material Symbols and restaurant illustrations. The 120 focused repository and service tests passed. The local Windows environment blocked loopback during Uvicorn startup, so Chromium verification is tracked on PR #142.
 - PR: [#142](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/pull/142).
 - Student review status: Pending.
+
+### Entry 94: Local demo accounts and sign-in presets (#141)
+
+- Student(s): Gwantana Kiboigo (`gwan-kib`), issue assignee and requesting student.
+- Artifact: Local demo launcher, customer sign-in template and JavaScript, shared styles, setup guides, and tests.
+- Label: `AI-GENERATED`.
+- AI tool: OpenAI Codex.
+- Purpose: Make the customer, Cedar Bowl manager, and administrator accounts easy to reuse during demonstrations.
+- Influence: Codex wrote the launcher, reused the existing registration and staff provisioning services, added form presets, and routed each authenticated account to its matching page. Demo data and generated preset passwords live in the ignored demo directory.
+- Validation: All 911 non-browser pytest tests passed using an in-process event loop adapted to the Windows execution environment. Repeated setup preserved existing data, and all three roles signed in after recreating the app. A JavaScript smoke test with a simulated DOM verified prefill and role destinations. The Chromium click-through awaits a browser-accessible local server.
+- Issue: [#141](https://github.com/gwan-kib/COSC-310-Lab-Food4Thought/issues/141).
+- Student review status: Pending.

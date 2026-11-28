@@ -159,6 +159,28 @@ With the disposable stores configured, sign in through `POST /auth/login` as a p
 
 To update that item, use its returned ID and the same restaurant ID in `PATCH /restaurants/{restaurant_id}/menu/items/{item_id}` with `{"price":"7.5"}`. The response contains the complete saved item with price `"7.50"`; its ID, name, and description remain unchanged. Fetch the menu after restarting with the same disposable data path to verify the update persisted. Supply at least one of `name`, `description`, `price`, or `available`. Availability accepts JSON `true` or `false`. Both menu item write operations require the assigned manager’s bearer token. A missing token returns 401, and a customer, administrator or manager assigned to a different existing restaurant receives 403. Omitting it on creation defaults to true, and omitting it on update preserves the saved value. Legacy menu reads return true without writing. A successful restaurant-file save can make that default explicit throughout the file. Nulls and unsupported fields are rejected. See the [API contract](M1_API_CONTRACT.md#pydantic-model-responsibilities) for validation and parent-scoping behavior.
 
+## Run with reusable demo accounts
+
+Activate the virtual environment, stop any server using port 8000, and run from the repository root:
+
+```sh
+python -m app.scripts.run_demo
+```
+
+Open [My account](http://127.0.0.1:8000/app/account.html). Under **Sign in**, click a demo account button to fill its email and password, then click **Sign in**.
+
+| Button | Opens |
+| --- | --- |
+| Demo customer | Customer profile |
+| Demo manager | Cedar Bowl’s restaurant editor (`restaurant-001`) |
+| Demo administrator | Create restaurant |
+
+Use **Create a customer account** and an unused email when rehearsing signup. To switch away from the demo customer account, click **Sign out of this tab**.
+
+The first run creates the ignored `.demo-data/` directory and generates local passwords. Stop the demo with `Ctrl+C` and run the same command to reuse its accounts, carts and orders. Use `--port 8001` to choose another local port. The demo listens only on `127.0.0.1`.
+
+The account stores hold password hashes. `.demo-data/passwords.json` holds the local preset values in customer, manager, administrator order so the form can fill them in. If a demo account’s password changes, update its preset to match and restart the demo. Keep this directory private and use the presets only with demo data. Start the regular app with the Uvicorn command in step 7 for ordinary development.
+
 ## Current data configuration
 
 Representative restaurant data is stored at:

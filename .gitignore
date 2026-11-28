@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .env
+.demo-data/
 .pytest_cache/
 data/test_*.json
 .DS_Store

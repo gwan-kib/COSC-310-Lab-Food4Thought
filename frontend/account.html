@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Present customer sign-in, registration, and profile forms using the shared design. Account operations are handled by the REST API. -->
+<!-- Present customer account forms and optional local demo sign-in controls. Account operations are handled by the REST API. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -34,6 +34,14 @@
               <label for="signin-password">Password</label>
               <input id="signin-password" name="password" type="password" autocomplete="current-password" required />
               <button type="submit"><svg class="icon" aria-hidden="true"><use href="icons.svg#login"></use></svg> Sign in</button>
+              <div id="demo-accounts" class="demo-accounts" role="group" aria-labelledby="demo-accounts-heading" hidden>
+                <h3 id="demo-accounts-heading">Demo accounts</h3>
+                <div class="demo-account-buttons">
+                  <button type="button" data-demo-role="customer" hidden>Demo customer</button>
+                  <button type="button" data-demo-role="restaurant_user" hidden>Demo manager</button>
+                  <button type="button" data-demo-role="administrator" hidden>Demo administrator</button>
+                </div>
+              </div>
             </fieldset>
           </form>
           <p id="signin-status" class="status" role="status"></p>
